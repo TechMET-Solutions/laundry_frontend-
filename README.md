@@ -1,1 +1,1 @@
-# laundry_frontend-
+# Laundry POS System
