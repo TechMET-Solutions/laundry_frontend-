@@ -77,25 +77,27 @@ import {
   LuShoppingCart,
   LuClipboardList,
   LuUsers,
-  // LuBarChart3,
   LuBriefcase,
   LuUserCog,
   LuReceipt,
   LuClock,
   LuMapPin,
-  LuLogOut
+  LuLogOut,
+  FaMoneyBillTrendUp,
+  TbSettingsCode
 } from "react-icons/lu";
 
 const menu = [
   { name: 'Dashboard', icon: LuLayoutDashboard, path: '/' },
   { name: 'POS', icon: LuShoppingCart, path: '/pos' },
   { name: 'Orders', icon: LuClipboardList, path: '/orders' },
-  { name: 'Products', icon: LuBriefcase, path: '/products' },
+  { name: 'Collection', icon: LuBriefcase, path: '/collection' },
+  { name: 'Expenses', icon: FaMoneyBillTrendUp, path: '/expenses' },
   { name: 'Customers', icon: LuUsers, path: '/customers' },
-  { name: 'Reports', icon: LuBriefcase, path: '/reports' },
-  { name: 'Services', icon: LuBriefcase, path: '/services' },
+  { name: 'Services', icon: TbSettingsCode, path: '/services' },
   { name: 'Employees', icon: LuUserCog, path: '/employees' },
   { name: 'Payment Receipt', icon: LuReceipt, path: '/payments' },
+  { name: 'Reports', icon: LuBriefcase, path: '/reports' },
   { name: 'Time Slots', icon: LuClock, path: '/time-slots' },
   { name: 'Location Management', icon: LuMapPin, path: '/locations' },
 ]
