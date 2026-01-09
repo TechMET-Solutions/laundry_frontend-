@@ -83,16 +83,16 @@ import {
   LuClock,
   LuMapPin,
   LuLogOut,
-  FaMoneyBillTrendUp,
-  TbSettingsCode
 } from "react-icons/lu";
+import { GiTakeMyMoney } from "react-icons/gi";
+import { TbSettingsCode } from "react-icons/tb";
 
 const menu = [
   { name: 'Dashboard', icon: LuLayoutDashboard, path: '/' },
   { name: 'POS', icon: LuShoppingCart, path: '/pos' },
   { name: 'Orders', icon: LuClipboardList, path: '/orders' },
   { name: 'Collection', icon: LuBriefcase, path: '/collection' },
-  { name: 'Expenses', icon: FaMoneyBillTrendUp, path: '/expenses' },
+  { name: 'Expenses', icon: GiTakeMyMoney, path: '/expenses' },
   { name: 'Customers', icon: LuUsers, path: '/customers' },
   { name: 'Services', icon: TbSettingsCode, path: '/services' },
   { name: 'Employees', icon: LuUserCog, path: '/employees' },
