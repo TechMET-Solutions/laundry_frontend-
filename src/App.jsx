@@ -9,6 +9,22 @@ import Addon from "./pages/services/Addon";
 import Emirates from "./pages/Location_management.jsx/Emirates";
 import Area from "./pages/Location_management.jsx/Area";
 import Collections from "./pages/Collections.jsx";
+<<<<<<< HEAD
+import Employee from "./pages/Employee.jsx";
+=======
+import Daily_reports from "./pages/Reports/Daily_reports.jsx";  
+import Cloth_wise_reports from "./pages/Reports/Cloth_wise_report.jsx";
+import Outstanding_reports from "./pages/Reports/Outstanding_report.jsx";
+import Sales_report from "./pages/Reports/Sales_report.jsx";
+import Order_reports from "./pages/Reports/Order_reports.jsx";
+import Ledger_report from "./pages/Reports/Ledger_report.jsx";
+import Customer_outstanding_report from "./pages/Reports/Customer_outstanding_report.jsx";
+import Expenses_report from "./pages/Reports/Expenses_report.jsx";
+import Tax_report from "./pages/Reports/Tax_report.jsx";
+
+
+
+>>>>>>> e6c9ea1052eb80cae7db75801b4f18714b4a575f
 
 
 function App() {
@@ -27,6 +43,22 @@ function App() {
         <Route path="location_management/emirates" element={<Emirates />} />
         <Route path="location_management/areas" element={<Area />} />
         <Route path="collection" element={<Collections />} />
+<<<<<<< HEAD
+        <Route path="employees" element={<Employee />} />
+=======
+        <Route path="reports" element={<Daily_reports />} />
+        <Route path="reports/daily_reports" element={<Daily_reports />} />
+        <Route path="reports/outstanding_reports" element={<Outstanding_reports />} />
+        <Route path="reports/sales_reports" element={<Sales_report />} />
+        <Route path="reports/order_reports" element={<Order_reports />} />
+        <Route path="reports/ledger_reports" element={<Ledger_report />} />
+        <Route path="reports/customer_outstanding_reports" element={<Customer_outstanding_report />} />
+        <Route path="reports/cloth_wise_reports" element={<Cloth_wise_reports />} />
+
+        <Route path="reports/expenses_reports" element={<Expenses_report />} />
+        <Route path="reports/tax_reports" element={<Tax_report />} />
+
+>>>>>>> e6c9ea1052eb80cae7db75801b4f18714b4a575f
 
       </Route>
 
