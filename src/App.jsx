@@ -9,6 +9,7 @@ import Addon from "./pages/services/Addon";
 import Emirates from "./pages/Location_management.jsx/Emirates";
 import Area from "./pages/Location_management.jsx/Area";
 import Collections from "./pages/Collections.jsx";
+import Employee from "./pages/Employee.jsx";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="location_management/emirates" element={<Emirates />} />
         <Route path="location_management/areas" element={<Area />} />
         <Route path="collection" element={<Collections />} />
+        <Route path="employees" element={<Employee />} />
 
       </Route>
 
