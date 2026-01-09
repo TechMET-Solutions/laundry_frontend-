@@ -8,7 +8,7 @@ import ServiceCategory from "./pages/services/ServiceCategory";
 import Addon from "./pages/services/Addon";
 import Emirates from "./pages/Location_management.jsx/Emirates";
 import Area from "./pages/Location_management.jsx/Area";
-
+import Collections from "./pages/Collections.jsx";
 
 
 function App() {
@@ -26,6 +26,7 @@ function App() {
         <Route path="services/addon" element={<Addon />} />
         <Route path="location_management/emirates" element={<Emirates />} />
         <Route path="location_management/areas" element={<Area />} />
+        <Route path="collection" element={<Collections />} />
 
       </Route>
 
