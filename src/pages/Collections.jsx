@@ -3,8 +3,15 @@ import React from "react";
 import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 
+import { useState } from "react";
+import AddCollectionModal from "./services/AddCollectionModal";
+
+
 
 function Collections() {
+
+  const [openModal, setOpenModal] = useState(false);
+
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* Header */}
@@ -21,9 +28,15 @@ function Collections() {
             </h1>
         </div>
 
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm cursor-pointer">
+        <button className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm cursor-pointer"
+        onClick={() => setOpenModal(true)}>
             + Add New Collection
         </button>
+
+        {openModal && (
+            <AddCollectionModal onClose={() => setOpenModal(false)} />
+        )}  
+
         </div>
 
         {/* Search & Filters */}
@@ -66,28 +79,28 @@ function Collections() {
         <table className="w-full text-sm border-separate border-spacing-x-2 ">
             <thead>
                 <tr>
-                    <th className="bg-[#56CCFF] px-4 py-3 text-left text-gray-800 font-medium ">
+                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
                     Collection Id
                     </th>
-                    <th className="bg-[#56CCFF] px-4 py-3 text-left text-gray-800 font-medium">
+                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium">
                     Collection Info
                     </th>
-                    <th className="bg-[#56CCFF] px-4 py-3 text-left text-gray-800 font-medium">
+                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium">
                     Customer
                     </th>
-                    <th className="bg-[#56CCFF] px-4 py-3 text-left text-gray-800 font-medium ">
+                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
                     Status
                     </th>
-                    <th className="bg-[#56CCFF] px-4 py-3 text-left text-gray-800 font-medium ">
+                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
                     Driver
                     </th>
-                    <th className="bg-[#56CCFF] px-4 py-3 text-left text-gray-800 font-medium ">
+                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
                     Type
                     </th>
-                    <th className="bg-[#56CCFF] px-4 py-3 text-left text-gray-800 font-medium ">
+                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
                     Created By
                     </th>
-                    <th className="bg-[#56CCFF] px-4 py-3 text-left text-gray-800 font-medium">
+                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium">
                     Action
                     </th>
                 </tr>
@@ -174,7 +187,20 @@ function Collections() {
   );
 }
 
+
 export default Collections;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
