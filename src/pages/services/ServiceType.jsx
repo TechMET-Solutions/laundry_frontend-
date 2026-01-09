@@ -5,6 +5,7 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 
 import Setting_img from "../../assets/carbon_settings-services.png";
 
+
 const ServiceType = () => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState("Sort By Category");

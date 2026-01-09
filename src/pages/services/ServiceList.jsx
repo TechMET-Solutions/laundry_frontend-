@@ -185,8 +185,7 @@ const ServiceList = ( ) => {
           </span>
         </td>
 
-        {/* Action */}
-        <td className="px-4 py-3  border-b text-left border-gray-300">
+         <td className="px-4 py-3  border-b text-left border-gray-300">
           <div className="flex gap-2">
             <button className="rounded-md bg-indigo-100 p-2 text-indigo-600 cursor-pointer">
               <FiEdit />

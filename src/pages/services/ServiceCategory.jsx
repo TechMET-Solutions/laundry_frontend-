@@ -36,7 +36,6 @@ const ServiceCategory = () => {
         </div>
       </div>
 
- 
       <div className="flex justify-end gap-4 mb-6">
         {/* Search */}
         <div className="relative w-64 ">

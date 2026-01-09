@@ -46,6 +46,7 @@ const Addon = () => {
         </div>
       </div>
 
+
       <div className="bg-[#f4f7fb]  ">
         <table className="w-full text-sm border-separate  ">
           <thead>
