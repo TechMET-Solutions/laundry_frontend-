@@ -16,7 +16,7 @@ const AddExpenses = ({onClose}) => {
                     Date
                     <span className="text-red-500">*</span>
                 </label>
-                <input type="date" className="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                <input type="date" className="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm ">
                 </input>
             </div>
             <div>

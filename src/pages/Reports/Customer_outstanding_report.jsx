@@ -79,7 +79,7 @@ function Customer_outstanding_report() {
               </button>
             </div>
           </div>
-          <div className="flex gap-6 mt-6">
+          <div className="flex items-center gap-6 mt-6 mb-6">
       {/* Total Debit */}
       <div className=" bg-white rounded-lg shadow-sm w-56">
         <div className="flex gap-4 px-4 py-3 border-b border-green-400">
@@ -123,6 +123,28 @@ function Customer_outstanding_report() {
           className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
         />
       </div>
+      <div className="flex items-center bg-gray-200 rounded-lg px-3 py-2 w-64">
+    <input
+      type="text"
+      placeholder="Search Customer..."
+      className="bg-transparent outline-none text-sm w-full"
+    />
+    <span className="text-gray-500 cursor-pointer">✕</span>
+  </div>
+       <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
+    <option>All Drivers</option>
+    <option>Aswin VD</option>
+    <option>Super Man</option>
+    <option>Sles Team</option>
+  </select>
+  <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
+    <option>All Payments</option>
+    <option>Pending</option>
+    <option>Partially Paid</option>
+    <option>Fully Paid</option>
+  </select>
+
+
     </div>
     
     

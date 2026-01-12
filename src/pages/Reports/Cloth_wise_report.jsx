@@ -123,6 +123,35 @@ function Cloth_wise_report() {
          className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
        />
      </div>
+      <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
+    <option>All Services</option>
+    <option>Shirt</option>
+    <option>T shirt</option>
+    <option>Trouser</option>
+    <option>Short</option>
+    <option>Carpet</option>
+    <option >Jacket Men</option>
+    <option >Pajama</option>
+    
+  </select>
+      <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
+    <option>All Drivers</option>
+    <option>Aswin VD</option>
+    <option>Super Man</option>
+    <option>Sles Team</option>
+  </select>
+  <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
+    <option>All Service type</option>
+    <option>Shirt</option>
+    <option>Washing & folding</option>
+    <option>Trouser</option>
+    <option>Short</option>
+    <option>Carpet</option>
+    <option >Jacket Men</option>
+    <option >Pajama</option>
+    
+  </select>
+
    </div>
    
    

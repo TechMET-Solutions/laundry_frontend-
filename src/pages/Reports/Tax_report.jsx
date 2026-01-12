@@ -123,6 +123,12 @@ function Tax_report() {
           className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
         />
       </div>
+      <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
+    <option>Sales</option>
+    <option>Sales</option>
+    <option>Expenses</option>
+    
+  </select>
     </div>
     
     
