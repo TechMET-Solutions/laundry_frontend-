@@ -4,6 +4,7 @@ import { IoReturnUpBackOutline } from "react-icons/io5";
 import Excel from "../assets/excel.png";
 import AddCustomerModal from "./services/AddCustomerModal"; // Import the modal component
 
+
 function Customer() {
   // State for customers data
   const [customers, setCustomers] = useState([
