@@ -15,6 +15,8 @@ function Employee() {
   const [search, setSearch] = useState("");
   const [showAddEmployee, setShowAddEmployee] = useState(false);
 
+
+
   const employees = [
     { id: 1, name: "Test", contact: "9718974583", address: "Arakkal", role: "Driver" },
     { id: 2, name: "sales team", contact: "9719588676", address: "KFC kochi", role: "Driver" },
@@ -100,7 +102,7 @@ function Employee() {
 
       {/* Table */}
       <div className="absolute top-[238px] left-[338px] right-[60px]">
-        <table className="w-full border-separate border-spacing-x-2 border-spacing-y-3">
+        <table className="w-full border-separate border-spacing-x-2 border-spacing-y-3 border-[#898d96]">
           <thead>
             <tr>
               <th className="bg-[#56CCF2] rounded-md py-3">Sr No</th>
