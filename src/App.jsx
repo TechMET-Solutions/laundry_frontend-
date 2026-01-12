@@ -19,6 +19,7 @@ import Ledger_report from "./pages/Reports/Ledger_report.jsx";
 import Customer_outstanding_report from "./pages/Reports/Customer_outstanding_report.jsx";
 import Expenses_report from "./pages/Reports/Expenses_report.jsx";
 import Tax_report from "./pages/Reports/Tax_report.jsx";
+import Employee from "./pages/Employee.jsx"
 
 
 
@@ -51,6 +52,8 @@ function App() {
 
         <Route path="reports/expenses_reports" element={<Expenses_report />} />
         <Route path="reports/tax_reports" element={<Tax_report />} />
+
+        <Route path="/employees" element={<Employee></Employee>}></Route>
 
 
 
