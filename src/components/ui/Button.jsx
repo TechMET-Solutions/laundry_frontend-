@@ -2,23 +2,32 @@ const Button = ({
   btnText,
   variant = "outline",
   className = "",
+  onClick,
+  type = "button",
 }) => {
   const baseStyles =
-    "w-auto min-w-[28] sm:min-w-[32] px-4 py-2 rounded-md font-sans font-semibold text-center outline-none transition";
+    "inline-flex items-center cursor-pointer justify-center rounded-lg font-sans text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2";
+
+  const sizeStyles =
+    "h-10 px-6";
 
   const variants = {
     outline:
-      "border-2 border-[#1B76BB] bg-white text-[#1B76BB]",
+      "border border-[#1B76BB] text-[#1B76BB] bg-white hover:bg-blue-50 focus:ring-blue-300",
     primary:
-      "border-2 border-[#1B76BB] bg-[#1B76BB] text-white",
+      "border border-[#1B76BB] bg-[#1B76BB] text-white hover:bg-blue-700 focus:ring-blue-300",
     danger:
-      "border-2 border-red-600 bg-red-600 text-white",
+      "border border-red-600 bg-red-600 text-white hover:bg-red-700 focus:ring-red-300",
     ghost:
-      "border-0 bg-transparent text-[#1B76BB]",
+      "border-none bg-transparent text-[#1B76BB] hover:bg-blue-50 focus:ring-blue-300",
   };
 
   return (
-    <button className={`${baseStyles} ${variants[variant]} ${className}`}>
+    <button
+      type={type}
+      onClick={onClick}
+      className={`${baseStyles} ${sizeStyles} ${variants[variant]} ${className}`}
+    >
       {btnText}
     </button>
   );

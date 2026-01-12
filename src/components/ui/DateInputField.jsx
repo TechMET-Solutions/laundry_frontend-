@@ -1,9 +1,9 @@
 
-const DateInputField = ({ labelText }) => {
+const DateInputField = ({ label }) => {
   return (
     <div className="flex flex-col w-full max-w-md font-sans gap-2">
       <label className="text-sm sm:text-base font-medium leading-6 text-gray-700 flex items-center gap-1">
-        {labelText}  <span className="text-red-600">*</span>
+        {label}  <span className="text-red-600">*</span>
       </label>
 
       <div className="relative w-full">
