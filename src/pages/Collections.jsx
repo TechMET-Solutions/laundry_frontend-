@@ -4,13 +4,23 @@ import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 
 import { useState } from "react";
-import AddCollectionModal from "./services/AddCollectionModal";
+import AddCollectionModal from "./AddCollectionModal";
+import ViewCollectionDetails from "./services/ViewCollectionDetails";    
 
 
 
 function Collections() {
 
   const [openModal, setOpenModal] = useState(false);
+
+
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedData, setSelectedData] = useState(null); 
+
+  const handleViewClick = (item) => {
+    setSelectedData(item); // Store the data of the row you clicked
+    setViewModalOpen(true);      // Open the modal
+  };
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -33,9 +43,9 @@ function Collections() {
             + Add New Collection
         </button>
 
-        {openModal && (
+        {/* {openModal && (
             <AddCollectionModal onClose={() => setOpenModal(false)} />
-        )}  
+        )}   */}
 
         </div>
 
@@ -76,7 +86,7 @@ function Collections() {
 
       {/* Table */}
       <div className="bg-[#f4f7fb]  ">
-        <table className="w-full text-sm border-separate border-spacing-x-2 ">
+        <table className="w-full text-sm border-separate border-spacing-x-sm ">
             <thead>
                 <tr>
                     <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
@@ -168,9 +178,14 @@ function Collections() {
                     <td className="p-3">Shop</td>
 
                     <td className="p-3 flex gap-2">
-                    <button className="p-2 bg-sky-100 text-sky-600 rounded cursor-pointer">
+                    <button className="p-2 bg-sky-100 text-sky-600 rounded cursor-pointer"
+                      onClick={() =>handleViewClick(item)}
+                    >
                         <FiEye />
                     </button>
+
+    
+
                     <button className="p-2 bg-indigo-100 text-indigo-600 rounded">
                         <FiEdit />
                     </button>
@@ -183,6 +198,18 @@ function Collections() {
             </tbody>
         </table>
       </div>
+
+            {openModal && (
+                <AddCollectionModal onClose={() => setOpenModal(false)} />
+            )}  
+
+
+            <ViewCollectionDetails 
+                isOpen={viewModalOpen} 
+                onClose={() => setViewModalOpen(false)} 
+                data={selectedData} 
+            />
+
     </div>
   );
 }
