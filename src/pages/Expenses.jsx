@@ -5,9 +5,16 @@ import { TbArrowBackUp } from "react-icons/tb";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { useState } from "react";
 import AddExpenses from "./services/AddExpenses";
+import EditExpenses from './services/EditExpenses';
+import DeleteExpenses from './services/DeleteExpenses'
+import DeleteSuccess from './services/DeleteSuccess'
 
 function Expenses() {
   const [expenseModel, setexpenseModel] = useState(false);
+  const [editModal,seteditModal]=useState(false);
+  const [deleteModal,setdeleteModal]=useState(false);
+  const[successModal,setsuccessModal]=useState(false);
+
   const data = [
     {
       date: "2025-11-28",
@@ -106,12 +113,36 @@ function Expenses() {
                 <td className="px-4 py-3">{item.createdBy}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <button className="bg-indigo-100 text-indigo-700 p-2 rounded-md">
-                      <FiEdit />
+                    <button className="bg-indigo-100 text-indigo-700 p-2 rounded-md "onClick={() => seteditModal(true)}>
+                          
+                    <FiEdit />
                     </button>
-                    <button className="bg-red-100 text-red-700 p-2 rounded-md">
+                    
+                    {editModal && (
+                        <EditExpenses onClose={() => seteditModal(false)} />
+                    )} 
+                      
+                    <button
+                      className="bg-red-100 text-red-700 p-2 rounded-md"
+                      onClick={() => setdeleteModal(true)}
+                    >
                       <MdDeleteOutline />
                     </button>
+
+                    {deleteModal && (
+                      <DeleteExpenses
+                        onClose={() => setdeleteModal(false)}
+                        onDelete={() => {
+                          setdeleteModal(false);
+                          setsuccessModal(true);
+                        }}
+                      />
+                    )}
+
+                    {successModal && (
+                      <DeleteSuccess onClose={() => setsuccessModal(false)} />
+                    )}
+
                   </div>
                 </td>
               </tr>
