@@ -79,7 +79,7 @@ function Sales_report() {
              </button>
            </div>
          </div>
-         <div className="flex gap-6 mt-6">
+    <div className="flex items-center gap-6 mt-6 mb-6">
      {/* Total Debit */}
      <div className=" bg-white rounded-lg shadow-sm w-56">
        <div className="flex gap-4 px-4 py-3 border-b border-green-400">
@@ -88,6 +88,12 @@ function Sales_report() {
    
        </div>
      </div> 
+      <div className="bg-white rounded-lg shadow-sm w-56">
+        <div className=" flex gap-4 py-3 border-b border-yellow-400">
+          <p className="text-sm text-gray-600">Total Sales</p>
+            <span className="text-2xl font-semibold text-gray-800">AED 398.75</span>
+        </div>
+      </div>
    
      {/* Total Credit */}
      <div className="bg-white rounded-lg shadow-sm w-56">
@@ -99,7 +105,16 @@ function Sales_report() {
    </div>
    
          {/* DATE FILTERS */}
-   <div className="flex justify-end gap-6 mb-6">
+   <div className="flex justify-center gap-6 mb-6">
+    <div className="flex items-center bg-gray-200 rounded-lg px-3 py-2 w-64">
+    <input
+      type="text"
+      placeholder="Search Customer..."
+      className="bg-transparent outline-none text-sm w-full"
+    />
+    <span className="text-gray-500 cursor-pointer">✕</span>
+  </div>
+
      <div className="flex items-center gap-2">
        <label className="text-sm font-medium text-gray-600">
          Start Date
@@ -123,6 +138,13 @@ function Sales_report() {
          className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
        />
      </div>
+     <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
+    <option>All Drivers</option>
+    <option>Aswin VD</option>
+    <option>Super Man</option>
+    <option>Sles Team</option>
+  </select>
+
    </div>
    
    
@@ -132,8 +154,15 @@ function Sales_report() {
                   <thead>
              <tr>
                {[
-                 "Particulars",
-                 "Value"
+                 "Date",
+                 "Order ID",
+                 "Costomer",
+                 "Driver",
+                 "Sub Total",
+                 "Addon Total",
+                 "Discount",
+                 "Tax Amount",
+                 "Gross Total",
                ].map((head) => (
                  <th
                    key={head}
@@ -146,41 +175,73 @@ function Sales_report() {
            </thead>
              <tbody>
          {[
-           {
-             Particulars: "Orders",
-             Value: "9",
-           },
-           {
-             Particulars: "No. of Orders Delivered",
-             Value: "0",
-           },
-           {
-             Particulars: "Total Sales",
-             Value: "AED 418.25",
-           },
-           {
-             Particulars: "Total Payment",
-             Value: "AED 121.43",
-           },
-           {
-             Particulars: "Total Expense",
-             Value: "AED 0.00",
-           },
-           {
-             Particulars: "Total Outstanding",
-             Value: "AED 296.82",
-           },
-         ].map((item, index) => (
+  {
+    "Date": "01/12/2025",
+    "Order Id": "TMS/ORD-03",
+    "Customer": "AB devilliers",
+    "Driver": "Aswin VD",
+    "Sub Total": "AED 3.50",
+    "Addon Total": "AED 30.00",
+    "Discount": "AED 0.00",
+    "Tax Amount": "AED 1.68",
+    "Gross Total": "AED 35.25"
+  },
+  {
+    "Date": "01/12/2025",
+    "Order Id": "TMS/ORD-02",
+    "Customer": "adithi",
+    "Driver": "Aswin VD",
+    "Sub Total": "AED 10.50",
+    "Addon Total": "AED 5.00",
+    "Discount": "AED 0.00",
+    "Tax Amount": "AED 0.62",
+    "Gross Total": "AED 30.00"
+  },
+  {
+    Date: "01/12/2025",
+    "Order Id": "TMS/ORD-01",
+    Customer: "Test 1",
+    Driver: "Aswin VD",
+    "Sub Total": "AED 3.50",
+    "Addon Total": "AED 0.00",
+    Discount: "AED 0.00",
+    "Tax Amount": "AED 0.18",
+    "Gross Total": "AED 30.00"
+  }
+]
+.map((item, index) => (
            <tr
              key={index}
              className="bg-[#f1f5fb] border-b"
            >
              <td className="px-4 py-3 text-left">
-               {item.Particulars}
+               {item.Date}
              </td>
              <td className="px-4 py-3 text-left font-medium">
-               {item.Value}
+               {item["Order ID"]}
              </td>
+             <td className="px-4 py-3 text-left">
+               {item.Customer}
+             </td>
+             <td className="px-4 py-3 text-left font-medium">
+               {item.Driver}
+             </td>
+             <td className="px-4 py-3 text-left">
+               {item["Sub Total"]}
+             </td>
+             <td className="px-4 py-3 text-left font-medium">
+               {item["Addon Total"]}
+             </td>
+             <td className="px-4 py-3 text-left">
+               {item.Discount}
+             </td>
+             <td className="px-4 py-3 text-left font-medium">
+               {item["Tax Amount"]}
+             </td>
+             <td className="px-4 py-3 text-left">
+               {item["Gross Total"]}
+             </td>
+             
            </tr>
          ))}
        </tbody>

@@ -4,6 +4,7 @@ import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
 
 import Setting_img from "../../assets/carbon_settings-services.png";
+import AddNewService_Addon_PopUp from "./AddNewService_Addon_PopUp";
 
 const Addon = () => {
   const [open, setOpen] = useState(false);
@@ -23,7 +24,7 @@ const Addon = () => {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 rounded-full bg-indigo-600 px-3 py-2 text-white">
+        <div className="flex items-center gap-2 cursor-pointer rounded-full bg-indigo-600 px-3 py-2 text-white" onClick={() => setOpen(true)}>
           <img
             src={Setting_img}
             alt="setting"
@@ -33,6 +34,9 @@ const Addon = () => {
           <span className="text-sm font-medium">Add New Addon</span>
         </div>
       </div>
+      {open && (
+        <AddNewService_Addon_PopUp  onClose={() => setOpen(false)} />
+      )}
 
       <div className="flex justify-end gap-4 mb-6">
         {/* Search */}

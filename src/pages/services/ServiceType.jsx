@@ -4,6 +4,7 @@ import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
 
 import Setting_img from "../../assets/carbon_settings-services.png";
+import AddNewServicesType_PopUp from "./AddNewServicesType_PopUp";
 
 
 const ServiceType = () => {
@@ -26,7 +27,7 @@ const ServiceType = () => {
           <h1 className="text-xl font-semibold text-gray-800">Service Type</h1>
         </div>
 
-        <div className="flex items-center gap-2 rounded-full bg-indigo-600 px-3 py-2 text-white">
+        <div className="flex items-center gap-2 cursor-pointer rounded-full bg-indigo-600 px-3 py-2 text-white" onClick={() => setOpen(true)}>
           <img
             src={Setting_img}
             alt="setting"
@@ -35,6 +36,9 @@ const ServiceType = () => {
 
           <span className="text-sm font-medium">Add New Service Type</span>
         </div>
+        {open && (
+          <AddNewServicesType_PopUp onClose={() => setOpen(false)} />
+        )}
       </div>
 
  

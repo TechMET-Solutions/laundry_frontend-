@@ -4,6 +4,8 @@ import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
 
 import Setting_img from "../../assets/carbon_settings-services.png";
+import AddServices_PopUp from './AddNewServices_PopUp';
+import AddNewService_Category from './AddNewService_Category_PopUp';
 
 const ServiceCategory = () => {
   const [open, setOpen] = useState(false);
@@ -25,15 +27,19 @@ const ServiceCategory = () => {
           <h1 className="text-xl font-semibold text-gray-800">Categories</h1>
         </div>
 
-        <div className="flex items-center gap-2 rounded-full bg-indigo-600 px-3 py-2 text-white">
+        <div className="flex items-center gap-2 cursor-pointer rounded-full bg-indigo-600 px-3 py-2 text-white" onClick={() => setOpen(true)} >
           <img
             src={Setting_img}
             alt="setting"
             className="h-4 w-4 object-contain"
           />
 
-          <span className="text-sm font-medium">Add New Service Type</span>
+          <span className="text-sm font-medium">Add New Category</span>
         </div>
+        {open && (
+        <AddNewService_Category onClose={() => setOpen(false)} />
+      )}
+
       </div>
 
       <div className="flex justify-end gap-4 mb-6">

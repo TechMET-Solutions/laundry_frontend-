@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const ToggleButton = () => {
+const ToggleButton = ({label}) => {
   const [isOn, setIsOn] = useState(false);
 
   const handleToggle = () => {
@@ -13,7 +13,7 @@ const ToggleButton = () => {
     <div
     id="active"
       className={`w-14 h-7 rounded-full cursor-pointer relative transition-colors duration-300 ${
-        isOn ? "bg-[#342eee]" : "bg-gray-400"
+        isOn ? "bg-[#369CEB]" : "bg-gray-400"
       }`}
       onClick={handleToggle}
     >
@@ -24,7 +24,7 @@ const ToggleButton = () => {
       />
       
     </div>
-    <label htmlFor="active"> { isOn? "is active ?":"not active" }</label>
+    <label htmlFor="active" className="font-medium text-gray-700" > { isOn? `${label}`:"not active" }</label>
    </div>
   );
 };

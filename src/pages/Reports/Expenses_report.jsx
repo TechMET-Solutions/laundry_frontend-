@@ -131,8 +131,13 @@ const [endDate, setEndDate] = useState("2025-12-01");
                    <thead>
               <tr>
                 {[
-                  "Particulars",
-                  "Value"
+                 "Sr No",
+                  "Date",
+                  "Towards",
+                  "Expense Amount",
+                  "Tax%",
+                  "Tax amount",
+                  "Payment Mode",
                 ].map((head) => (
                   <th
                     key={head}
@@ -146,39 +151,40 @@ const [endDate, setEndDate] = useState("2025-12-01");
               <tbody>
           {[
             {
-              Particulars: "Orders",
-              Value: "9",
+              "Sr No":1,
+                  Date:"3/12/2025",
+                  "Towards":"Item Purchase",
+                  "Expense Amount":"AED 11.00",
+                  "Tax%":"-",
+                  "Tax amount":"AED 0.00",
+                  "Payment Mode":"Cash",
             },
-            {
-              Particulars: "No. of Orders Delivered",
-              Value: "0",
-            },
-            {
-              Particulars: "Total Sales",
-              Value: "AED 418.25",
-            },
-            {
-              Particulars: "Total Payment",
-              Value: "AED 121.43",
-            },
-            {
-              Particulars: "Total Expense",
-              Value: "AED 0.00",
-            },
-            {
-              Particulars: "Total Outstanding",
-              Value: "AED 296.82",
-            },
+            
           ].map((item, index) => (
             <tr
               key={index}
               className="bg-[#f1f5fb] border-b"
             >
               <td className="px-4 py-3 text-left">
-                {item.Particulars}
+                {item["Sr No"]}
               </td>
               <td className="px-4 py-3 text-left font-medium">
-                {item.Value}
+                {item.Date}
+              </td>
+             <td className="px-4 py-3 text-left font-medium">
+                {item.Towards}
+              </td>
+              <td className="px-4 py-3 text-left font-medium">
+                {item["Expense Amount"]}
+              </td>
+              <td className="px-4 py-3 text-left font-medium">
+                {item["Tax%"]}
+              </td>
+               <td className="px-4 py-3 text-left font-medium">
+                {item["Tax amount"]}
+              </td>
+               <td className="px-4 py-3 text-left font-medium">
+                {item["Payment Mode"]}
               </td>
             </tr>
           ))}

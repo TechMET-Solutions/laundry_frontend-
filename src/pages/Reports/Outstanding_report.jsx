@@ -132,8 +132,15 @@ function Outstanding_report() {
                    <thead>
               <tr>
                 {[
-                  "Particulars",
-                  "Value"
+                  "Sr No",
+                  "Date",
+                  "Ordered ID",
+                  "Customer",
+                  "Driver",
+                  "Gross amt",
+                  "Received Amt",
+                  "Discount",
+                  "Outstanding Amount",
                 ].map((head) => (
                   <th
                     key={head}
@@ -147,39 +154,102 @@ function Outstanding_report() {
               <tbody>
           {[
             {
-              Particulars: "Orders",
-              Value: "9",
-            },
-            {
-              Particulars: "No. of Orders Delivered",
-              Value: "0",
-            },
-            {
-              Particulars: "Total Sales",
-              Value: "AED 418.25",
-            },
-            {
-              Particulars: "Total Payment",
-              Value: "AED 121.43",
-            },
-            {
-              Particulars: "Total Expense",
-              Value: "AED 0.00",
-            },
-            {
-              Particulars: "Total Outstanding",
-              Value: "AED 296.82",
-            },
+    "Sr No": 1,
+    Date: "05/11/2025",
+    "Order ID": "TMS/ORD-06",
+    Customer: "dinil",
+    Driver: "sourav kk",
+    "Gross Amt.": "AED 0.00",
+    "Received Amt.": "AED 0.00",
+    Discount: "AED 0.00",
+    "Outstanding Amt.": "AED 0.00",
+  },
+  {
+    "Sr No": 2,
+    Date: "05/11/2025",
+    "Order ID": "TMS/ORD-05",
+    Customer: "vivek",
+    Driver: "sourav kk",
+    "Gross Amt.": "AED 30.00",
+    "Received Amt.": "AED 27.00",
+    Discount: "AED 0.00",
+    "Outstanding Amt.": "AED 3.00",
+  },
+  {
+    "Sr No": 3,
+    Date: "05/11/2025",
+    "Order ID": "TMS/ORD-04",
+    Customer: "dinil",
+    Driver: "sourav kk",
+    "Gross Amt.": "AED 30.00",
+    "Received Amt.": "AED 0.00",
+    Discount: "AED 0.00",
+    "Outstanding Amt.": "AED 30.00",
+  },
+  {
+    "Sr No": 4,
+    Date: "05/11/2025",
+    "Order ID": "TMS/ORD-03",
+    Customer: "Asvi",
+    Driver: "sourav kk",
+    "Gross Amt.": "AED 105.00",
+    "Received Amt.": "AED 43.17",
+    Discount: "AED 0.00",
+    "Outstanding Amt.": "AED 61.83",
+  },
+  {
+    "Sr No": 5,
+    Date: "05/11/2025",
+    "Order ID": "TMS/ORD-02",
+    Customer: "Asvi",
+    Driver: "sourav kk",
+    "Gross Amt.": "AED 0.00",
+    "Received Amt.": "AED 6.83",
+    Discount: "AED 0.00",
+    "Outstanding Amt.": "AED 0.00",
+  },
+  {
+    "Sr No": 6,
+    Date: "05/11/2025",
+    "Order ID": "TMS/ORD-01",
+    Customer: "Asvi",
+    Driver: "sourav kk",
+    "Gross Amt.": "AED 33.25",
+    "Received Amt.": "AED 33.25",
+    Discount: "AED 3.50",
+    "Outstanding Amt.": "AED 0.00",
+  },
           ].map((item, index) => (
             <tr
               key={index}
               className="bg-[#f1f5fb] border-b"
             >
               <td className="px-4 py-3 text-left">
-                {item.Particulars}
+                {item["Sr No"]}
               </td>
               <td className="px-4 py-3 text-left font-medium">
-                {item.Value}
+                {item.Date}
+              </td>
+              <td className="px-4 py-3 text-left">
+                {item["Order ID"]}
+              </td>
+              <td className="px-4 py-3 text-left">
+                {item.Customer}
+              </td>
+              <td className="px-4 py-3 text-left">
+                {item.Driver}
+              </td>
+              <td className="px-4 py-3 text-left font-medium">
+                {item["Gross Amt."]}
+              </td>
+              <td className="px-4 py-3 text-left">
+                {item["Received Amt."]}
+              </td>
+              <td className="px-4 py-3 text-left">
+                {item.Discount}
+              </td>
+              <td className="px-4 py-3 text-left font-medium">
+                {item["Outstanding Amt."]}
               </td>
             </tr>
           ))}
