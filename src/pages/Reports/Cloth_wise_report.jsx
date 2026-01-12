@@ -79,7 +79,7 @@ function Cloth_wise_report() {
              </button>
            </div>
          </div>
-         <div className="flex gap-6 mt-6">
+         <div className="flex items-center gap-6 mt-6 mb-6">
      {/* Total Debit */}
      <div className=" bg-white rounded-lg shadow-sm w-56">
        <div className="flex gap-4 px-4 py-3 border-b border-green-400">

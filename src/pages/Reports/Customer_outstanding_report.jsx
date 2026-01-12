@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
+import { CiSearch } from "react-icons/ci";
 
 const reportitems = [
   { name: "Daily Reports", path: "/reports/daily_reports" },
@@ -126,7 +127,7 @@ function Customer_outstanding_report() {
       <div className="flex items-center bg-gray-200 rounded-lg px-3 py-2 w-64">
     <input
       type="text"
-      placeholder="Search Customer..."
+      placeholder="🔍Search Customer..."
       className="bg-transparent outline-none text-sm w-full"
     />
     <span className="text-gray-500 cursor-pointer">✕</span>
@@ -204,6 +205,7 @@ function Customer_outstanding_report() {
     "Total Amt.": "AED 30.00",
     "Total Paid": "AED 27.00",
     "Outstanding Amt.": "AED 3.00",
+    
   },
           ].map((item, index) => (
             <tr
@@ -228,9 +230,16 @@ function Customer_outstanding_report() {
               <td className="px-4 py-3 text-left font-medium">
                 {item["Outstanding Amt."]}
               </td>
-              {/* <td className="px-4 py-3 text-left font-medium">
-                {item.Action}
-              </td> */}
+             <td className="px-4 py-3 text-left">
+              <button
+                onClick={() => console.log("View", item.customer)}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                <FiEye size={18} />
+              </button>
+            </td>
+
+              
             </tr>
           ))}
         </tbody>

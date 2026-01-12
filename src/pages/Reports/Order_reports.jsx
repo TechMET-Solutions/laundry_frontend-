@@ -81,10 +81,10 @@ const [endDate, setEndDate] = useState("2025-12-01");
           </button>
         </div>
       </div>
-      <div className="flex gap-6 mt-6">
+      <div className="flex items-center gap-6 mt-6 mb-6">
   {/* Total Debit */}
   <div className=" bg-white rounded-lg shadow-sm w-56">
-    <div className="flex gap-4 px-4 border-b border-green-400">
+    <div className="flex gap-4 px-4 py-3 border-b border-green-400">
       <p className="text-sm text-gray-600">Total Order</p>
             <span className="text-2xl font-semibold text-gray-800">08</span>
 
@@ -93,7 +93,7 @@ const [endDate, setEndDate] = useState("2025-12-01");
 
   {/* Total Credit */}
   <div className="bg-white rounded-lg shadow-sm w-56">
-    <div className=" flex gap-4 px-4 border-b border-yellow-400">
+    <div className="flex gap-4 px-4 border-b border-yellow-400">
       <p className="text-sm text-gray-600">Total Order Amount</p>
             <span className="text-2xl font-semibold text-gray-800">AED 15.82</span>
     </div>
@@ -106,7 +106,7 @@ const [endDate, setEndDate] = useState("2025-12-01");
   <div className="flex items-center bg-gray-200 rounded-lg px-3 py-2 w-64">
     <input
       type="text"
-      placeholder="Search Customer..."
+      placeholder="🔍Search Customer..."
       className="bg-transparent outline-none text-sm w-full"
     />
     <span className="text-gray-500 cursor-pointer">✕</span>
