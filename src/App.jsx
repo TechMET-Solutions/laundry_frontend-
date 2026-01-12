@@ -19,6 +19,7 @@ import Ledger_report from "./pages/Reports/Ledger_report.jsx";
 import Customer_outstanding_report from "./pages/Reports/Customer_outstanding_report.jsx";
 import Expenses_report from "./pages/Reports/Expenses_report.jsx";
 import Tax_report from "./pages/Reports/Tax_report.jsx";
+import Customer from "./pages/Customer.jsx";
 
 import Expenses from "./pages/Expenses.jsx";
 import TimeSlot from "./pages/TimeSlot.jsx";
@@ -57,6 +58,7 @@ function App() {
         <Route path="reports/tax_reports" element={<Tax_report />} />
         <Route path="expenses" element={<Expenses />} />
         <Route path="time-slots" element={<TimeSlot />} />
+        <Route path="customers" element= {<Customer/>}/>
 
         <Route path="/employees" element={<Employee></Employee>}></Route>
 
