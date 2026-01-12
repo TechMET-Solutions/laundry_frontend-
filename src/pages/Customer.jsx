@@ -12,7 +12,7 @@ function Customer() {
   const [customers, setCustomers] = useState([
 
 
-    
+    //trying 
     {
       id: 1,
       name: "John Doe",
