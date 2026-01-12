@@ -441,4 +441,4 @@ const AddCustomerModal = ({ onClose, onSave }) => {
   );
 };
 
-export default AddCustomerModal;
+export default AddCustomerModal; 

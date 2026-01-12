@@ -3,6 +3,9 @@ import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import Excel from "../assets/excel.png";
 import AddCustomerModal from "./services/AddCustomerModal"; // Import the modal component
+import BillingDetailsModal from "./services/BillingDetailsModal" ;
+// import Book from "../assets/book.png";
+import { FaRegAddressBook } from "react-icons/fa";
 
 function Customer() {
   // State for customers data
@@ -49,6 +52,9 @@ function Customer() {
 
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
+  // Billing Details Modal State
+  const [showBillingModal, setShowBillingModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   // Handle adding new customer
   const handleAddCustomer = (newCustomer) => {
@@ -66,6 +72,11 @@ function Customer() {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
+  //handle view billing details
+  const handleViewBilling = (customer) => {
+  setSelectedCustomer(customer);
+  setShowBillingModal(true);
+};
 
   // Filter customers based on search
   const filteredCustomers = customers.filter(customer =>
@@ -133,7 +144,7 @@ function Customer() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-[#f4f7fb]  rounded-lg shadow-sm overflow-hidden">
         <table className="w-full text-sm border-separate border-spacing-x-0.5 border-spacing-y-2">
           <thead>
             <tr className="bg-[#56CCFF] text-center">
@@ -174,8 +185,12 @@ function Customer() {
                      onClick={() => setShowAddModal(true)} >
                       <FiEdit />
                     </button>
-                    <button className="p-2 bg-red-100 text-red-500 rounded hover:bg-red-200 transition cursor-pointer">
-                      <FiTrash2 />
+                    <button className="p-2 bg-red-100 text-red-500 rounded hover:bg-red-200 transition cursor-pointer" 
+                    onClick={() => handleViewBilling(customer)}
+                    title="View Billing Details">
+                      {/* <img src={Book} alt="" /> */}
+                      <FaRegAddressBook />
+                      
                     </button>
                   </div>
                 </td>
@@ -192,6 +207,13 @@ function Customer() {
           onSave={handleAddCustomer}
         />
       )}
+
+      {showBillingModal && selectedCustomer && (
+    <BillingDetailsModal
+    customer={selectedCustomer}
+    onClose={() => setShowBillingModal(false)}
+  />
+)}
     </div>
   );
 }
