@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/layout/Layout";
-import Pos from "./pages/Pos"
+import PosPage from "./pages/Pos/PosPage.jsx"
 import ServiceList from "./pages/services/ServiceList";
 import ServiceType from "./pages/services/ServiceType";
 import ServiceCategory from "./pages/services/ServiceCategory";
@@ -42,7 +42,7 @@ function App() {
         element={<Layout />}
       >
         <Route index element={<Dashboard />} />
-        <Route path="pos" element={<Pos />} />
+        <Route path="pos" element={<PosPage />} />
        <Route path="services/list" element={<ServiceList />} />
         <Route path="services/type" element={<ServiceType />} />
         <Route path="services/category" element={<ServiceCategory />} />
