@@ -132,8 +132,13 @@ function Tax_report() {
                    <thead>
               <tr>
                 {[
-                  "Particulars",
-                  "Value"
+                  "Sr No",
+                 "Date",
+                 "Order ID",
+                 "Before Tax",
+                 "Tax Amount",
+                 "Total Amount",
+
                 ].map((head) => (
                   <th
                     key={head}
@@ -147,39 +152,37 @@ function Tax_report() {
               <tbody>
           {[
             {
-              Particulars: "Orders",
-              Value: "9",
+              "Sr No":1,
+              Date:"",
+              "Order ID":"TMS/ORD-01",
+              "Before Tax":"AED 28.50",
+              "Tax Amount":"AED 1.50",
+              "Total Amount":"AED 30.00",
+
             },
-            {
-              Particulars: "No. of Orders Delivered",
-              Value: "0",
-            },
-            {
-              Particulars: "Total Sales",
-              Value: "AED 418.25",
-            },
-            {
-              Particulars: "Total Payment",
-              Value: "AED 121.43",
-            },
-            {
-              Particulars: "Total Expense",
-              Value: "AED 0.00",
-            },
-            {
-              Particulars: "Total Outstanding",
-              Value: "AED 296.82",
-            },
+           
           ].map((item, index) => (
             <tr
               key={index}
               className="bg-[#f1f5fb] border-b"
             >
-              <td className="px-4 py-3 text-left">
-                {item.Particulars}
+               <td className="px-4 py-3 text-left">
+                {item["Sr No"]}
               </td>
               <td className="px-4 py-3 text-left font-medium">
-                {item.Value}
+                {item.Date}
+              </td>
+              <td className="px-4 py-3 text-left">
+                {item["Order ID"]}
+              </td>
+               <td className="px-4 py-3 text-left">
+                {item["Before Tax"]}
+              </td>
+               <td className="px-4 py-3 text-left">
+                {item["Tax Amount"]}
+              </td>
+               <td className="px-4 py-3 text-left">
+                {item["Total Amount"]}
               </td>
             </tr>
           ))}

@@ -18,8 +18,9 @@ const reportitems = [
 function Customer_outstanding_report() {
   const navigate = useNavigate();
   const location = useLocation();
- const [startDate, setStartDate] = useState("2025-12-01");
-const [endDate, setEndDate] = useState("2025-12-01");
+   const [startDate, setStartDate] = useState("2025-12-01");
+  const [endDate, setEndDate] = useState("2025-12-01");
+
   // find active report from URL
   const activeReport =
     reportitems.find((item) => item.path === location.pathname) ||
@@ -131,8 +132,13 @@ const [endDate, setEndDate] = useState("2025-12-01");
                    <thead>
               <tr>
                 {[
-                  "Particulars",
-                  "Value"
+                  "Sr No",
+                  "Customer",
+                  "Total Orders",
+                  "Total Amt",
+                  "Total Paid",
+                  "Outstanding Amount",
+                  "Actions",
                 ].map((head) => (
                   <th
                     key={head}
@@ -145,41 +151,64 @@ const [endDate, setEndDate] = useState("2025-12-01");
             </thead>
               <tbody>
           {[
-            {
-              Particulars: "Orders",
-              Value: "9",
-            },
-            {
-              Particulars: "No. of Orders Delivered",
-              Value: "0",
-            },
-            {
-              Particulars: "Total Sales",
-              Value: "AED 418.25",
-            },
-            {
-              Particulars: "Total Payment",
-              Value: "AED 121.43",
-            },
-            {
-              Particulars: "Total Expense",
-              Value: "AED 0.00",
-            },
-            {
-              Particulars: "Total Outstanding",
-              Value: "AED 296.82",
-            },
+             {
+    "Sr No": 1,
+    Customer: "Infra",
+    "Total Orders": 2,
+    "Total Amt.": "AED 765.00",
+    "Total Paid": "AED 633.67",
+    "Outstanding Amt.": "AED 131.33",
+  },
+  {
+    "Sr No": 2,
+    Customer: "Asvi",
+    "Total Orders": 7,
+    "Total Amt.": "AED 913.50",
+    "Total Paid": "AED 827.50",
+    "Outstanding Amt.": "AED 86.00",
+  },
+  {
+    "Sr No": 3,
+    Customer: "dinil",
+    "Total Orders": 2,
+    "Total Amt.": "AED 30.00",
+    "Total Paid": "AED 0.00",
+    "Outstanding Amt.": "AED 30.00",
+  },
+  {
+    "Sr No": 4,
+    Customer: "vivek",
+    "Total Orders": 1,
+    "Total Amt.": "AED 30.00",
+    "Total Paid": "AED 27.00",
+    "Outstanding Amt.": "AED 3.00",
+  },
           ].map((item, index) => (
             <tr
               key={index}
               className="bg-[#f1f5fb] border-b"
             >
               <td className="px-4 py-3 text-left">
-                {item.Particulars}
+                {item["Sr No"]}
               </td>
               <td className="px-4 py-3 text-left font-medium">
-                {item.Value}
+                {item.Customer}
               </td>
+              <td className="px-4 py-3 text-left">
+                {item["Total Orders"]}
+              </td>
+              <td className="px-4 py-3 text-left">
+                {item["Total Amt."]}
+              </td>
+              <td className="px-4 py-3 text-left">
+                {item["Total Paid"]}
+              </td>
+              <td className="px-4 py-3 text-left font-medium">
+                {item["Outstanding Amt."]}
+              </td>
+              {/* <td className="px-4 py-3 text-left font-medium">
+                {item.Action}
+              </td> */}
             </tr>
           ))}
         </tbody>
