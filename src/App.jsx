@@ -26,6 +26,13 @@ import TimeSlot from "./pages/TimeSlot.jsx";
 
 import Employee from "./pages/Employee.jsx"
 
+import Order_List from "./pages/Orders/OrdersList.jsx";
+import Order_Status_Screen from "./pages/Orders/Order_Status_Screen.jsx";
+import Delete_Order from "./pages/Orders/Delete_Order.jsx";
+
+
+  
+
 
 function App() {
   return (
@@ -61,6 +68,10 @@ function App() {
         <Route path="customers" element= {<Customer/>}/>
 
         <Route path="/employees" element={<Employee></Employee>}></Route>
+        
+        <Route path="/orders" element={<Order_List />} />
+            <Route path="/orders/status_screen" element={<Order_Status_Screen  />} />
+            <Route path="/orders/delete_order" element={<Delete_Order />} />
 
 
 

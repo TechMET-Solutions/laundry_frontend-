@@ -109,7 +109,7 @@ function Sales_report() {
     <div className="flex items-center bg-gray-200 rounded-lg px-3 py-2 w-64">
     <input
       type="text"
-      placeholder="Search Customer..."
+      placeholder="🔍Search Customer..."
       className="bg-transparent outline-none text-sm w-full"
     />
     <span className="text-gray-500 cursor-pointer">✕</span>

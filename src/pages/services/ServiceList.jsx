@@ -3,16 +3,27 @@ import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import AddServices_PopUp from "./AddNewServices_PopUp";
+import DeletePopUp from "../../components/utilities/DeletePopUp";
 
 const ServiceList = ( ) => {
   
 
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState("Sort By Category");
-
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const [selected, setSelected] = useState("Sort by Category");
+  const [edit , setEdit] = useState(false);
+  const [deleteService , setDeleteService] = useState(false);
+ 
+  
   const handleSelect = () => { 
-    setOpen(false);
+    setOpenDropdown(false);
   };
+
+  const handleSelection = (option) => {
+    setSelected(option);
+    setOpenDropdown(false);
+  }
+   
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* Header */}
@@ -55,7 +66,7 @@ const ServiceList = ( ) => {
           {/* Dropdown button */}
           <button
             type="button"
-            onClick={() => setOpen(!open)}
+            onClick={() => setOpenDropdown(!openDropdown)}
             className="flex h-9 cursor-pointer  w-full items-center justify-between rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700"
           >
             <span>{selected}</span>
@@ -63,12 +74,12 @@ const ServiceList = ( ) => {
           </button>
 
           {/* Dropdown menu */}
-          {open && (
-            <ul className="absolute left-0 top-full z-20 mt-1 w-full rounded-lg border border-gray-300 bg-white shadow-md" onClick={handleSelect} >
-              <li className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100">Gendes</li>
-              <li className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100">Ladies</li>
-              <li className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100">Kids</li>
-              <li className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100">Other</li>
+          {openDropdown && (
+            <ul  className="absolute left-0 top-full z-20 mt-1 w-full rounded-lg border border-gray-300 bg-white shadow-md" onClick={handleSelect} >
+              <li onClick={() => handleSelection("Gendes")} className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100">Gendes</li>
+              <li onClick={() => handleSelection("Ladies")} className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100">Ladies</li>
+              <li onClick={() => handleSelection("Kids")} className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100">Kids</li>
+              <li onClick={() => handleSelection("Other")} className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100">Other</li>
             </ul>
           )}
         </div>
@@ -193,10 +204,11 @@ const ServiceList = ( ) => {
 
          <td className="px-4 py-3  border-b text-left border-gray-300">
           <div className="flex gap-2">
-            <button className="rounded-md bg-indigo-100 p-2 text-indigo-600 cursor-pointer">
+            <button onClick={()=>setEdit(true)} className="rounded-md bg-indigo-100 p-2 text-indigo-600 cursor-pointer">
               <FiEdit />
             </button>
-            <button className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer">
+           
+            <button onClick={() => setDeleteService(true)} className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer">
               <FiTrash2 />
             </button>
           </div>
@@ -206,6 +218,13 @@ const ServiceList = ( ) => {
   </tbody>
         </table>
       </div>
+       {edit && (
+              <AddServices_PopUp edit={edit} onClose={() => setEdit(false)} />
+            )}
+            {deleteService && (
+              <DeletePopUp onClose={() => setDeleteService(false)} />
+            )}
+        
     </div>
   );
 };

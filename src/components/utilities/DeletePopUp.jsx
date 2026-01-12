@@ -1,7 +1,7 @@
 import Button from "../ui/Button";
  
 
-export default function ({ PopupDescriptionMessage }) {
+export default function ({ PopupDescriptionMessage ,onClose}  ) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50">
         
@@ -15,7 +15,7 @@ export default function ({ PopupDescriptionMessage }) {
         </p>
 
         <div className="mt-6 flex justify-center gap-4">
-          <Button className="px-6 " btnText="Cancel" variant="outline" />
+          <Button className="px-6 " btnText="Cancel" onClick={onClose}   variant="outline" />
           <Button className="px-6 " btnText="Update" variant="primary" />
         </div>
       </div>

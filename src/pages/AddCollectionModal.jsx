@@ -1,3 +1,8 @@
+import React from "react";
+import InputField from "../components/ui/InputField";
+import DropDownInputField from "../components/ui/DropDownInputField";
+import Button from "../components/ui/Button";
+import DateInputField from "../components/ui/DateInputField";
 
 
 const AddCollectionModal = ({onClose}) => {
@@ -42,10 +47,13 @@ const AddCollectionModal = ({onClose}) => {
                             </select>
                             </div>
 
-                            <div>
+                            {/* <div>
                             <label className="text-gray-800">Pick Up Date *</label>
                             <input type="date" className="w-full mt-1 border rounded-lg px-3 py-2 border-2 border-gray-300 text-gray-500" />
-                            </div>
+                            </div> */}
+
+                            <DateInputField labelText="Pick Up Date"/>
+                            
 
                             <div>
                             <label className="text-gray-800">Time Slot *</label>
@@ -96,7 +104,7 @@ const AddCollectionModal = ({onClose}) => {
                         <div className="flex justify-end gap-3 mt-6">
                             <button
                             onClick={onClose}
-                            className="px-5 py-2 border rounded-lg"
+                            className="px-5 py-2 border rounded-lg cursor-pointer"
                             >
                                 Cancel
                             </button>
