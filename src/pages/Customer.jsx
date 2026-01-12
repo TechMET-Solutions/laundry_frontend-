@@ -10,6 +10,9 @@ import { FaRegAddressBook } from "react-icons/fa";
 function Customer() {
   // State for customers data
   const [customers, setCustomers] = useState([
+
+
+    
     {
       id: 1,
       name: "John Doe",
