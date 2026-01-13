@@ -87,7 +87,7 @@ function OrderSummary({ orders }) {
       </div>
 
       {/* PAYMENT */}
-      <div className="flex gap-1 items-center">
+      <div className="flex justify-center gap-1 items-center">
         <input
           type="text"
           placeholder="Enter payment"
