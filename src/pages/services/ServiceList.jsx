@@ -3,7 +3,7 @@ import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import AddServices_PopUp from "./AddNewServices_PopUp";
-import DeletePopUp from "../../components/utilities/DeletePopUp";
+// import DeletePopUp from "../../components/utilities/DeletePopUp";
 
 const ServiceList = ( ) => {
   
@@ -221,9 +221,9 @@ const ServiceList = ( ) => {
        {edit && (
               <AddServices_PopUp edit={edit} onClose={() => setEdit(false)} />
             )}
-            {deleteService && (
+            {/* {deleteService && (
               <DeletePopUp onClose={() => setDeleteService(false)} />
-            )}
+            )} */}
         
     </div>
   );

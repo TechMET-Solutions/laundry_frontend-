@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import Excel from "../assets/excel.png";
-import AddCustomerModal from "./services/AddCustomerModal"; // Import the modal component
-import BillingDetailsModal from "./services/BillingDetailsModal" ;
-// import Book from "../assets/book.png";
+import AddCustomerModal from "./services/AddCustomerModal";
+import BillingDetailsModal from "./services/BillingDetailsModal";
 import { FaRegAddressBook } from "react-icons/fa";
+import { useNavigate } from "react-router-dom"; // ADD THIS IMPORT
 
 function Customer() {
+  const navigate = useNavigate(); // ADD THIS HOOK
+  
   // State for customers data
   const [customers, setCustomers] = useState([
-
-
-    //trying 
     {
       id: 1,
       name: "John Doe",
@@ -55,6 +54,7 @@ function Customer() {
 
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
+  
   // Billing Details Modal State
   const [showBillingModal, setShowBillingModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -75,11 +75,20 @@ function Customer() {
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
-  //handle view billing details
+  
+  // Handle view billing details
   const handleViewBilling = (customer) => {
-  setSelectedCustomer(customer);
-  setShowBillingModal(true);
-};
+    setSelectedCustomer(customer);
+    setShowBillingModal(true);
+  };
+
+  // NEW FUNCTION: Handle view customer details - navigate to CustomerD page
+  const handleViewCustomerDetails = (customer) => {
+    // Navigate to customer details page with customer ID
+    navigate(`/customers/${customer.id}/details`, {
+      state: { customerData: customer } // Pass customer data
+    });
+  };
 
   // Filter customers based on search
   const filteredCustomers = customers.filter(customer =>
@@ -181,19 +190,28 @@ function Customer() {
                 <td className="px-4 py-3 text-center text-gray-600 max-w-xs truncate">{customer.address}</td>
                 <td className="px-4 py-3 text-center">
                   <div className="flex justify-center gap-2">
-                    <button className="p-2 bg-sky-100 text-sky-600 rounded hover:bg-sky-200 transition cursor-pointer"  >
+                    {/* UPDATED EYE BUTTON - Now navigates to CustomerD */}
+                    <button 
+                      className="p-2 bg-sky-100 text-sky-600 rounded hover:bg-sky-200 transition cursor-pointer" 
+                      onClick={() => handleViewCustomerDetails(customer)} // CHANGED HERE
+                      title="View Details"
+                    >
                       <FiEye />
                     </button>
-                    <button className="p-2 bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200 transition cursor-pointer"
-                     onClick={() => setShowAddModal(true)} >
+                    
+                    <button 
+                      className="p-2 bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200 transition cursor-pointer"
+                      onClick={() => setShowAddModal(true)}
+                    >
                       <FiEdit />
                     </button>
-                    <button className="p-2 bg-red-100 text-red-500 rounded hover:bg-red-200 transition cursor-pointer" 
-                    onClick={() => handleViewBilling(customer)}
-                    title="View Billing Details">
-                      {/* <img src={Book} alt="" /> */}
+                    
+                    <button 
+                      className="p-2 bg-red-100 text-red-500 rounded hover:bg-red-200 transition cursor-pointer" 
+                      onClick={() => handleViewBilling(customer)}
+                      title="View Billing Details"
+                    >
                       <FaRegAddressBook />
-                      
                     </button>
                   </div>
                 </td>
@@ -212,13 +230,14 @@ function Customer() {
       )}
 
       {showBillingModal && selectedCustomer && (
-    <BillingDetailsModal
-    customer={selectedCustomer}
-    onClose={() => setShowBillingModal(false)}
-  />
-)}
+        <BillingDetailsModal
+          customer={selectedCustomer}
+          onClose={() => setShowBillingModal(false)}
+        />
+      )}
     </div>
   );
 }
 
 export default Customer;
+
