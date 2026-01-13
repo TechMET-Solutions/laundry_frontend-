@@ -16,6 +16,7 @@ import {
 } from "react-icons/lu";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { TbSettingsCode } from "react-icons/tb";
+import { RiArrowDownSLine, RiArrowRightSLine } from 'react-icons/ri';
 
 const menu = [
   { name: 'Dashboard', icon: LuLayoutDashboard, path: '/' },
@@ -51,95 +52,120 @@ const menu = [
 
 function Sidebar() {
   const [openMenu, setOpenMenu] = useState(null)
+  const [open, setOpen] = useState(false)
 
   return (
-    <aside className="h-screen m-6 w-64 bg-white border rounded-xl flex flex-col">
-      
-      {/* Logo */}
-      <div className="p-6">
-        <img src={logo} alt="Logo" className="w-28 mx-auto" />
-      </div>
+    <>
+      {/* Mobile / Tablet Toggle Button */}
+      <button
+        onClick={() => setOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-[#EAEEF6] shadow"
+      >
+        ☰
+      </button>
 
-      <nav className="flex-1 overflow-y-auto px-3 space-y-1">
-        {menu.map((item, i) => {
-          const Icon = item.icon
+      {/* Overlay for mobile */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 bg-black/30 z-40 md:hidden"
+        />
+      )}
 
-          // 🔽 DROPDOWN ITEMS
-          if (item.children) {
-            const isOpen = openMenu === item.name
+      <aside
+        className={`
+          fixed md:static z-50
+          h-screen m-0 md:m-6 w-64
+          bg-white rounded-xl shadow-xl
+          flex flex-col
+          transition-transform duration-300
+          ${open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}
+      >
+        {/* Logo */}
+        <div className="p-6">
+          <img src={logo} alt="Logo" className="w-28 mx-auto" />
+        </div>
 
-            return (
-              <div key={i}>
-                <button
-                  onClick={() => setOpenMenu(isOpen ? null : item.name)}
-                  className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
-                             text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition"
-                >
-                  <Icon className="text-lg" />
-                  <span className="flex-1 text-left">{item.name}</span>
-                  <span>{isOpen ? '▾' : '▸'}</span>
-                </button>
+        <nav className="flex-1 overflow-y-auto px-3 space-y-1">
+          {menu.map((item, i) => {
+            const Icon = item.icon
 
-                {isOpen && (
-                  <div className="ml-8 mt-1 space-y-1">
-                    {item.children.map((child, idx) => (
-                      <NavLink
-                        key={idx}
-                        to={child.path}
-                        className={({ isActive }) =>
-                          `block px-3 py-2 rounded-md text-sm transition
-                          ${
-                            isActive
+            if (item.children) {
+              const isOpen = openMenu === item.name
+
+              return (
+                <div key={i}>
+                  <button
+                    onClick={() => setOpenMenu(isOpen ? null : item.name)}
+                    className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
+                               text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition"
+                  >
+                    <Icon className="text-lg" />
+                    <span className="flex-1 text-left">{item.name}</span>
+                    <span>{isOpen ? <RiArrowDownSLine /> : <RiArrowRightSLine />}</span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="ml-8 mt-1 space-y-1">
+                      {item.children.map((child, idx) => (
+                        <NavLink
+                          key={idx}
+                          to={child.path}
+                          onClick={() => setOpen(false)}
+                          className={({ isActive }) =>
+                            `block px-3 py-2 rounded-md text-sm transition
+                            ${isActive
                               ? 'bg-blue-100 text-blue-600'
                               : 'text-gray-500 hover:bg-blue-50 hover:text-blue-600'
-                          }`
-                        }
-                      >
-                        {child.name}
-                      </NavLink>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )
-          }
+                            }`
+                          }
+                        >
+                          {child.name}
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            }
 
-          // 🔴 LOGOUT (DESTRUCTIVE ACTION)
-          if (item.name === 'Logout') {
+            if (item.name === 'Logout') {
+              return (
+                <NavLink
+                  key={i}
+                  to={item.path}
+                  onClick={() => setOpen(false)}
+                  className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
+                             text-red-600 hover:bg-red-50 hover:text-red-700 transition"
+                >
+                  <Icon className="text-lg" />
+                  {item.name}
+                </NavLink>
+              )
+            }
+
             return (
               <NavLink
                 key={i}
                 to={item.path}
-                className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
-                           text-red-600 hover:bg-red-50 hover:text-red-700 transition"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition
+                  ${isActive
+                    ? 'bg-blue-100 text-blue-600'
+                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                  }`
+                }
               >
                 <Icon className="text-lg" />
                 {item.name}
               </NavLink>
             )
-          }
-
-          // 🔹 NORMAL ITEMS
-          return (
-            <NavLink
-              key={i}
-              to={item.path}
-              className={({ isActive }) =>
-                `w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition
-                ${
-                  isActive
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                }`
-              }
-            >
-              <Icon className="text-lg" />
-              {item.name}
-            </NavLink>
-          )
-        })}
-      </nav>
-    </aside>
+          })}
+        </nav>
+      </aside>
+    </>
   )
 }
 

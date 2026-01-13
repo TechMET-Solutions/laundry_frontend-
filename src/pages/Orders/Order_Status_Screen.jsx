@@ -1,7 +1,18 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 import { TbArrowBackUp } from "react-icons/tb";
 
 function Order_Status_Screen() {
+
+  const navigate=useNavigate();
+
+  const HandlerOrderList= ()=>{
+
+    navigate("/orders");
+
+  }
+
+
 
   const orders = [
   {
@@ -45,8 +56,10 @@ function Order_Status_Screen() {
   return (
     <>
     {/* Back Button */}
-         <div className="flex items-center justify-center bg-indigo-800 w-11 h-11 rounded-sm absolute top-[40px] left-[338px] cursor-pointer">
+         <div onClick={HandlerOrderList} className="flex items-center justify-center bg-indigo-800 w-11 h-11 rounded-sm absolute top-[40px] left-[338px] cursor-pointer">
+          
            <TbArrowBackUp className="w-6 h-6 text-white" />
+          
          </div>
 
          <div>
@@ -60,7 +73,7 @@ function Order_Status_Screen() {
 
   <div className="grid grid-cols-3 gap-x-6">
 
-    {/* Column 1 - Order Received */}
+    {/* Column 1 - Order Received */} 
     <div className="flex flex-col gap-4">
       {orders
         .filter(o => o.status === "Order Received")
