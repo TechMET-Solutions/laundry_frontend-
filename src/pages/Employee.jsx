@@ -57,7 +57,7 @@ function Employee() {
   const roles = ["Supervisor", "Driver"];
 
   return (
-    <>
+    <div className="bg-indigo-800">
       {/* Add Employee Button */}
       <div
         onClick={() => {
@@ -216,7 +216,7 @@ function Employee() {
         />
       )}
 
-    </>
+    </div>
   );
 }
 
