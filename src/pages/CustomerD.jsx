@@ -1,10 +1,7 @@
 import React from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { IoReturnUpBackOutline } from "react-icons/io5";
-import { 
-  Phone, Mail, MapPin, Calendar, FileText, 
-  DollarSign, CreditCard, Package 
-} from "lucide-react";
+
 import { BsFilePersonFill } from "react-icons/bs";
 import { FaSquarePhone } from "react-icons/fa6";
 import { MdOutlineEmail } from "react-icons/md";
