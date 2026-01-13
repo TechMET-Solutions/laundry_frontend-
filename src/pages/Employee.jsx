@@ -9,6 +9,7 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 import AddNewEmployee from "../components/models/AddNewEmployee";
 import { getAllEmployees, deleteEmployee } from "../api/employee";
 import DeleteModal from "../components/models/DeleteModal";
+import Pagination from "../components/Pagination";
 
 function Employee() {
   const [showRoles, setShowRoles] = useState(false);
@@ -17,16 +18,30 @@ function Employee() {
   const [showDeleteEmployee, setShowDeleteEmployee] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  const [employees, setEmployees] = useState([]);
-
   const [showModal, setShowModal] = useState(false);
   const [mode, setMode] = useState("add");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-  const fetchEmployees = async () => {
-    const res = await getAllEmployees();
+  const [employees, setEmployees] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // const fetchEmployees = async () => {
+  //   const res = await getAllEmployees();
+  //   setEmployees(res.data.data);
+  // };
+
+  const fetchEmployees = async (p = page) => {
+    const res = await getAllEmployees(p, 10);
+
     setEmployees(res.data.data);
+    setTotalPages(res.data.pagination.totalPages);
   };
+
+  useEffect(() => {
+    fetchEmployees(page);
+  }, [page]);
+
 
   useEffect(() => {
     fetchEmployees();
@@ -151,7 +166,9 @@ function Employee() {
           <tbody>
             {filteredEmployees.map((emp, index) => (
               <tr key={emp.id} className="border-b hover:bg-gray-50">
-                <td className="text-center px-4 py-3">{index + 1}</td>
+                <td className="text-center px-4 py-3">
+                  {(page - 1) * 10 + index + 1}
+                </td>
                 <td className="text-center px-4 py-3">
                   {emp.first_name} {emp.last_name}
                 </td>
@@ -195,6 +212,13 @@ function Employee() {
             ))}
           </tbody>
         </table>
+        <div className="w-full flex justify-center my-6">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage}
+          />
+        </div>
       </div>
 
       {/* Modals */}

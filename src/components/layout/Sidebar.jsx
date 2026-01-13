@@ -16,6 +16,7 @@ import {
 } from "react-icons/lu";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { TbSettingsCode } from "react-icons/tb";
+import { RiArrowDownSLine, RiArrowRightSLine } from 'react-icons/ri';
 
 const menu = [
   { name: 'Dashboard', icon: LuLayoutDashboard, path: '/' },
@@ -102,7 +103,7 @@ function Sidebar() {
                   >
                     <Icon className="text-lg" />
                     <span className="flex-1 text-left">{item.name}</span>
-                    <span>{isOpen ? '▾' : '▸'}</span>
+                    <span>{isOpen ? <RiArrowDownSLine /> : <RiArrowRightSLine />}</span>
                   </button>
 
                   {isOpen && (
