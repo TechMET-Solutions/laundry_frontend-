@@ -32,6 +32,9 @@ import Delete_Order from "./pages/Orders/Delete_Order.jsx";
 import Add_Order from "./pages/Orders/Add_Order.jsx";
 import Payment from "./pages/Payment_Receipt.jsx"
 
+// Add this import with other imports
+import CustomerD from "./pages/CustomerD.jsx";
+
 
   
 
@@ -77,7 +80,15 @@ function App() {
             <Route path="/orders/add_order" element={<Add_Order />} />
             <Route path="/payments" element={<Payment/>}/>
 
-
+        {/* ... other routes ... */}
+        <Route path="reports/tax_reports" element={<Tax_report />} />
+        <Route path="expenses" element={<Expenses />} />
+        <Route path="time-slots" element={<TimeSlot />} />
+        
+        <Route path="customers/:id/details" element={<CustomerD />} /> {/* ADDED ROUTE */}
+        <Route path="/employees" element={<Employee />} />
+        <Route path="/orders" element={<Order_List />} />
+{/* ... rest of routes ... */}
 
 
 
