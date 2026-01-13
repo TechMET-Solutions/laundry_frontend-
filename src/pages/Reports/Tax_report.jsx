@@ -131,8 +131,6 @@ function Tax_report() {
   </select>
     </div>
     
-    
-          {/* TABLE */}
            <div className="bg-[#f4f7fb]  ">
                   <table className="w-full text-sm border-separate  ">
                    <thead>
@@ -159,7 +157,7 @@ function Tax_report() {
           {[
             {
               "Sr No":1,
-              Date:"",
+              Date:"3/12/2025",
               "Order ID":"TMS/ORD-01",
               "Before Tax":"AED 28.50",
               "Tax Amount":"AED 1.50",
