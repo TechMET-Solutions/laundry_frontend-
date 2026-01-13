@@ -60,7 +60,8 @@ const [endDate, setEndDate] = useState("2025-12-01");
         </div>
       </div>
        <div className="flex gap-6">
-    <button>Enter Payment</button>
+    <input type="text"
+    placeholder="Enter payment" className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none" />
       
        <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
     <option>Payment Method</option>
