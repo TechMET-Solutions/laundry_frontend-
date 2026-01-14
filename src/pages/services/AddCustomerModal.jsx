@@ -113,7 +113,7 @@ const AddCustomerModal = ({ onClose, onSave }) => {
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"></div>
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"></div>
 
       {/* Modal Container */}
       <div className="fixed inset-0 flex items-center justify-center z-50 text-gray-700">
