@@ -7,6 +7,8 @@ import BillingDetailsModal from "./services/BillingDetailsModal";
 import { FaRegAddressBook } from "react-icons/fa";
 import { useNavigate } from "react-router-dom"; // ADD THIS IMPORT
 
+import { getAllCustomers, deleteCustomers } from "../api/customer";
+
 function Customer() {
   const navigate = useNavigate(); // ADD THIS HOOK
   

@@ -1,0 +1,20 @@
+import axios from "axios";
+
+const API = axios.create({
+    baseURL: "http://localhost:5000/api/customers",
+});
+
+// CREATE
+export const createCustomers = (data) => API.post("/create", data);
+
+// GET ALL (with pagination)
+export const getAllCustomers = () => API.get(`/list`);
+
+// GET BY ID
+export const getCustomersById = (id) => API.get(`/list/${id}`);
+
+// UPDATE
+export const updateCustomers = (id, data) => API.put(`/update/${id}`, data);
+
+// DELETE
+export const deleteCustomers = (id) => API.delete(`/delete/${id}`);
