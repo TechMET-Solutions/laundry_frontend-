@@ -1,221 +1,176 @@
-
-import React from "react";
-import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiEye, FiTrash2, FiEdit } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
-
-import { useState } from "react";
-import AddCollectionModal from "./AddCollectionModal";
-import ViewCollectionDetails from "./services/ViewCollectionDetails";    
-
+import { MdDeleteOutline } from "react-icons/md";
+import AddCollectionModal from "../components/models/AddCollectionModal";
+import ViewCollectionDetails from "../components/models/ViewCollectionDetails";
+import { getAllCollections, deleteCollection } from "../api/collection";
+import DeleteModal from "../components/models/DeleteModal";
 
 
 function Collections() {
-
   const [openModal, setOpenModal] = useState(false);
+  const [mode, setMode] = useState(null); // add | edit | view
+  const [selectedData, setSelectedData] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  // const [showModal, setShowModal] = useState(false);
+   const [showDeleteCollection, setShowDeleteCollection] = useState(false);
+  const [collections, setCollections] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const fetchCollections = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllCollections(page, 10);
+      setCollections(res.data.data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCollections();
+  }, [page]);
+
+const handleDelete = async () => {
+    if (!deleteId) return;
+    await deleteCollection(deleteId);
+    // setShowDeleteCollection(false);
+    setDeleteId(null);
+    fetchCollections();
+  };
 
 
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedData, setSelectedData] = useState(null); 
-
-  const handleViewClick = (item) => {
-    setSelectedData(item); // Store the data of the row you clicked
-    setViewModalOpen(true);      // Open the modal
+  // ✅ SINGLE SOURCE OF TRUTH FOR CLOSING MODALS
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setMode(null);
+    setSelectedData(null);
   };
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-        
-        {/* Left: Back + Title */}
-        <div className="flex items-center gap-3 cursor-pointer">
-            <div className="h-8 w-8 flex items-center justify-center bg-blue-600 text-white rounded">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 flex items-center justify-center bg-blue-600 text-white rounded">
             <IoReturnUpBackOutline />
-            </div>
-
-            <h1 className="text-xl font-semibold text-gray-800">
-            Collections
-            </h1>
+          </div>
+          <h1 className="text-xl font-semibold">Collections</h1>
         </div>
 
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm cursor-pointer"
-        onClick={() => setOpenModal(true)}>
-            + Add New Collection
+        <button
+          className="bg-indigo-600 text-white px-4 py-2 rounded-full text-sm"
+          onClick={() => {
+            setMode("add");
+            setSelectedData(null);
+            setOpenModal(true);
+          }}
+        >
+          + Add New Collection
         </button>
-
-        {/* {openModal && (
-            <AddCollectionModal onClose={() => setOpenModal(false)} />
-        )}   */}
-
-        </div>
-
-        {/* Search & Filters */}
-        <div className="flex items-center gap-4 mb-6">
-            {/* Search */}
-            <div className="relative w-64 ">
-            <FiSearch className="absolute left-3 top-3 text-gray-400" />
-            <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
-            />
-            </div>
-
-            {/* Filters */}
-            <select className="px-4 py-2  rounded-lg text-sm bg-gray-200 cursor-pointer">
-            <option>All Types</option>
-            <option>Cloth Collection</option>
-            <option>Payment Collection</option>
-            </select>
-
-            <select className="px-4 py-2  rounded-lg text-sm bg-gray-200 cursor-pointer">
-            <option>All Drivers</option>
-            <option>Aswin VD</option>
-            <option>Super Man</option>
-            <option>Sales Team</option>
-            </select>
-
-            <select className="px-4 py-2 rounded-lg text-sm bg-gray-200">
-            <option>All Collection</option>
-            <option>Canceled</option>
-            <option>Re-Scheduled</option>
-            <option>Scheduled</option>
-            <option>Collected</option>
-            </select>
-        </div>
+      </div>
 
       {/* Table */}
-      <div className="bg-[#f4f7fb]  ">
-        <table className="w-full text-sm border-separate border-spacing-x-sm ">
-            <thead>
-                <tr>
-                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
-                    Collection Id
-                    </th>
-                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium">
-                    Collection Info
-                    </th>
-                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium">
-                    Customer
-                    </th>
-                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
-                    Status
-                    </th>
-                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
-                    Driver
-                    </th>
-                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
-                    Type
-                    </th>
-                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium ">
-                    Created By
-                    </th>
-                    <th className="bg-sky-300 px-4 py-3 text-left text-gray-800 font-medium">
-                    Action
-                    </th>
-                </tr>
-            </thead>
+      <div className="bg-white rounded-lg">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-sky-300 text-left">
+              <th className="p-3">Collection ID</th>
+              <th className="p-3">Info</th>
+              <th className="p-3">Customer</th>
+              <th className="p-3">Status</th>
+              <th className="p-3">Driver</th>
+              <th className="p-3">Type</th>
+              <th className="p-3">Created By</th>
+              <th className="p-3">Action</th>
+            </tr>
+          </thead>
 
+          <tbody>
+            {collections.map((item) => (
+              <tr key={item.id} className="border-b">
+                <td className="p-3">{item.collection_code}</td>
+                <td className="p-3 text-xs">
+                  {item.pickup_date}
+                  <br />
+                  {item.time_slot}
+                </td>
+                <td className="p-3">{item.customer_id}</td>
+                <td className="p-3">{item.status}</td>
+                <td className="p-3">{item.driver_id}</td>
+                <td className="p-3">{item.collection_type}</td>
+                <td className="p-3">{item.created_by}</td>
+                <td className="p-3 flex gap-2">
+                  {/* VIEW */}
+                  <button
+                    className="p-2 bg-sky-100 text-sky-600 rounded"
+                    onClick={() => {
+                      setMode("view");
+                      setSelectedData(item);
+                      setOpenModal(true);
+                    }}
+                  >
+                    <FiEye />
+                  </button>
 
-            <tbody> 
-                {[
-                {
-                    id: "TMS/COL-06",
-                    date: "29/11/25",
-                    time: "05 PM - 06 PM",
-                    customer: "Testing",
-                    status: "Scheduled",
-                    driver: "Aswin VD",
-                    type: "Cloth",
-                },
-                {
-                    id: "TMS/COL-05",
-                    date: "28/11/25",
-                    time: "10 AM - 11 AM",
-                    customer: "As Laundry",
-                    status: "Done",
-                    driver: "adhil",
-                    type: "Cloth",
-                },
-                {
-                    id: "TMS/COL-04",
-                    date: "25/11/25",
-                    time: "09 AM - 10 AM",
-                    customer: "Ahmadd",
-                    status: "Cancelled",
-                    driver: "Motorist SS",
-                    type: "Payment",
-                },
-                ].map((item, index) => (
-                <tr key={index} className="border-b">
-                    <td className="p-3">{item.id}</td>
+                  {/* EDIT */}
+                  <button
+                    className="p-2 bg-indigo-100 text-indigo-600 rounded"
+                    onClick={() => {
+                      setMode("edit");
+                      setSelectedData(item);
+                      setOpenModal(true);
+                    }}
+                  >
+                    <FiEdit />
+                  </button>
 
-                    <td className="p-3 text-xs text-gray-600">
-                    Pickup date: {item.date} <br />
-                    Time Slot: {item.time}
-                    </td>
-
-                    <td className="p-3">{item.customer}</td>
-
-                    <td className="p-3">
-                    <span
-                        className={`font-semibold ${
-                        item.status === "Done"
-                            ? "text-green-600"
-                            : item.status === "Cancelled"
-                            ? "text-red-500"
-                            : "text-blue-500"
-                        }`}
-                    >
-                        {item.status}
-                    </span>
-                    </td>
-
-                    <td className="p-3">{item.driver}</td>
-
-                    <td className="p-3 text-blue-600 font-medium">{item.type}</td>
-
-                    <td className="p-3">Shop</td>
-
-                    <td className="p-3 flex gap-2">
-                    <button className="p-2 bg-sky-100 text-sky-600 rounded cursor-pointer"
-                      onClick={() =>handleViewClick(item)}
-                    >
-                        <FiEye />
+                  {/* DELETE */}
+                 <button
+                   onClick={() => {
+                     setDeleteId(item.id);
+                    setShowDeleteCollection(true);
+                     }}
+                     className="p-2 bg-red-100 text-red-600 rounded"
+                      >                      <MdDeleteOutline size={20} />
+                      
                     </button>
-
-    
-
-                    <button className="p-2 bg-indigo-100 text-indigo-600 rounded">
-                        <FiEdit />
-                    </button>
-                    <button className="p-2 bg-red-100 text-red-500 rounded">
-                        <FiTrash2 />
-                    </button>
-                    </td>
-                </tr>
-                ))}
-            </tbody>
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 
-            {openModal && (
-                <AddCollectionModal onClose={() => setOpenModal(false)} />
-            )}  
+      {/* ADD / EDIT MODAL */}
+      {openModal &&  (
+        <AddCollectionModal
+          mode={mode}
+          collection={selectedData}
+          onClose={handleCloseModal}
+          onSuccess={fetchCollections}
+        />
+      )}
 
+      {/* VIEW MODAL */}
+      <ViewCollectionDetails
+        isOpen={openModal && mode === "view"}
+        onClose={handleCloseModal}
+        data={selectedData}
+      />
 
-            <ViewCollectionDetails 
-                isOpen={viewModalOpen} 
-                onClose={() => setViewModalOpen(false)} 
-                data={selectedData} 
-            />
-
+      {showDeleteCollection && (
+              <DeleteModal
+                isOpen={showDeleteCollection}
+                onCancel={() => setShowDeleteCollection(false)}
+                onConfirm={handleDelete}
+              />
+            )}
+      
     </div>
   );
 }
 
-
 export default Collections;
-
-
-

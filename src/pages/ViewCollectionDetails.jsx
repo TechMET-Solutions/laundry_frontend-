@@ -115,46 +115,46 @@
 
 
 
-import { useParams, useNavigate } from "react-router-dom";
-import { IoReturnUpBackOutline } from "react-icons/io5";
+// import { useParams, useNavigate } from "react-router-dom";
+// import { IoReturnUpBackOutline } from "react-icons/io5";
 
-function ViewCollectionDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+// function ViewCollectionDetails() {
+//   const { id } = useParams();
+//   const navigate = useNavigate();
 
-  return (
-    <div className="p-6 bg-[#f4f7fb] min-h-screen">
-      <div className="bg-white rounded-xl shadow max-w-4xl mx-auto p-6">
+//   return (
+//     <div className="p-6 bg-[#f4f7fb] min-h-screen">
+//       <div className="bg-white rounded-xl shadow max-w-4xl mx-auto p-6">
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 bg-indigo-600 text-white rounded"
-            >
-              <IoReturnUpBackOutline />
-            </button>
-            <h2 className="text-lg font-semibold">Collection Details</h2>
-          </div>
+//         {/* Header */}
+//         <div className="flex items-center justify-between mb-6">
+//           <div className="flex items-center gap-3">
+//             <button
+//               onClick={() => navigate(-1)}
+//               className="p-2 bg-indigo-600 text-white rounded"
+//             >
+//               <IoReturnUpBackOutline />
+//             </button>
+//             <h2 className="text-lg font-semibold">Collection Details</h2>
+//           </div>
 
-          <select className="px-3 py-2 bg-gray-100 rounded">
-            <option>Scheduled</option>
-            <option>Done</option>
-            <option>Cancelled</option>
-          </select>
-        </div>
+//           <select className="px-3 py-2 bg-gray-100 rounded">
+//             <option>Scheduled</option>
+//             <option>Done</option>
+//             <option>Cancelled</option>
+//           </select>
+//         </div>
 
-        {/* ID Row */}
-        <div className="flex justify-between bg-gray-100 p-4 rounded mb-6">
-          <span className="font-medium">DEMO LAUNDRY</span>
-          <span className="font-semibold">#{id}</span>
-        </div>
+//         {/* ID Row */}
+//         <div className="flex justify-between bg-gray-100 p-4 rounded mb-6">
+//           <span className="font-medium">DEMO LAUNDRY</span>
+//           <span className="font-semibold">#{id}</span>
+//         </div>
 
-        {/* Rest of UI → exactly from Figma */}
-      </div>
-    </div>
-  );
-}
+//         {/* Rest of UI → exactly from Figma */}
+//       </div>
+//     </div>
+//   );
+// }
 
-export default ViewCollectionDetails;
+// export default ViewCollectionDetails;
