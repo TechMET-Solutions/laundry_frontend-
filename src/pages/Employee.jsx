@@ -50,7 +50,7 @@ function Employee() {
   const handleDelete = async () => {
     if (!deleteId) return;
     await deleteEmployee(deleteId);
-    setShowDeleteEmployee(false);
+    // setShowDeleteEmployee(false);
     setDeleteId(null);
     fetchEmployees();
   };
