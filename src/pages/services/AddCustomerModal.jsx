@@ -24,8 +24,6 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
   });
 
   /* ✅ ADDED */
-  const [errors, setErrors] = useState({});
-
   const [loading, setLoading] = useState(false);
 
   /* ===============================
@@ -57,33 +55,28 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
      =============================== */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
 
-    if (
-      (name === "phonenumber" || name === "whatsappnumber") &&
-      !/^\d*$/.test(value)
-    )
-      return;
+    let updatedValue = value;
+
+    // Apply numeric + length restriction for both numbers
+    if (name === "phonenumber" || name === "whatsappnumber") {
+      const numericValue = value.replace(/\D/g, "");
+
+      if (numericValue.length > 10) {
+        alert("Mobile number must be 10 digits only.");
+        return;
+      }
+      updatedValue = numericValue;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: updatedValue,
+    }));
   };
 
   const handleSwitchToggle = () => {
     setFormData({ ...formData, active: !formData.active });
-  };
-
-  /*  VALIDATION FUNCTION — PLACE HERE */
-  const validatePhoneNumbers = () => {
-    const newErrors = {};
-
-    if (!/^\d{10}$/.test(formData.phonenumber)) {
-      newErrors.phonenumber = "Phone number must be exactly 10 digits";
-    }
-
-    if (formData.whatsappnumber && !/^\d{10}$/.test(formData.whatsappnumber)) {
-      newErrors.whatsappnumber = "WhatsApp number must be exactly 10 digits";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
@@ -175,11 +168,6 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
                 />
-                {errors.phonenumber && (
-                  <span className="text-red-500 text-xs">
-                    {errors.phonenumber}
-                  </span>
-                )}
               </Field>
             </div>
 
@@ -286,14 +274,12 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
               <button
                 type="button"
                 onClick={handleSwitchToggle}
-                className={`w-11 h-6 rounded-full ${
-                  formData.active ? "bg-green-500" : "bg-gray-300"
-                } relative`}
+                className={`w-11 h-6 rounded-full ${formData.active ? "bg-green-500" : "bg-gray-300"
+                  } relative`}
               >
                 <span
-                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition ${
-                    formData.active ? "right-1" : "left-1"
-                  }`}
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition ${formData.active ? "right-1" : "left-1"
+                    }`}
                 />
               </button>
             </div>

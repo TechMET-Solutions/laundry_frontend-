@@ -41,24 +41,33 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
     }
   }, [employee]);
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    let updatedValue = value;
+
+    // Apply mobile-specific logic
+    if (name === "mobile_no") {
+      const numericValue = value.replace(/\D/g, "");
+      if (numericValue.length > 10) {
+        alert("Mobile number must be 10 digits only.");
+        return;
+      }
+      updatedValue = numericValue;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: updatedValue,
+    }));
   };
+
 
   const handleRoleChange = (e) => {
     const value = e.target.value;
     setSelectedRole(value);
     setForm((prev) => ({ ...prev, role: value }));
   };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   await createEmployee(form);
-  //   onSuccess?.();
-  //   onClose();
-  // };
 
   const isView = mode === "view";
   const isEdit = mode === "edit";
@@ -150,6 +159,8 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
                 value={form.mobile_no}
                 disabled={isView}
                 onChange={handleChange}
+                maxLength={10}
+                pattern="[0-9]{10}"
                 className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px]"
               />
             </div>
