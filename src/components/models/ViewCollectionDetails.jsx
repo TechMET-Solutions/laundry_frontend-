@@ -1,23 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { RiArrowLeftRightLine } from "react-icons/ri";
 import { MdClose } from "react-icons/md";
 
-const ViewCollectionDetails = ({ isOpen = false, onClose, data = {} }) => {
-  const [status, setStatus] = useState("Scheduled");
+const ViewCollectionDetails = ({ isOpen, onClose, data }) => {
+ if (!isOpen) return null;
 
-  useEffect(() => {
-    if (data?.status) {
-      setStatus(data.status);
-    }
-  }, [data]);
-
-  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl animate-in fade-in zoom-in duration-200">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
 
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-3">
             <div className="bg-indigo-600 p-2 rounded-lg text-white">
@@ -30,14 +23,11 @@ const ViewCollectionDetails = ({ isOpen = false, onClose, data = {} }) => {
 
           <div className="flex items-center gap-4">
             <select
-               value={status}
-               onChange={(e) => setStatus(e.target.value)}
               className="bg-gray-200 rounded px-3 py-2 text-sm outline-none cursor-pointer"
+              value={data.status}
+              disabled
             >
-              <option>Scheduled</option>
-              <option >Done</option>
-              <option value="Cancelled">Cancelled</option>
-              <option value="Re-Scheduled">Re-Scheduled</option>
+              <option>{data.status}</option>
             </select>
 
             <button
@@ -53,10 +43,10 @@ const ViewCollectionDetails = ({ isOpen = false, onClose, data = {} }) => {
         <div className="px-6 py-4">
           <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex justify-between items-center">
             <span className="text-black uppercase tracking-wide">
-              {data?.customer || "Demo Laundry"}
+              {data.customer_id || "Demo Laundry"}
             </span>
             <span className="font-bold">
-              #{data?.id || "TMS/COL-06"}
+              #{data.collection_code}
             </span>
           </div>
         </div>
@@ -72,116 +62,75 @@ const ViewCollectionDetails = ({ isOpen = false, onClose, data = {} }) => {
 
             <div className="space-y-3 text-sm">
               <div className="flex">
-                <span className="w-32 font-medium">
-                  Collection Status
-                </span>
+                <span className="w-32 font-medium">Status</span>
                 <span className="text-blue-500 font-semibold">
-                  {status}
+                  {data.status}
                 </span>
               </div>
 
               <div className="flex">
-                <span className="w-32 font-medium">
-                  Pickup Date
-                </span>
-                <span className="text-gray-800">
-                  {data?.date || "04/12/2025"}
-                </span>
+                <span className="w-32 font-medium">Pickup Date</span>
+                <span>{data.pickup_date}</span>
               </div>
 
               <div className="flex">
-                <span className="w-32 font-medium">
-                  Time Slot
-                </span>
-                <span className="text-gray-800">
-                  {data?.time || "09:00 AM - 10:00 AM"}
-                </span>
+                <span className="w-32 font-medium">Time Slot</span>
+                <span>{data.time_slot}</span>
               </div>
 
               <div className="flex">
-                <span className="w-32 font-medium">
-                  Created On
-                </span>
-                <span className="text-gray-800">
-                  {data?.createdOn || "02/12/2025"}
-                </span>
+                <span className="w-32 font-medium">Created By</span>
+                <span>{data.created_by}</span>
               </div>
             </div>
           </div>
 
-          {/* Collection Logistics */}
+          {/* Logistics */}
           <div className="border-t border-gray-400 my-4"></div>
 
-          <div>
-            <h3 className="font-bold text-gray-800 mb-4 pb-1">
-              Collection Logistics
-            </h3>
-
-            <div className="grid grid-cols-2 gap-8 text-sm">
-              {/* Customer Details */}
-              <div className="space-y-2">
-                <p className="font-semibold mb-2">
-                  Customer Details
-                </p>
-
+          <div className="grid grid-cols-2 gap-8 text-sm">
+            <div>
+              <p className="font-semibold mb-2">Customer Details</p>
+              <div className=" justify-between">
+                <span>Name {data.customer_id || "Shubham"}</span>
+               </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Name</span>
-                  <span>{data?.customer || "Test"}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="font-medium">Phone</span>
-                  <span>{data?.phone || "9876543210"}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="font-medium">Email</span>
-                  <span>{data?.email || "test@gmail.com"}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="font-medium">Address</span>
-                  <span>{data?.address || "Dubai"}</span>
-                </div>
+                <span>phone</span>
+                <span>{data.phone || "1234567892"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Email</span>
+                <span>{data.email || "as@kdkw"}</span>
+              </div>
+                 <div className="flex justify-between">
+                <span>Address</span>
+                <span>{data.Address || "Dubai"}</span>
               </div>
 
-              {/* Driver Details */}
-              <div className="space-y-2">
-                <p className="font-semibold mb-2">
-                  Driver Details
-                </p>
+            </div>
 
-                <div className="flex justify-between">
-                  <span className="font-medium">Name</span>
-                  <span>{data?.driver || "Test"}</span>
-                </div>
+            <div>
+              <p className="font-semibold mb-2">Driver Details</p>
+              <div className="flex justify-between">
+                <span>Name</span>
+                <span>{data.driver_id || "N/A"}</span>
 
-                <div className="flex justify-between">
-                  <span className="font-medium">Phone</span>
-                  <span>{data?.driverPhone || "9876543210"}</span>
-                </div>
+              </div>
+               <div className="flex justify-between">
+                <span>Phone</span>
+                <span>{data.Phone || "1234567892"}</span>
               </div>
             </div>
+           
+              
+          
+
+
+
+
+
+
           </div>
-        </div>
-
-        {/* Footer Notes */}
-        <div className="ml-10 mb-10">
-          <span className="font-medium">
-            Order Comments
-          </span>
-          <span className="ml-4 text-gray-800">
-            {data?.comments || "Lorem ipsum dolor sit amet consectetur adipisicing elit."}
-          </span>
-
-          <br /><br />
-
-          <span className="font-medium">
-            Status Notes
-          </span>
-          <span className="ml-4">
-            {data?.statusNotes || "New Cloth"}
-          </span>
         </div>
 
       </div>
