@@ -4,7 +4,7 @@ import { createCollection, updateCollection } from "../../api/collection";
 const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
   const isView = mode === "view";
   const isEdit = mode === "edit";
-  
+
   const [form, setForm] = useState({
     collection_type: "CLOTH",
     customer_type: "",
@@ -48,7 +48,7 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
     e.preventDefault();
 
     if (isEdit) {
-       console.log(collection);
+      console.log(collection);
 
       await updateCollection(collection.id, form);
     } else {
@@ -61,7 +61,7 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-40"></div>
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"></div>
 
       <div className="fixed inset-0 flex items-center justify-center z-50">
         <form
@@ -74,134 +74,156 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
 
           {/* Collection Type */}
           <div className="flex gap-6 mb-4 text-sm">
-            <label>
+            <label className="flex items-center gap-2">
               <input
                 type="radio"
                 checked={form.collection_type === "CLOTH"}
                 onChange={() => handleTypeChange("CLOTH")}
                 disabled={isView}
-              />{" "}
+              />
               Cloth Collection
             </label>
 
-            <label>
+            <label className="flex items-center gap-2">
               <input
                 type="radio"
                 checked={form.collection_type === "PAYMENT"}
                 onChange={() => handleTypeChange("PAYMENT")}
                 disabled={isView}
-              />{" "}
+              />
               Payment Collection
             </label>
           </div>
 
-          {/* Form */}
+          {/* Form Grid */}
           <div className="grid grid-cols-2 gap-4 text-sm">
-            
             {form.collection_type === "CLOTH" && (
-              <select
-                name="customer_type"
-                value={form.customer_type}
-                onChange={handleChange}
-                disabled={isView}
-                className="border p-2 rounded"
-              >
-                <option value="">Customer Type</option>
-                <option value="Individual">Individual</option>
-                <option value="Corporate">Corporate</option>
-              </select>
+              <div>
+                <label className="block text-gray-600 font-medium mb-1">
+                  Customer Type
+                </label>
+                <select
+                  name="customer_type"
+                  value={form.customer_type}
+                  onChange={handleChange}
+                  disabled={isView}
+                  className="border p-2 rounded w-full"
+                >
+                  <option value="">Select Customer Type</option>
+                  <option value="Individual">Individual</option>
+                  <option value="Corporate">Corporate</option>
+                </select>
+              </div>
             )}
+
             <div>
-               <label className="text-sm text-gray-600 font-medium">
+              <label className="block text-gray-600 font-medium mb-1">
                 Customer Id <span className="text-red-500">*</span>
               </label>
-               <input
-              name="customer_id"
-              value={form.customer_id}
-              onChange={handleChange}
-              disabled={isView}
-              placeholder="Customer ID"
-              className="border p-2 rounded"
-            /></div>
-           
-              <div>
-              
-                <input
-              type="date"
-              name="pickup_date"
-              value={form.pickup_date}
-              onChange={handleChange}
-              disabled={isView}
-              className="border p-2 rounded"
-            /></div>
-            
-            <div>
-               
-              <select
-              name="time_slot"
-              value={form.time_slot}
-              onChange={handleChange}
-              disabled={isView}
-              className="border p-2 rounded"
-            >
-              <option value="">Time Slot</option>
-              <option>03 PM - 04 PM</option>
-              <option>04 PM - 05 PM</option>
-              <option>05 PM - 06 PM</option>
-            </select></div>
+              <input
+                name="customer_id"
+                value={form.customer_id}
+                onChange={handleChange}
+                disabled={isView}
+                placeholder="Customer ID"
+                className="border p-2 rounded w-full"
+              />
+            </div>
 
-                <div className="">
-                 <label className="text-sm text-gray-600 font-medium">
+            <div>
+              <label className="block text-gray-600 font-medium mb-1">
+                Pickup Date
+              </label>
+              <input
+                type="date"
+                name="pickup_date"
+                value={form.pickup_date}
+                onChange={handleChange}
+                disabled={isView}
+                className="border p-2 rounded w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-600 font-medium mb-1">
+                Time Slot
+              </label>
+              <select
+                name="time_slot"
+                value={form.time_slot}
+                onChange={handleChange}
+                disabled={isView}
+                className="border p-2 rounded w-full"
+              >
+                <option value="">Select Time Slot</option>
+                <option>03 PM - 04 PM</option>
+                <option>04 PM - 05 PM</option>
+                <option>05 PM - 06 PM</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-600 font-medium mb-1">
                 Phone Number <span className="text-red-500">*</span>
               </label>
-                  <input
-              type="text"
-              name="phone_number"
-              value={form.phone_number}
-              onChange={handleChange}
-              disabled={isView}
-              placeholder="10-digit phone number"
-              pattern="^[0-9]{10}$"
-              inputMode="numeric"
-              maxLength={10}
-              required
-              title="Phone number must be exactly 10 digits"
-              className="border p-2 rounded w-full"
-            /></div>        
-                
+              <input
+                type="text"
+                name="phone_number"
+                value={form.phone_number}
+                onChange={handleChange}
+                disabled={isView}
+                placeholder="10-digit phone number"
+                pattern="^[0-9]{10}$"
+                inputMode="numeric"
+                maxLength={10}
+                required
+                title="Phone number must be exactly 10 digits"
+                className="border p-2 rounded w-full"
+              />
+            </div>
 
-            
-              <div className="">
-                <label className="text-sm text-gray-600 font-medium">
-                Driver Id<span className="text-red-500">*</span>
+            <div>
+              <label className="block text-gray-600 font-medium mb-1">
+                Driver Id <span className="text-red-500">*</span>
               </label>
-                <input
-              name="driver_id"
-              value={form.driver_id}
-              onChange={handleChange}
-              disabled={isView}
-              placeholder="Driver ID"
-              className="border p-2 rounded"
-            /></div>
-            
+              <input
+                name="driver_id"
+                value={form.driver_id}
+                onChange={handleChange}
+                disabled={isView}
+                placeholder="Driver ID"
+                className="border p-2 rounded w-full"
+              />
+            </div>
           </div>
 
-          <textarea
-            name="comments"
-            value={form.comments}
-            onChange={handleChange}
-            disabled={isView}
-            className="border w-full mt-4 p-2 rounded"
-            placeholder="Comments"
-          />
+          <div className="mt-4">
+            <label className="block text-gray-600 font-medium mb-1">Comments</label>
+            <textarea
+              name="comments"
+              value={form.comments}
+              onChange={handleChange}
+              disabled={isView}
+              className="border w-full p-2 rounded"
+              placeholder="Comments"
+              rows={2}
+            />
+          </div>
 
           <div className="flex justify-end gap-3 mt-6">
-            <button type="button" onClick={onClose} className="border px-4 py-2 rounded">
+            <button
+              type="button"
+              onClick={onClose}
+              className="border px-4 py-2 rounded"
+            >
               Cancel
             </button>
 
             {!isView && (
-              <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">
+              <button
+                type="submit"
+                className="bg-indigo-600 text-white px-4 py-2 rounded"
+              >
                 {isEdit ? "Update" : "Save"}
               </button>
             )}
@@ -209,6 +231,7 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
         </form>
       </div>
     </>
+
   );
 };
 
