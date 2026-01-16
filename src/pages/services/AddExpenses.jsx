@@ -30,6 +30,7 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
   };
 
   
@@ -90,11 +91,11 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
                 value={formData.category}
                 onChange={handleChange}
               >
-                <option disabled>Choose Expense Category</option>
-                <option>Item Purchase</option>
-                <option>Internet</option>
-                <option>Dewa Bill</option>
-                <option>Petty Cash</option>
+                <option value="" disabled>Choose Expense Category</option>
+                <option value="Item Purchase">Item Purchase</option>
+                <option value="Internet">Internet</option>
+                <option value="Dewa Bill">Dewa Bill</option>
+                <option value="Petty Cash">Petty Cash</option>
               </select>
             </div>
 
@@ -123,12 +124,13 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
                 onChange={handleChange}
                 class="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               >
-                <option>Choose Whatsapp Number</option>
-                <option>Cash</option>
-                <option>UPI</option>
-                <option>Card</option>
-                <option>Cheque</option>
-                <option>Bank Transfer</option>
+                 <option value="" disabled  >Choose Payment Mode</option>
+                 <option value="Choose Whatsapp Number" >Choose Whatsapp Number</option>
+                <option value="Cash">Cash</option>
+                <option value="UPI">UPI</option>
+                <option value="Card">Card</option>
+                <option value="Cheque">Cheque</option>
+                <option value="Bank Transfer">Bank Transfer</option>
               </select>
             </div>
             <div class="md:col-span-2">
