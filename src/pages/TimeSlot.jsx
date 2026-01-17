@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import { BiSearchAlt2, BiSolidContact } from "react-icons/bi";
 import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
@@ -11,7 +11,8 @@ import { getAllTimeSlot, deleteTimeSlot } from "../api/timeslot";
 function TimeSlot(){
   //  const[addTimeModal,setaddTimeModal]=useState(false);
   const[slots, setSlots] = useState([]);
-  const [addTimeModal, setaddTimeModal] = useState(false);
+  const [addTimeModal, setaddTimeModal] = useState({ open: false, slot: null});
+  const [editingSlot, setEditingSlot] = useState(null);
 
   //Statically Created Data :
 
@@ -52,6 +53,15 @@ function TimeSlot(){
       }
     };
 
+    // shows AM-PM
+    // const formatTime = (time) => {
+    //   if (!time) return "";
+    //   const [hour, minute] = time.split(":");
+    //   let h = parseInt(hour, 10);
+    //   const ampm = h >= 12 ? "PM" : "AM";
+    //   h = h % 12 || 12;
+    //   return `${h}:${minute} ${ampm}`;
+    // };
     
       return (
         <div className="min-h-screen bg-slate-100 p-6">
@@ -68,17 +78,25 @@ function TimeSlot(){
             <div className="flex gap-3">
               
               <button className="bg-indigo-800 text-white px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer"
-              onClick={()=>setaddTimeModal(true)}
+              onClick={()=>setaddTimeModal({ open: true, slot: null })}
               >
                 <IoIosAddCircleOutline size={18} />
                 Add Time Slot
               </button>
-              {addTimeModal && (
+              {/* {addTimeModal && (
                 <AddTime 
                   onClose={() => setaddTimeModal(false)}
                   onSuccess = {fetchTimeSlot}
                 />
-             )}
+              )} */}
+
+                {addTimeModal.open && (
+                    <AddTime 
+                        onClose={() => setaddTimeModal({ open: false, slot: null })}
+                        onSuccess={fetchTimeSlot}
+                        slot={addTimeModal.slot} // pass the slot object here
+                    />
+                )}
             </div>
           </div>
     
@@ -137,6 +155,18 @@ function TimeSlot(){
                     <td className="px-4 py-3  w-100">
                       {item.time_slot}
                     </td>
+
+                  {/* // add AM - PM */}
+                      {/* <td className="px-4 py-3 w-100">
+                        {(() => {
+                          if (!item.time_slot) return "";
+                          const [from, to] = item.time_slot.split(" - ");
+                          return `${formatTime(from)} - ${formatTime(to)}`;
+                        })()} 
+                      </td> */}
+
+ 
+
                     {/* <td className="px-4 py-3 text-green-600 list-circle pl-6 text-center align-middle">
                       <li className="text-center align-middle list-disc list-inside">
                         {item.status}
@@ -164,13 +194,18 @@ function TimeSlot(){
 
                     <td className="px-4 py-3 text-center">
                       <button
-                        className="bg-indigo-100 text-indigo-700 p-2 rounded-md mr-2"
-                        onClick={() => setaddTimeModal(true)}
+                        className="bg-indigo-100 text-indigo-700 p-2 rounded-md mr-2 cursor-pointer"
+                        //onClick={() => setaddTimeModal(true)
+                           onClick={() => {
+                            setaddTimeModal({ open: true, slot: item})//pass slot
+                             //setEditingSlot(item) //store the slot we want to edit 
+                             //setaddTimeModal(true)   // open modal
+                        }}
                       >
                         <FiEdit />
                       </button>
                       <button
-                        className="bg-red-100 text-red-700 p-2 rounded-md"
+                        className="bg-red-100 text-red-700 p-2 rounded-md cursor-pointer"
                         onClick={() => handleDelete(item.id)}
                       >
                         <MdDeleteOutline />
