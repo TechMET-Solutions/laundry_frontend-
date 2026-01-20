@@ -1,21 +1,16 @@
 import { useState } from "react";
-import { IoShirt } from "react-icons/io5";
-import { GiHoodie } from "react-icons/gi";
-import { BiBlanket } from "react-icons/bi";
 import { FiSearch } from "react-icons/fi";
 
-const categories = [
-  { name: "Ghutra", icon: IoShirt, price: 10 },
-  { name: "Under T-Shirt", icon: IoShirt, price: 8 },
-  { name: "Designer Saree", icon: IoShirt, price: 25 },
-  { name: "Hoodies", icon: GiHoodie, price: 15 },
-  { name: "Blanket", icon: BiBlanket, price: 20 },
-];
+ 
 
 
-function Category({ onSaveOrder }) {
+
+function Category({ onSaveOrder ,servicesData}) {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [quantity, setQuantity] = useState(1);
+
+  const [selectedValue, setSelectedValue] = useState("");
+const [searchQuery, setSearchQuery] = useState("");
 
   const closePopup = () => {
     setSelectedCategory(null);
@@ -32,6 +27,34 @@ function Category({ onSaveOrder }) {
   closePopup();
 };
 
+ 
+
+//Filter Dropdown
+
+  const handleSelection = (value) => {
+    setSelectedValue(value);
+     
+  };
+
+// Common filtering logic search + dropdown
+// console.log(servicesData);
+  const filteredServices = servicesData.filter((item) => {
+   const isActive = item.status === 1;
+
+   const matchesSearch =
+    searchQuery.trim() === "" ||
+    item.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesDropdown =
+      selectedValue === "" ||
+      selectedValue === "All" || 
+      item.name.toLowerCase() === selectedValue.toLowerCase();
+
+  return isActive  && matchesSearch && matchesDropdown;
+});
+
+
+
   return (
     <>
       <aside className="bg-slate-100 p-4">
@@ -39,32 +62,36 @@ function Category({ onSaveOrder }) {
               <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 flex-1 mb-6">
                 <FiSearch className="text-gray-400" />
                 <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="outline-none flex-1"
                   placeholder="Search..."
                 />
               </div>
         
-              <select className="bg-white px-2 mb-6">
-                <option>Sort By Category</option>
-                 <option>Gents</option>
-                  <option>Ladies</option>
-                   <option>Kids</option>
-                    <option>Other</option>
+              <select className="bg-white px-2 mb-6" value={selectedValue} onChange={(e) => handleSelection(e.target.value)}  >
+                <option value="" >Sort By Category</option>
+                  <option value="All" >All</option>
+                 <option value="Gents">Gents</option>
+                  <option value="Ladies">Ladies</option>
+                   <option value="Kids">Kids</option>
+                    <option value="Other">Other</option>
               </select>
             </div>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          {categories.map((cat) => {
-            const Icon = cat.icon;
+          {filteredServices.map((el) => {
+         
 
             return (
               <div
-                key={cat.name}
-                onClick={() => setSelectedCategory(cat)}
-                className="bg-white rounded-xl p-4 flex flex-col items-center
-                           cursor-pointer hover:shadow-md"
+                key={el.name}
+                onClick={() => setSelectedCategory(el)}
+                className="bg-white  p-2 flex flex-col items-center
+                           cursor-pointer hover:shadow-md max-w-[120px]"
               >
-                <Icon className="text-4xl text-indigo-400 mb-2" />
-                <span className="text-sm font-medium">{cat.name}</span>
+                 <img src={`http://localhost:5000/uploads/services/${el.addIcon}`} alt={el.addIcon} />
+                <span className="text-xl mt-2">{el.name}</span>
               </div>
             );
           })}
@@ -74,12 +101,13 @@ function Category({ onSaveOrder }) {
       {selectedCategory && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
           <div className="bg-white rounded-xl p-6 w-80 text-center">
-            <selectedCategory.icon className="text-6xl text-indigo-500 mb-4" />
+            {/* <selectedCategory.icon className="text-6xl text-indigo-500 mb-4" /> */}
+
+            <img src={`http://localhost:5000/uploads/services/${selectedCategory.addIcon}`} alt={selectedCategory.name} />
 
             <h2 className="text-lg font-semibold mb-4">
               {selectedCategory.name}
             </h2>
-
             <input
               type="number"
               min="1"

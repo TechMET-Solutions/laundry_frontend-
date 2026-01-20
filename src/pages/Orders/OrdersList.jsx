@@ -58,7 +58,7 @@ export default function Order_List() {
           </button>
 
           <button
-            onClick={() => navigate("/orders/add_order")}
+            onClick={() => navigate("/pos")}
             className="bg-indigo-600 text-white flex items-center gap-2 px-4 py-3 rounded-full text-sm"
           >
             <IoAddCircleOutline />

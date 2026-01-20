@@ -2,47 +2,82 @@ import { FiUser } from "react-icons/fi";
 import { useState } from "react";
 import { MdOutlinePersonAddAlt } from "react-icons/md";
 import { GrCycle } from "react-icons/gr";
+import { useNavigate } from "react-router-dom";
+import { FiCalendar } from "react-icons/fi";
 
-function OrderSummary({ orders }) {
-  const [startDate, setStartDate] = useState("2025-12-01");
-  const [endDate, setEndDate] = useState("2025-12-01");
+function OrderSummary({
+  orders,
+  increaseQuantity,
+  decreaseQuantity,
+  removeItem,
+}) {
+  const navigate = useNavigate();
+
+  const [orderDate, setOrderDate] = useState("2025-11-28");
+  const [deliveryDate, setDeliveryDate] = useState("2025-11-30");
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
   // ---- CALCULATIONS ----
   const subtotal = orders.reduce(
     (sum, item) => sum + item.quantity * (item.price || 0),
-    0
+    0,
   );
 
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
 
   return (
-    <div className="bg-white rounded-xl p-4 flex flex-col gap-4 h-full">
-      {/* DATES */}
-      <div className="flex justify-between items-end text-sm gap-4">
-        <div className="flex flex-col gap-1">
-          <p className="text-gray-500">Order Date</p>
+    <div className="bg-white rounded-xl  p-4 flex flex-col gap-4 h-full">
+       
+      <div className="flex justify-between items-center gap-6">
+       
+        <div className="flex items-center gap-2 text-[12px]">
+          <span className="text-gray-700">Order Date</span>
+
           <input
             type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
+            value={orderDate}
+            onChange={(e) => setOrderDate(e.target.value)}
+            className="
+        bg-transparent
+        text-indigo-600
+        text-[12px]
+        font-semibold
+        outline-none
+        cursor-pointer
+      "
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <p className="text-gray-500">Delivery Date</p>
+         <div className="flex items-center gap-2 text-[12px]">
+          <span className="text-gray-700">Delivery Date</span>
+
           <input
             type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
+            value={deliveryDate}
+            min={orderDate}
+            onChange={(e) => setDeliveryDate(e.target.value)}
+            className="
+        bg-transparent
+        text-indigo-600
+        text-[12px]
+        font-semibold
+        outline-none
+        cursor-pointer
+      "
           />
         </div>
       </div>
 
-      {/* CUSTOMER / DRIVER */}
-      <div className="flex gap-4 items-center">
+       <div className="flex gap-4 items-center">
         <button className="flex items-center gap-2 h-10 bg-indigo-50 rounded-lg px-3 font-medium">
           <FiUser /> Select Driver
         </button>
@@ -57,15 +92,45 @@ function OrderSummary({ orders }) {
       </div>
 
       {/* ORDER ITEMS */}
-      <div className="border rounded-lg p-3 text-sm space-y-2">
+      <div className="border rounded-lg p-3 text-sm space-y-2 ">
         {orders.length === 0 && (
           <p className="text-gray-400 text-center">No items added</p>
         )}
 
         {orders.map((item, index) => (
-          <div key={index} className="grid grid-cols-[1fr_auto] gap-4">
-            <span className="truncate">{item.name}</span>
-            <span className="font-medium">x{item.quantity}</span>
+          <div
+            key={index}
+            className="grid grid-cols-[1fr_auto] gap-4 bg-[#E5E9FF] h-[70px] rounded p-3"
+          >
+            <div>
+              <span className="font-medium text-lg">{item.name}</span>
+              <p>{item.price}</p>
+            </div>
+            <div className="flex items-center gap-2 ">
+              <button
+                onClick={() => decreaseQuantity(index)}
+                className="w-7 h-7 bg-[#D2D5E8] rounded shadow cursor-pointer"
+                disabled={item.quantity === 1}
+              >
+                -
+              </button>
+
+              <span className="font-medium">{item.quantity}</span>
+
+              <button
+                onClick={() => increaseQuantity(index)}
+                className="w-7 h-7 bg-[#D2D5E8] rounded shadow cursor-pointer"
+              >
+                +
+              </button>
+
+              <button
+                onClick={() => removeItem(index)}
+                className="text-red-500 text-lg cursor-pointer"
+              >
+                🗑
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -107,7 +172,10 @@ function OrderSummary({ orders }) {
 
       {/* ACTIONS */}
       <div className="flex justify-end items-center gap-4 mt-6 mb-6">
-        <button className="h-10 bg-green-600 text-white px-4 rounded-full text-sm">
+        <button
+          onClick={() => navigate("/orders")}
+          className="h-10 bg-green-600 text-white px-4 rounded-full text-sm"
+        >
           Save
         </button>
 
