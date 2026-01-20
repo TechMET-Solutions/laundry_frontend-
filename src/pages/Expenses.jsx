@@ -5,7 +5,7 @@ import { TbArrowBackUp } from "react-icons/tb";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import AddExpenses from "../components/models/AddExpenses";
+import AddExpenses from "./services/AddExpenses";
 import DeleteModal from "../components/models/DeleteModal";
 import Pagination from "../components/Pagination";
 
