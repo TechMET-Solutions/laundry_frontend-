@@ -34,6 +34,20 @@ function Area() {
     fetchAreas(page);
   }, [page]);
 
+  const handleDelete = async (id) => {
+    console.log("CALLING DELETE API WITH:", id);
+    if (!window.confirm("Delete this area?")) return;
+    try {
+      const res = await deleteArea(id);
+      console.log("DELETE RESPONSE:", res.data);
+      fetchAreas(page);
+    }
+    catch (err) {
+      console.error("DELETE ERROR:", err.response?.data);
+    }
+  };
+
+
   // // ✅ Area data 
   // const data = [
   //   {
@@ -147,7 +161,10 @@ function Area() {
                     >
                       <FiEdit size={18} />
                     </button>
-                    <button className="p-2 bg-red-100 text-red-600 rounded">
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="p-2 bg-red-100 text-red-700 rounded"
+                    >
                       <MdDeleteOutline size={18} />
                     </button>
                   </div>
