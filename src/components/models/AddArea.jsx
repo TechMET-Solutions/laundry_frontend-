@@ -1,10 +1,42 @@
 import React, { useState } from "react";
 import { IoIosClose } from "react-icons/io";
+import{ createArea} from "../../api/location_management";
 
-function AddEmirates({ onClose }) {
+function AddArea({ onClose }) {
   const [isActive, setIsActive] = useState(true);
+const [form, setForm] = useState({
+      area: "",
+      emirates:"",
+      radius: "",
+      country: "",
+      status: true,
+    });
+    
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
 
+  const handleSubmit = async () => {
+      if (!form.area || !form.emirates || !form.radius || !form.country) {
+      alert("Fill all required fields");
+      return;
+    }
+    try {
+      await createArea({
+      area: form.area,              
+      emirates: form.emirates,
+      radius: form.radius,
+      country: form.country,
+      status: form.status ? 1 : 0,
+      });
+
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error("Error creating area:", error);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -21,12 +53,28 @@ function AddEmirates({ onClose }) {
 
         {/* Row 1 */}
         <div className="flex gap-4 mb-4">
+        <div className="flex-1">
+            <label className="text-sm font-medium">
+              Area Name<span className="text-red-500">*</span>
+            </label>
+            <input
+              name="area"
+              value={form.area}
+              onChange={handleChange}
+              placeholder="Area Name"
+              className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300"
+            />
+        </div>
+
+
           <div className="flex-1">
             <label className="text-sm font-medium">
               Emirate<span className="text-red-500">*</span>
             </label>
             <input
-              type="text"
+              name="emirates"
+              value={form.emirates}
+              onChange={handleChange}
               placeholder="Emirate"
               className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300"
             />
@@ -34,11 +82,13 @@ function AddEmirates({ onClose }) {
 
           <div className="flex-1">
             <label className="text-sm font-medium">
-              Code<span className="text-red-500">*</span>
+              Radius<span className="text-red-500">*</span>
             </label>
             <input
-              type="text"
-              placeholder="Code"
+              name="radius"
+              value={form.radius}
+              onChange={handleChange}
+              placeholder="radius"
             className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300"
             />
           </div>
@@ -49,10 +99,13 @@ function AddEmirates({ onClose }) {
           <label className="text-sm font-medium">
             Country<span className="text-red-500">*</span>
           </label>
+          
           <select className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300">
             <option>Choose Country</option>
             <option>United Arab Emirates</option>
             <option>India</option>
+            <option >Antarctica</option>
+            <option>Antigua And Barbuda</option>
           </select>
         </div>
 
@@ -81,7 +134,7 @@ function AddEmirates({ onClose }) {
           >
             Cancel
           </button>
-          <button className="px-6 py-2 bg-indigo-600 text-white rounded-md text-sm">
+          <button onClick={handleSubmit} className="px-6 py-2 bg-indigo-600 text-white rounded-md text-sm">
             Save
           </button>
         </div>
@@ -90,4 +143,4 @@ function AddEmirates({ onClose }) {
   );
 }
 
-export default AddEmirates;
+export default AddArea;

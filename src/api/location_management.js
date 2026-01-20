@@ -8,7 +8,10 @@ const API = axios.create({
 
 export const createEmirate = (data) => API.post("/emirates/create", data);
 
-export const getAllEmirates = () => API.get("/emirates/list");
+export const getAllEmirates = (page = 1, limit = 10) =>
+     API.get(`/emirates/list?page=${page}&limit=${limit}`);
+
+
 
 export const getEmirateById = (id) => API.get(`/emirates/list/${id}`);
 
@@ -21,7 +24,9 @@ export const deleteEmirate = (id) => API.delete(`/emirates/delete/${id}`);
 
 export const createArea = (data) => API.post("/areas/create", data);
 
-export const getAllAreas = () => API.get("/areas/list");
+export const getAllAreas = (page = 1, limit = 10) => 
+    API.get(`/areas/list?page=${page}&limit=${limit}`);
+
 
 export const getAreaById = (id) => API.get(`/areas/list/${id}`);
 

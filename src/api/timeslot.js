@@ -10,7 +10,8 @@ const API = axios.create({
 export const createTimeSlot = (data) => API.post("/create", data);
 
 // GET ALL (Pagination)
-export const getAllTimeSlot = () => API.get(`/list`);
+export const getAllTimeSlot = (page = 1, limit = 10) => 
+    API.get(`/list?page=${page}&limit=${limit}`);
 
 //GET BY ID 
 export const getTimeSlotById = (id) => API.get(`/list/${id}`);

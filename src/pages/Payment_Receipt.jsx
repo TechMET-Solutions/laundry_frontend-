@@ -1,24 +1,32 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
+import Pagination from "../components/Pagination";
+// import { getAllPaymentReceipts } from "../api/payment_receipt";
 
-const reportitems = [
-  { name: "Daily Reports", path: "/reports/daily_reports" },
-  { name: "Order Reports", path: "/reports/order_reports" },
-  { name: "Sales Reports", path: "/reports/sales_reports" },
-  { name: "Cloth Wise Reports", path: "/reports/cloth_wise_reports" },
-  { name: "Ledger Reports", path: "/reports/ledger_reports" },
-  { name: "Outstanding Reports", path: "/reports/outstanding_reports" },
-  { name: "Customer Outstanding Reports", path: "/reports/customer_outstanding_reports" },
-  { name: "Expenses Reports", path: "/reports/expenses_reports" },
-  { name: "Tax Reports", path: "/reports/tax_reports" },
-];
-
-function Cloth_wise_report() {
+function Payment_Receipt () {
   const navigate = useNavigate();
    const [startDate, setStartDate] = useState("2025-12-01");
   const [endDate, setEndDate] = useState("2025-12-01");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+
+  const fetchPaymentReceipts = async (p = page) => {
+    try {
+      const res = await getAllPaymentReceipts(p, 10);
+
+      setPaymentReceipts(res.data.data);
+      setTotalPages(res.data.pagination.totalPages);
+    } catch (error) {
+      console.error("API ERROR:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPaymentReceipts(page);
+  }, [page]);
 
   return (
    <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -162,6 +170,13 @@ function Cloth_wise_report() {
        </tbody>
    
                  </table>
+                 <div className="w-full flex justify-center my-6">
+                               <Pagination
+                                 currentPage={page}
+                                 totalPages={totalPages}
+                                 onChange={setPage}
+                               />
+                               </div>
                </div>
              </div>
            
@@ -169,4 +184,4 @@ function Cloth_wise_report() {
    }
    
 
-export default Cloth_wise_report;
+export default Payment_Receipt;

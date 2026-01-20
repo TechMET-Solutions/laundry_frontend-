@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect} from "react";
 import { TbArrowBackUp } from "react-icons/tb";
 import { FaRegUser } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
@@ -6,49 +6,71 @@ import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosClose } from "react-icons/io";
 
-import AddEmirates from "./AddEmirates";
-import EditArea from "./EditArea";
-
+import AddEmirates from "../../components/models/AddEmirates";
+import EditArea from "../../components/models/EditArea";
+import { getAllAreas ,deleteArea } from "../../api/location_management";
+import Pagination from "../../components/Pagination";
+import AddArea from "../../components/models/AddArea";
 function Area() {
+  const [areas, setAreas] = useState([]);
   const [search, setSearch] = useState("");
   const [showAddArea, setShowAddArea] = useState(false);
   const [showEditArea, setShowEditArea] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // ✅ Area data 
-  const areas = [
-    {
-      id: 1,
-      areaName: "Dubai",
-      emirate: "Dubai",
-      country: "Antigua And Barbuda",
-      radius: "10 Km",
-      status: "Active",
-    },
-    {
-      id: 2,
-      areaName: "Blur Dubai",
-      emirate: "Dubai",
-      country: "Antarctica",
-      radius: "8 Km",
-      status: "Active",
-    },
-    {
-      id: 3,
-      areaName: "Mussaffah",
-      emirate: "Ajman",
-      country: "United Arab Emirates",
-      radius: "12 Km",
-      status: "Active",
-    },
-    {
-      id: 4,
-      areaName: "Abu Dhabi",
-      emirate: "Ajman",
-      country: "United Arab Emirates",
-      radius: "15 Km",
-      status: "Active",
-    },
-  ];
+
+
+  const fetchAreas = async (p = page) => {
+    try {
+      const res = await getAllAreas(p, 10);
+
+      setAreas(res.data.data);
+      setTotalPages(res.data.pagination.totalPages);
+    } catch (error) {
+      console.error("API ERROR:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAreas(page);
+  }, [page]);
+
+  // // ✅ Area data 
+  // const data = [
+  //   {
+  //     id: 1,
+  //     areaName: "Dubai",
+  //     emirate: "Dubai",
+  //     country: "Antigua And Barbuda",
+  //     radius: "10 Km",
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 2,
+  //     areaName: "Blur Dubai",
+  //     emirate: "Dubai",
+  //     country: "Antarctica",
+  //     radius: "8 Km",
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 3,
+  //     areaName: "Mussaffah",
+  //     emirate: "Ajman",
+  //     country: "United Arab Emirates",
+  //     radius: "12 Km",
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 4,
+  //     areaName: "Abu Dhabi",
+  //     emirate: "Ajman",
+  //     country: "United Arab Emirates",
+  //     radius: "15 Km",
+  //     status: "Active",
+  //   },
+  // ];
 
   return (
     <>
@@ -68,7 +90,7 @@ function Area() {
 
       {/* Add Modal */}
       {showAddArea && (
-        <AddEmirates onClose={() => setShowAddArea(false)} />
+        <AddArea onClose={() => setShowAddArea(false)} />
       )}
 
       {/* Search */}
@@ -136,6 +158,13 @@ function Area() {
             ))}
           </tbody>
         </table>
+         <div className="w-full flex justify-center my-6">
+                   <Pagination
+                     currentPage={page}
+                     totalPages={totalPages}
+                     onChange={setPage}
+                  />
+                   </div>
 
         {/* Edit Modal */}
         {showEditArea && (

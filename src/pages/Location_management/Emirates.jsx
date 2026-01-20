@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { TbArrowBackUp } from "react-icons/tb";
 import { FaRegUser } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
@@ -7,53 +7,46 @@ import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosClose } from "react-icons/io";
 
-import AddEmirates from "./AddEmirates";
-
-import EditEmirates from "./EditEmirates";
+import AddEmirates from "../../components/models/AddEmirates";
+import Pagination from "../../components/Pagination";
+// import EditEmirates from "./EditEmirates";
+import { getAllEmirates, deleteEmirate } from "../../api/location_management";
 
 function Emirates() {
   const [search, setSearch] = useState("");
    const [showAddEmirates, setShowAddEmirates] = useState(false);
     const [showEditEmirates, setShowEditEmirates] = useState(false);
-   
+   const [page, setPage] = useState(1); 
+    const [totalPages, setTotalPages] = useState(1);
+    const [emirates, setEmirates] = useState([]);
 
+    const fetchEmirates = async (p = page) => {
+      try {
+        const res = await getAllEmirates(p, 10);
+        setEmirates(res.data.data);
+        setTotalPages(res.data.pagination.totalPages);
+      } catch (err) {
+  console.error("BACKEND ERROR:", err.response?.data);
+  alert(err.response?.data?.message || "Server error");
+}
 
+    };
+  useEffect(() => {
+    fetchEmirates(page);
+  }, [page]);
+const handleDelete = async (id) => {
+  console.log("CALLING DELETE API WITH:", id);
 
-  // ✅ Emirates data 
-  const emirates = [
-    {
-      id: 1,
-      name: "Dubai",
-      code: "DXB",
-      country: "United Arab Emirates",
-      status: "Active",
-      createdBy: "30-12-2024",
-    },
-    {
-      id: 2,
-      name: "Ajman",
-      code: "AJM",
-      country: "United Arab Emirates",
-      status: "Active",
-      createdBy: "30-12-2024",
-    },
-    {
-      id: 3,
-      name: "Abu Dhabi",
-      code: "AUX",
-      country: "United Arab Emirates",
-      status: "Active",
-      createdBy: "03-01-2025",
-    },
-    {
-      id: 4,
-      name: "Sad",
-      code: "ASD",
-      country: "United Arab Emirates",
-      status: "Active",
-      createdBy: "03-01-2025",
-    },
-  ];
+  if (!window.confirm("Delete this emirate?")) return;
+
+  try {
+    const res = await deleteEmirate(id);
+    console.log("DELETE RESPONSE:", res.data);
+    fetchEmirates(page);
+  } catch (err) {
+    console.error("DELETE ERROR:", err.response?.data);
+  }
+};
 
   return (
     <>
@@ -72,12 +65,6 @@ function Emirates() {
           Add New Emirates
         </span>
       </div>
-
-      {/* Modal */}
-      {showAddEmirates && (
-        <AddEmirates onClose={() => setShowAddEmirates(false)} />
-      )}
-
       {/* Search */}
       <div className="absolute top-[120px] right-[60px]">
         <div className="w-[320px] h-12 rounded-lg bg-[#E2E8F0] flex items-center px-3 gap-2">
@@ -117,7 +104,7 @@ function Emirates() {
             {emirates.map((item, index) => (
               <tr key={item.id} className="bg-white rounded-md">
                 <td className="text-center py-3">{index + 1}</td>
-                <td className="text-center py-3">{item.name}</td>
+                <td className="text-center py-3">{item.emirate}</td>
                 <td className="text-center py-3">{item.code}</td>
                 <td className="text-center py-3">{item.country}</td>
                 <td className="text-center py-3">
@@ -134,9 +121,15 @@ function Emirates() {
                     <button  onClick={() => setShowEditEmirates(true)} className="p-2 bg-indigo-100 text-indigo-700 rounded">
                       <FiEdit size={18} />
                     </button>
-                    <button className="p-2 bg-red-100 text-red-600 rounded">
-                      <MdDeleteOutline size={18} />
-                    </button>
+                    <button
+                    onClick={() => {
+                      handleDelete(item.id);
+                    }}
+                    className="p-2 bg-red-100 text-red-600 rounded"
+                  >
+                    <MdDeleteOutline size={18} />
+                  </button>
+
                   </div>
                 </td>
               </tr>
@@ -144,11 +137,27 @@ function Emirates() {
           </tbody>
         </table>
 
-        {/* Edit Modal */}
-      {showEditEmirates && (
-        <EditEmirates onClose={() => setShowEditEmirates(false)} />
-      )}
+        <div className="w-full flex justify-center my-6">
+        <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage} />
+          </div>
+        
 
+        {/* Edit Modal */}
+      {showAddEmirates && (
+  <AddEmirates
+    onClose={() => setShowAddEmirates(false)}
+    onSuccess={() => fetchEmirates(1)}
+  />
+)}
+      {/* {showEditEmirates && (
+        <EditEmirates
+          onClose={() => setShowEditEmirates(false)}
+          onSuccess={() => fetchEmirates(page)}
+        />
+      )} */}
       </div>
     </>
   );

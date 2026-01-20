@@ -3,66 +3,74 @@ import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { TbArrowBackUp } from "react-icons/tb";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import AddExpenses from "./services/AddExpenses";
 import DeleteModal from "../components/models/DeleteModal";
+import Pagination from "../components/Pagination";
 
 import { deleteExpense, getAllExpenses } from "../api/expences";
-import { IoReturnUpBackOutline } from "react-icons/io5";
 
 function Expenses() {
-  // ---------------- STATES ----------------
+  const navigate = useNavigate();
+
+  // modal & selection
   const [expenseModal, setExpenseModal] = useState(false);
   const [mode, setMode] = useState("add");
   const [selectedExpense, setSelectedExpense] = useState(null);
 
+  // delete
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
+  // data
   const [expensesData, setExpensesData] = useState([]);
-  const [refresh, setRefresh] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // ---------------- HANDLERS ----------------
-
-  const handleCloseModal = () => {
-    setExpenseModal(false);
-    setSelectedExpense(null);
-  };
-
-  const fetchAllExpenses = async () => {
+  // ---------------- FETCH ----------------
+  const fetchAllExpenses = async (p = 1) => {
     try {
-      const response = await getAllExpenses();
-      setExpensesData(response.data.data || []);
+      const res = await getAllExpenses(p, 10);
+      setExpensesData(res.data.data || []);
+      setTotalPages(res.data.pagination?.totalPages || 1);
     } catch (error) {
-      console.error("Error fetching expenses:", error);
+      console.error("Failed to fetch expenses:", error);
+      setExpensesData([]);
+      setTotalPages(1);
     }
   };
 
   useEffect(() => {
-    fetchAllExpenses();
-  }, [refresh]);
+    fetchAllExpenses(page);
+  }, [page]);
+
+  // ---------------- HANDLERS ----------------
+  const handleCloseModal = () => {
+    setExpenseModal(false);
+    setSelectedExpense(null);
+    setMode("add");
+  };
 
   const handleDelete = async () => {
     if (!deleteId) return;
 
-    try {
-      await deleteExpense(deleteId);
-      setDeleteId(null);
-      fetchAllExpenses();
-    } catch (error) {
-      console.error("Delete failed:", error);
-    }
+    await deleteExpense(deleteId);
+    setDeleteId(null);
+    setShowDeleteModal(false);
+    fetchAllExpenses();
   };
 
   // ---------------- UI ----------------
   return (
     <div className="min-h-screen bg-slate-100 p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <div
-           
-          className="flex items-center gap-3 "
-        >
-          <button  onClick={() => navigate(-1)} className="bg-indigo-800 text-white h-8 w-8 flex items-center justify-center cursor-pointer rounded">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-indigo-800 text-white h-8 w-8 flex items-center justify-center rounded"
+          >
             <TbArrowBackUp />
           </button>
           <h2 className="text-xl font-semibold">Expenses</h2>
@@ -80,6 +88,7 @@ function Expenses() {
         </button>
       </div>
 
+      {/* Search (UI only) */}
       <div className="flex justify-end mb-4">
         <div className="flex items-center gap-2 bg-slate-200 px-3 py-2 rounded-lg w-64">
           <BiSearchAlt2 />
@@ -91,8 +100,9 @@ function Expenses() {
         </div>
       </div>
 
+      {/* Table */}
       <div className="bg-[#f4f7fb] rounded-lg overflow-hidden">
-        <table className="w-full text-sm border-separate">
+        <table className="w-full text-sm">
           <thead>
             <tr>
               {[
@@ -106,7 +116,7 @@ function Expenses() {
               ].map((head) => (
                 <th
                   key={head}
-                  className="bg-[#56CCFF] px-4 py-3 text-left font-medium text-gray-800"
+                  className="bg-[#56CCFF] px-4 py-3 text-left font-medium"
                 >
                   {head}
                 </th>
@@ -124,15 +134,18 @@ function Expenses() {
             ) : (
               expensesData.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3">{item.date?.split("T")[0]}</td>
-                  <td className="px-4 py-3 font-semibold">₹{item.amount}</td>
+                  <td className="px-4 py-3">
+                    {item.date?.split("T")[0]}
+                  </td>
+                  <td className="px-4 py-3 font-semibold">
+                    ₹{item.amount}
+                  </td>
                   <td className="px-4 py-3">{item.category}</td>
                   <td className="px-4 py-3">{item.tax}</td>
                   <td className="px-4 py-3">{item.payment_mode}</td>
                   <td className="px-4 py-3">Admin</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      {/* EDIT */}
                       <button
                         className="bg-indigo-100 text-indigo-700 p-2 rounded-md"
                         onClick={() => {
@@ -144,7 +157,6 @@ function Expenses() {
                         <FiEdit />
                       </button>
 
-                      {/* DELETE */}
                       <button
                         className="bg-red-100 text-red-700 p-2 rounded-md"
                         onClick={() => {
@@ -161,17 +173,28 @@ function Expenses() {
             )}
           </tbody>
         </table>
+
+        {/* Pagination */}
+        <div className="w-full flex justify-center my-6">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage}
+          />
+        </div>
       </div>
 
+      {/* Add / Edit Modal */}
       {expenseModal && (
         <AddExpenses
           onClose={handleCloseModal}
           expenseData={selectedExpense}
           mode={mode}
-          setRefresh={setRefresh}
+          onSuccess={fetchAllExpenses}
         />
       )}
 
+      {/* Delete Modal */}
       {showDeleteModal && (
         <DeleteModal
           isOpen={showDeleteModal}

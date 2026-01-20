@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { FaRegAddressBook } from "react-icons/fa";
@@ -8,6 +8,7 @@ import Excel from "../assets/excel.png";
 import AddCustomerModal from "./services/AddCustomerModal";
 import BillingDetailsModal from "./services/BillingDetailsModal";
 import { getAllCustomers, deleteCustomers } from "../api/customer";
+import Pagination from "../components/Pagination";
 
 function Customer() {
   const navigate = useNavigate();
@@ -17,39 +18,36 @@ function Customer() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showBillingModal, setShowBillingModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-
-  // ✅ Edit state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [editCustomer, setEditCustomer] = useState(null);
 
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (p = page) => {
     try {
-      const res = await getAllCustomers();
+      const res = await getAllCustomers(p, 10);
       setCustomers(res.data.data || []);
+      setTotalPages(res.data.pagination.totalPages);
     } catch (error) {
       console.error("API ERROR:", error);
     }
   };
+  useEffect(() => {
+    fetchCustomers(page);
+  }, [page]);
+  // useEffect(() => {
+  //   const fetchCustomers = async (p = page) => {
+  //     try {
+  //       const res = await getAllCustomers(p, 10);
+  //       setCustomers(res.data.data || []);
+  //       setTotalPages(res.data.pagination.totalPages);
+  //     } catch (error) {
+  //       console.error("API ERROR:", error);
+  //     }
+  //   };
 
-  // ✅ Add / Edit handler (unchanged logic)
-  // const handleAddCustomer = (savedCustomer) => {
-  //   if (editCustomer) {
-  //     setCustomers(
-  //       customers.map((c) =>
-  //         c.id === savedCustomer.id ? savedCustomer : c
-  //       )
-  //     );
-  //   } else {
-  //     setCustomers([...customers, savedCustomer]);
-  //   }
-
-  //   setEditCustomer(null);
-  //   setShowAddModal(false);
-  // };
-
+  //   fetchCustomers(page);
+  // }, [page]);
+  
   const handleAddCustomer = (savedCustomer) => {
     if (editCustomer) {
       setCustomers((prev) =>
@@ -232,6 +230,13 @@ function Customer() {
             ))}
           </tbody>
         </table>
+         <div className="w-full flex justify-center my-6">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onChange={setPage}
+                 />
+                  </div>
       </div>
 
       {/* Modals */}

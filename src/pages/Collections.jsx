@@ -6,6 +6,7 @@ import AddCollectionModal from "../components/models/AddCollectionModal";
 import ViewCollectionDetails from "../components/models/ViewCollectionDetails";
 import { getAllCollections, deleteCollection } from "../api/collection";
 import DeleteModal from "../components/models/DeleteModal";
+import Pagination from "../components/Pagination";
 
 
 function Collections() {
@@ -17,22 +18,20 @@ function Collections() {
    const [showDeleteCollection, setShowDeleteCollection] = useState(false);
   const [collections, setCollections] = useState([]);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const fetchCollections = async () => {
-    try {
-      setLoading(true);
-      const res = await getAllCollections(page, 10);
-      setCollections(res.data.data);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchCollections = async (p = page) => {
+     const res = await getAllCollections(p, 10);
 
-  useEffect(() => {
-    fetchCollections();
-  }, [page]);
-
+     setCollections(res.data.data);
+     setTotalPages(res.data.pagination.totalPages);
+   };
+ 
+   useEffect(() => {
+     fetchCollections(page);
+   }, [page]);
+ 
 const handleDelete = async () => {
     if (!deleteId) return;
     await deleteCollection(deleteId);
@@ -41,8 +40,6 @@ const handleDelete = async () => {
     fetchCollections();
   };
 
-
-  // ✅ SINGLE SOURCE OF TRUTH FOR CLOSING MODALS
   const handleCloseModal = () => {
     setOpenModal(false);
     setMode(null);
@@ -127,7 +124,6 @@ const handleDelete = async () => {
                     <FiEdit />
                   </button>
 
-                  {/* DELETE */}
                  <button
                    onClick={() => {
                      setDeleteId(item.id);
@@ -142,6 +138,13 @@ const handleDelete = async () => {
             ))}
           </tbody>
         </table>
+        <div className="w-full flex justify-center my-6">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage}
+         />
+          </div>
       </div>
 
       {/* ADD / EDIT MODAL */}

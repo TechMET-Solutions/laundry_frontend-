@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import Button from "../../components/ui/Button";
+import Button from "../ui/Button";
 import { createExpense, updateExpense } from "../../api/expences";
 
-const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
+const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
   const isEditMode = mode === "edit";
   const [formData, setFormData] = useState({
     date: "",
@@ -48,7 +48,7 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
       await createExpense(formData);
     }
 
-    setRefresh(prev => !prev);
+    onSuccess();
     onClose();
   } catch (error) {
     console.error("Expense save error:", error);
@@ -58,8 +58,8 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
 
   return (
     <>
-      <div class="fixed inset-0 flex items-center justify-center bg-black/40">
-        <div class="w-full max-w-xl rounded-xl bg-white p-8 shadow-lg">
+      <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+        <div className="w-full max-w-xl rounded-xl bg-white p-8 shadow-lg">
           <h2>Add Expenses</h2>
 
           <form
@@ -81,12 +81,12 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
               ></input>
             </div>
             <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700">
-                Expense Category<span class="text-red-500">*</span>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                Expense Category<span className="text-red-500">*</span>
               </label>
               <select
               required
-                class="w-full rounded-lg   border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-lg   border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
@@ -114,7 +114,7 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
               ></input>
             </div>
             <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Choose Payment Method<span class="text-red-500">*</span>
               </label>
               <select
@@ -122,7 +122,7 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
                 name="payment_mode"
                 value={formData.payment_mode}
                 onChange={handleChange}
-                class="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               >
                  <option value="" disabled  >Choose Payment Mode</option>
                  <option value="Choose Whatsapp Number" >Choose Whatsapp Number</option>
@@ -133,12 +133,12 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
                 <option value="Bank Transfer">Bank Transfer</option>
               </select>
             </div>
-            <div class="md:col-span-2">
-              <label class="mb-2 block text-sm font-medium text-gray-700">
-                Tax Include<span class="text-red-500">*</span>
+            <div className="md:col-span-2">
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Tax Include<span className="text-red-500">*</span>
               </label>
-              <div class="flex items-center gap-10">
-                <label class="flex items-center gap-2 text-sm text-gray-700">
+              <div className="flex items-center gap-10">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
                   <input
                   required
                     type="radio"
@@ -146,11 +146,11 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
                     value="Yes"
                     checked={formData.tax === "Yes"}
                     onChange={handleChange}
-                    class="h-4 w-4 accent-gray-600"
+                    className="h-4 w-4 accent-gray-600"
                   />
                   Yes
                 </label>
-                <label class="flex items-center gap-2 text-sm text-gray-700">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
                   <input
                   required
                     type="radio"
@@ -166,7 +166,7 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
             </div>
 
             <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 {`Enter ${mode==="edit"?"Updated":""} Note`}
               </label>
               <input
@@ -182,7 +182,7 @@ const AddExpenses = ({ mode, onClose, expenseData, setRefresh }) => {
             <br />
             <br />
 
-            <div class="flex justify-center items-center gap-6 p-4 ml-60 ">
+            <div className="flex justify-center items-center gap-6 p-4 ml-60 ">
               <Button onClick={onClose} btnText="Cancel" variant="outline" />
               <Button
                 type="submit"

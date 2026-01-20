@@ -5,7 +5,8 @@ const API = axios.create({
 
 export const createExpense = (data) => API.post("/create", data);
 
-export const getAllExpenses = () => API.get("/list");
+export const getAllExpenses = (page = 1, limit = 10) =>
+    API.get(`/list?page=${page}&limit=${limit}`);
 
 export const getExpenseById = (id) => API.get(`/list/${id}`);
 

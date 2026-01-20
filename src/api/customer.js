@@ -8,7 +8,8 @@ const API = axios.create({
 export const createCustomers = (data) => API.post("/create", data);
 
 // GET ALL (with pagination)
-export const getAllCustomers = () => API.get(`/list`);
+export const getAllCustomers = (page = 1, limit = 10) => 
+    API.get(`/list?page=${page}&limit=${limit}`);
 
 // GET BY ID
 export const getCustomersById = (id) => API.get(`/list/${id}`);

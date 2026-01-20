@@ -7,12 +7,31 @@ import { IoIosAddCircleOutline } from "react-icons/io";
 import AddTime from "./services/AddTime"
 
 import { getAllTimeSlot, deleteTimeSlot } from "../api/timeslot";
+import Pagination from "../components/Pagination";
 
 function TimeSlot(){
   //  const[addTimeModal,setaddTimeModal]=useState(false);
   const[slots, setSlots] = useState([]);
   const [addTimeModal, setaddTimeModal] = useState({ open: false, slot: null});
   const [editingSlot, setEditingSlot] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [timeSlots, setTimeSlots] = useState([]);
+
+
+  const fetchTimeSlot = async (p = page) => {
+    try {
+      const res = await getAllTimeSlot(p, 10);
+      setTimeSlots(res.data.data);
+      setTotalPages(res.data.pagination.totalPages);
+    } catch (error) {
+        console.log(`Error fetching data timeslot ${error}`);
+    }
+  };
+
+  useEffect(() => {
+    fetchTimeSlot(page);
+  }, [page]);
 
   //Statically Created Data :
 
@@ -32,19 +51,19 @@ function TimeSlot(){
     //   ];
 
 
-    const fetchTimeSlot = async () => {
-      try {
-        const res = await getAllTimeSlot(); //calls backend API
-        setSlots(res.data.data); //update state with DB data
-        console.log(res.data.data);
-      } catch (error) {
-          console.log(`Error fetching data timeslot ${error}`);
-      }
-    };
+    // const fetchTimeSlot = async () => {
+    //   try {
+    //     const res = await getAllTimeSlot(); //calls backend API
+    //     setSlots(res.data.data); //update state with DB data
+    //     console.log(res.data.data);
+    //   } catch (error) {
+    //       console.log(`Error fetching data timeslot ${error}`);
+    //   }
+    // };
 
-    useEffect(() => {
-      fetchTimeSlot();
-    }, []);
+    // useEffect(() => {
+    //   fetchTimeSlot();
+    // }, []);
 
     const handleDelete = async (id) => {
       if(window.confirm("Are you sure to delete this timeslot?")) {
@@ -136,7 +155,7 @@ function TimeSlot(){
     
               <tbody>
 
-                  {slots.length === 0 && (
+                  {timeSlots.length === 0 && (
                     <tr>
                       <td colSpan="4" className="text-center py-4 text-gray-500">
                         No time slots found
@@ -145,7 +164,7 @@ function TimeSlot(){
                   )}
 
 
-                {slots.map((item, index) => (
+                {timeSlots.map((item, index) => (
                   <tr key={item.id}
                     className="hover:bg-slate-50 transition ">
                   
@@ -216,6 +235,14 @@ function TimeSlot(){
                 ))}
               </tbody>
             </table>
+            <div className="w-full flex justify-center my-6">
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onChange={setPage}
+              />
+              </div>
+            
           </div>
         </div>
       );
