@@ -6,9 +6,7 @@ import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { IoIosClose } from "react-icons/io";
 
-import AddEmirates from "../../components/models/AddEmirates";
-import EditArea from "../../components/models/EditArea";
-import { getAllAreas ,deleteArea } from "../../api/location_management";
+import { getAllAreas ,deleteArea } from "../../api/area";
 import Pagination from "../../components/Pagination";
 import AddArea from "../../components/models/AddArea";
 function Area() {
@@ -132,8 +130,8 @@ function Area() {
             {areas.map((item, index) => (
               <tr key={item.id} className="bg-white rounded-md">
                 <td className="text-center py-3">{index + 1}</td>
-                <td className="text-center py-3">{item.areaName}</td>
-                <td className="text-center py-3">{item.emirate}</td>
+                <td className="text-center py-3">{item.area}</td>
+                <td className="text-center py-3">{item.emirates}</td>
                 <td className="text-center py-3">{item.country}</td>
                 <td className="text-center py-3">{item.radius}</td>
                 <td className="text-center py-3">
@@ -167,9 +165,13 @@ function Area() {
                    </div>
 
         {/* Edit Modal */}
-        {showEditArea && (
-          <EditArea onClose={() => setShowEditArea(false)} />
-        )}
+        {showAddArea && (
+  <AddArea
+    onClose={() => setShowAddArea(false)}
+    onSuccess={() => fetchAreas(1)}
+  />
+)}
+
       </div>
     </>
   );

@@ -12,7 +12,7 @@ import Pagination from "../../components/Pagination";
 // import EditEmirates from "./EditEmirates";
 import { getAllEmirates, deleteEmirate } from "../../api/location_management";
 
-function Emirates() {
+function Emirates() { 
   const [search, setSearch] = useState("");
    const [showAddEmirates, setShowAddEmirates] = useState(false);
     const [showEditEmirates, setShowEditEmirates] = useState(false);
@@ -26,8 +26,7 @@ function Emirates() {
         setEmirates(res.data.data);
         setTotalPages(res.data.pagination.totalPages);
       } catch (err) {
-  console.error("BACKEND ERROR:", err.response?.data);
-  alert(err.response?.data?.message || "Server error");
+        console.error("API ERROR:", err);
 }
 
     };

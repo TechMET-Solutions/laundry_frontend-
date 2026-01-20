@@ -15,9 +15,10 @@ export const getAllEmirates = (page = 1, limit = 10) =>
 
 export const getEmirateById = (id) => API.get(`/emirates/list/${id}`);
 
-export const updateEmirate = (id, data) => API.put(`/emirates/update/${id}`, data);
+export const updateEmirate = (id, data) => API.put(`/emirates/${id}`, data);
+export const deleteEmirate = (id) =>
+  API.delete(`/emirates/${id}`);
 
-export const deleteEmirate = (id) => API.delete(`/emirates/delete/${id}`);
 
 
 // Area APIs
@@ -33,4 +34,3 @@ export const getAreaById = (id) => API.get(`/areas/list/${id}`);
 export const updateArea = (id, data) => API.put(`/areas/update/${id}`, data);
 
 export const deleteArea = (id) => API.delete(`/areas/delete/${id}`);
-

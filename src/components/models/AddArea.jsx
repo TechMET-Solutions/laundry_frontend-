@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { IoIosClose } from "react-icons/io";
-import{ createArea} from "../../api/location_management";
+import{ createArea} from "../../api/area";
 
-function AddArea({ onClose }) {
+function AddArea({ onClose, onSuccess }) {
+
   const [isActive, setIsActive] = useState(true);
 const [form, setForm] = useState({
       area: "",
@@ -100,22 +101,29 @@ const [form, setForm] = useState({
             Country<span className="text-red-500">*</span>
           </label>
           
-          <select className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300">
-            <option>Choose Country</option>
-            <option>United Arab Emirates</option>
-            <option>India</option>
-            <option >Antarctica</option>
-            <option>Antigua And Barbuda</option>
-          </select>
+          <select
+  name="country"
+  value={form.country}
+  onChange={handleChange}
+  className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300"
+>
+  <option value="">Choose Country</option>
+  <option value="United Arab Emirates">United Arab Emirates</option>
+  <option value="India">India</option>
+  <option value="Antarctica">Antarctica</option>
+  <option value="Antigua And Barbuda">Antigua And Barbuda</option>
+</select>
+
         </div>
 
         {/* Toggle */}
         <div className="flex items-center gap-3 mb-6">
-          <div
-            onClick={() => setIsActive(!isActive)}
-            className={`w-10 h-5 flex items-center rounded-full cursor-pointer ${
-              isActive ? "bg-blue-500" : "bg-gray-300"
-            }`}
+        <div
+        onClick={() => {
+          setIsActive(!isActive);
+          setForm({ ...form, status: !form.status });
+        }}
+
           >
             <div
               className={`w-4 h-4 bg-white rounded-full shadow transform transition ${
