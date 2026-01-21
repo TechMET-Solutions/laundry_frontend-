@@ -3,9 +3,9 @@ import Button from "../../components/ui/Button";
 import { createNewServiceList, updateServiceList } from "../../api/servicelist";
 import ToggleButton from "../../components/ui/ToggleButton";
 import {
-  getAllServicesType,
+  getAllServiceType,
   getAllServicesCategory,
-} from "../../api/servicesapi"; 
+} from "../../api/servicesapi";
 
 const AddServices_PopUp = ({ mode, onClose, serviceData, setRefresh }) => {
   const isEditMode = mode === "edit";

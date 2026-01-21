@@ -79,41 +79,64 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
     setFormData({ ...formData, active: !formData.active });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validatePhoneNumbers()) return;
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const customerData = {
-      name: formData.name,
-      type: formData.typeofcustomer.toLowerCase(), // ✅ FIX (CRITICAL)
-      mobile_no: formData.phonenumber,
-      whatsapp_no: formData.whatsappnumber,
-      email: formData.email,
-      emirates: formData.emirates,
-      area: formData.area,
-      apartment_number: formData.appartmentnumber,
-      building_name: formData.buildingname,
-      map_location: formData.maplocation,
-      tax_number: formData.taxnumber,
-      address: formData.address,
-      status: formData.active ? 1 : 0,
-    };
+  if (!validatePhoneNumbers()) {
+    return;
+  }
 
-    try {
-      setLoading(true);
-
-      editData
-        ? await updateCustomers(editData.id, customerData)
-        : await createCustomers(customerData);
-
-      onSave({ ...customerData, id: editData?.id });
-      onClose();
-    } catch (error) {
-      alert("Failed to save customer");
-    } finally {
-      setLoading(false);
-    }
+  const customerData = {
+    name: formData.name,
+    type: formData.typeofcustomer.toLowerCase(),
+    mobile_no: formData.phonenumber,
+    whatsapp_no: formData.whatsappnumber,
+    email: formData.email,
+    emirates: formData.emirates,
+    area: formData.area,
+    apartment_number: formData.appartmentnumber,
+    building_name: formData.buildingname,
+    map_location: formData.maplocation,
+    tax_number: formData.taxnumber,
+    address: formData.address,
+    status: formData.active ? 1 : 0,
   };
+
+  try {
+    setLoading(true);
+
+    if (editData) {
+      await updateCustomers(editData.id, customerData);
+    } else {
+      await createCustomers(customerData);
+    }
+
+    await onSave();   // 🔥 parent re-fetch
+    onClose();
+  } catch (error) {
+    alert("Failed to save customer");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const validatePhoneNumbers = () => {
+  if (formData.phonenumber.length !== 10) {
+   
+    return false;
+  }
+
+  if (
+    formData.whatsappnumber &&
+    formData.whatsappnumber.length !== 10
+  ) {
+    
+    return false;
+  }
+
+  return true;
+};
+
 
   return (
     <>

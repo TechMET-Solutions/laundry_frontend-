@@ -34,36 +34,13 @@ function Customer() {
   useEffect(() => {
     fetchCustomers(page);
   }, [page]);
-  // useEffect(() => {
-  //   const fetchCustomers = async (p = page) => {
-  //     try {
-  //       const res = await getAllCustomers(p, 10);
-  //       setCustomers(res.data.data || []);
-  //       setTotalPages(res.data.pagination.totalPages);
-  //     } catch (error) {
-  //       console.error("API ERROR:", error);
-  //     }
-  //   };
-
-  //   fetchCustomers(page);
-  // }, [page]);
   
-  const handleAddCustomer = (savedCustomer) => {
-    if (editCustomer) {
-      setCustomers((prev) =>
-        prev.map((c) =>
-          c.id === savedCustomer.id
-            ? { ...c, ...savedCustomer } // ✅ CRITICAL FIX
-            : c
-        )
-      );
-    } else {
-      setCustomers((prev) => [...prev, savedCustomer]);
-    }
+ const handleAddCustomer = async () => {
+  await fetchCustomers(page);   
+  setEditCustomer(null);
+  setShowAddModal(false);
+};
 
-    setEditCustomer(null);
-    setShowAddModal(false);
-  };
 
   const handleSearch = (e) => setSearchTerm(e.target.value);
 
