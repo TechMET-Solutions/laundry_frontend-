@@ -2,7 +2,7 @@ import React from "react";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 
-export default function () {
+ function DetailedOrderPage() {
   const navigate = useNavigate();
   return (
     <div className="p-4 sm:p-4 bg-[#f4f7fb] min-h-screen ">
@@ -258,3 +258,5 @@ export default function () {
     </div>
   );
 }
+
+export default DetailedOrderPage;

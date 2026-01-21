@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IoReturnUpBackOutline, IoAddCircleOutline } from "react-icons/io5";
 import { AiOutlineDelete } from "react-icons/ai";
 import { RiArrowDropDownLine } from "react-icons/ri";
@@ -6,6 +6,17 @@ import { FiSearch, FiTrash2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Status_Screen from "../../assets/Status_Screen.svg";
 import { GrView } from "react-icons/gr";
+import { getAllOrders } from "../../api/order";
+
+const formatDisplayDate = (value) => {
+  if (!value) return "--";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 export default function Order_List() {
   const navigate = useNavigate();
@@ -14,20 +25,38 @@ export default function Order_List() {
   const [driversDropdown, setDriversDropdown] = useState(false);
   const [ordersDropdown, setOrdersDropdown] = useState(false);
 
-
   const [paymentSelected, setPaymentSelected] = useState("All Payment");
   const [driverSelected, setDriverSelected] = useState(" All Drivers");
   const [orderSelected, setOrderSelected] = useState("All Orders");
-  const [edit, setEdit] = useState(false);
+  // const [edit, setEdit] = useState(false);
   const [deleteOrder, setDeleteOrder] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const handleDeleteOrder = () => {
     // Implement delete order logic here
     setDeleteOrder(false);
-  }
+  };
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const res = await getAllOrders();
+
+        setOrders(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to load orders", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   return (
-    <div className="p-4 sm:p-6 bg-[#f4f7fb] min-h-screen">
+    <div className="py-6 bg-[#f4f7fb]  ">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -101,7 +130,7 @@ export default function Order_List() {
                   >
                     {item}
                   </li>
-                )
+                ),
               )}
             </ul>
           )}
@@ -129,7 +158,7 @@ export default function Order_List() {
                   >
                     {item}
                   </li>
-                )
+                ),
               )}
             </ul>
           )}
@@ -183,7 +212,7 @@ export default function Order_List() {
                 "Driver",
                 "Amount",
                 "Status",
-                "Payment",
+                "PaymentInfo",
                 "Created By",
                 "Payment",
                 "Action",
@@ -199,163 +228,130 @@ export default function Order_List() {
           </thead>
 
           <tbody>
-            {[
-              {
-                id: "TMS/ORD-06",
-                OrderInfo: {
-                  Orderdate: "28/11/25",
-                  DeliveryDate: "30/11/25",
-                },
-                customer: "Testing",
-                driver: "Aswin VD",
-                Amount: "AED 40.25",
-                Status: "Received",
-                PaymentStatus: {
-                  TotalAmount: "Total Amount: AED 40.25",
-                  PaidAmount: "Paid Amount: AED 0.00",
-                },
-                CreatedBy: "Shop",
-              },
-              {
-                id: "TMS/ORD-06",
-                OrderInfo: {
-                  Orderdate: "28/11/25",
-                  DeliveryDate: "30/11/25",
-                },
-                customer: "Testing",
-                driver: "Aswin VD",
-                Amount: "AED 40.25",
-                Status: "Received",
-                PaymentStatus: {
-                  TotalAmount: "Total Amount: AED 40.25",
-                  PaidAmount: "Paid Amount: AED 0.00",
-                },
-                CreatedBy: "Shop",
-              },
-              {
-                id: "TMS/ORD-06",
-                OrderInfo: {
-                  Orderdate: "28/11/25",
-                  DeliveryDate: "30/11/25",
-                },
-                customer: "Testing",
-                driver: "Aswin VD",
-                Amount: "AED 40.25",
-                Status: "Received",
-                PaymentStatus: {
-                  TotalAmount: "Total Amount: AED 40.25",
-                  PaidAmount: "Paid Amount: AED 0.00",
-                },
-                CreatedBy: "Shop",
-              },
-            ].map((item, index) => (
-              <tr key={index} className="bg-[#f1f5fb]">
-                {/* Order ID */}
-                <td className="px-2 py-2 sm:px-4 border-b border-gray-400 font-semibold whitespace-normal break-words">
-                  {item.id}
-                </td>
-
-                {/* Order Info */}
-                <td className="px-2 py-2 sm:px-4 border-b border-gray-400 text-[#3A3D51]">
-                  <div className="flex flex-col gap-1 text-sm leading-tight">
-                    <span>
-                      <span className="font-medium">Order date :</span>{" "}
-                      <span className="font-bold">
-                        {item.OrderInfo.Orderdate}
-                      </span>
-                    </span>
-                    <span>
-                      <span className="font-medium">Delivered :</span>{" "}
-                      <span className="font-bold">
-                        {item.OrderInfo.DeliveryDate}
-                      </span>
-                    </span>
-                  </div>
-                </td>
-
-                {/* Customer */}
-                <td className="px-2 py-2 sm:px-4 border-b border-gray-400 whitespace-normal break-words">
-                  {item.customer}
-                </td>
-
-                {/* Driver */}
-                <td className="hidden md:table-cell px-2 py-2 sm:px-4 border-b border-gray-400 whitespace-normal break-words">
-                  {item.driver}
-                </td>
-
-                {/* Amount */}
-                <td className="px-2 py-2 sm:px-4 border-b border-gray-400 font-semibold whitespace-normal">
-                  {item.Amount}
-                </td>
-
-                {/* Status */}
-                <td className="px-2 py-2 sm:px-4 border-b border-gray-400 text-[#707070]">
-                  {item.Status}
-                </td>
-
-                {/* Payment Info */}
-                <td className="px-2 py-2 sm:px-4 border-b border-gray-400">
-                  <div className="flex flex-col gap-1 text-sm leading-tight whitespace-normal">
-                    <span>{item.PaymentStatus.TotalAmount}</span>
-                    <span>{item.PaymentStatus.PaidAmount}</span>
-                  </div>
-                </td>
-
-                {/* Created By */}
-                <td className="hidden md:table-cell px-2 py-2 sm:px-4 border-b border-gray-400">
-                  {item.CreatedBy}
-                </td>
-
-                {/* Add Payment */}
-                <td className="px-2 py-2 border-b border-gray-400">
-                  <button className="bg-[#27AE60] px-3 py-1 sm:px-4 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap">
-                    Add Payment
-                  </button>
-                </td>
-
-                {/* Actions */}
-                <td className="px-2 py-6 sm:px-4 border-b border-gray-400 flex gap-2">
-                  <button
-                    className="p-2 bg-[#56CCF291] rounded"
-                    onClick={() => navigate("/orders/detailed_order")}
-                  >
-                    <GrView />
-                  </button>
-                  <button  className="p-2 bg-[#FFD0C6] text-[#C32300] rounded"
-                  onClick={() => setDeleteOrder(true)} onClose={() => setDeleteOrder(false)}
-                  >
-                    <FiTrash2  />
-                  </button>
+            {loading && (
+              <tr>
+                <td className="px-2 py-4 text-center" colSpan={10}>
+                  Loading orders...
                 </td>
               </tr>
-            ))}
+            )}
+
+            {!loading && orders.length === 0 && (
+              <tr>
+                <td className="px-2 py-4 text-center" colSpan={10}>
+                  No orders found.
+                </td>
+              </tr>
+            )}
+
+            {!loading &&
+              orders.map((item) => {
+                const orderId = item.order_code || "N/A";
+                const orderDate = formatDisplayDate(item.order_date);
+                const deliveryDate = formatDisplayDate(item.delivery_date);
+                const customerName = item.customer_name || "--";
+                const driverName = item.driver_name || "--";
+                const amount = item.total_amount || "--";
+                const status = item.status || "--";
+                const totalAmount = item.total_amount || "--";
+                const paidAmount = item.paid_amount || "--";
+                const createdBy = "Admin";
+
+                return (
+                  <tr key={orderId} className="bg-[#f1f5fb] text-[#3A3D51]">
+                    <td className="px-2 py-2 sm:px-2 border-b border-gray-400 font-semibold whitespace-nowrap  text-[12px]">
+                      {orderId}
+                    </td>
+
+                    <td className="px-2 py-2 whitespace-nowrap  text-[12px] sm:px-2 border-b border-gray-400 text-[#3A3D51]">
+                      <div className="flex flex-col gap-1 text-sm leading-tight">
+                        <span>
+                          <span className="font-medium">Order date :</span>{" "}
+                          <span className="font-bold">{orderDate}</span>
+                        </span>
+                        <span>
+                          <span className="font-medium">Delivered :</span>{" "}
+                          <span className="font-bold">{deliveryDate}</span>
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className=" py-2 font-medium whitespace-nowrap  text-[12px]   border-b border-gray-400  ">
+                      {customerName}
+                    </td>
+
+                    <td className="hidden md:table-cell font-semibold px-2 py-2 sm:px-2 border-b border-gray-400 whitespace-nowrap  text-[12px]">
+                      {driverName}
+                    </td>
+
+                    <td className="px-2 py-2 sm:px-2 border-b text-[#3A3D51] border-gray-400 font-semibold whitespace-nowrap  text-[12px]">
+                      AED {amount}
+                    </td>
+
+                    <td className="px-2 py-2 sm:px-2 border-b border-gray-400 text-[#707070] whitespace-nowrap  text-[12px]">
+                      {status}
+                    </td>
+
+                    <td className="px-2 py-2 sm:px-2 border-b whitespace-nowrap  text-[12px] border-gray-400">
+                      <div className="flex flex-col gap-1 text-[12px] leading-tight whitespace-normal">
+                        <span className="font-semibold text-[#3A3D51]">Total Amount: <span className="font-bold "> AED {totalAmount} </span></span>
+                        <span className="font-semibold text-[#3A3D51]">Paid Amount: <span className="font-bold "> AED {paidAmount} </span></span>
+                      </div>
+                    </td>
+
+                    <td className="  md:table-cell whitespace-nowrap text-[#3A3D51]  font-medium  text-[12px] px-2 py-2 sm:px-4 border-b border-gray-400">
+                      {createdBy}
+                    </td>
+
+                    <td className="px-2 py-2 border-b whitespace-nowrap  text-[12px] border-gray-400">
+                      <button className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap">
+                        Add Payment
+                      </button>
+                    </td>
+
+                    <td className="px-2 py-6 sm:px-2 border-b whitespace-nowrap  text-[12px] border-gray-400 flex gap-2">
+                      <button
+                        className="p-2 bg-[#56CCF291] rounded"
+                        onClick={() => navigate("/orders/detailed_order")}
+                      >
+                        <GrView />
+                      </button>
+                      <button
+                        className="p-2 bg-[#FFD0C6] text-[#C32300] rounded"
+                        onClick={() => setDeleteOrder(true)}
+                        onClose={() => setDeleteOrder(false)}
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
-    {deleteOrder && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-80">   
-          <h2 className="text-lg font-semibold mb-4">Delete Order</h2>
-          <p className="mb-6">Are you sure you want to delete this order?</p>
-          <div className="flex justify-end gap-4">
-            <button
-              onClick={() => setDeleteOrder(false)}
-              className="px-4 py-2 bg-gray-300 rounded-lg"
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={handleDeleteOrder}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg"
-            >   
-              Delete
-            </button>
+      {/* {deleteOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-80">
+            <h2 className="text-lg font-semibold mb-4">Delete Order</h2>
+            <p className="mb-6">Are you sure you want to delete this order?</p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setDeleteOrder(false)}
+                className="px-4 py-2 bg-gray-300 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteOrder}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
-         
+      )} */}
     </div>
-
   );
 }
