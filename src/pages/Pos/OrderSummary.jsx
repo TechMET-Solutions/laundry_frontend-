@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { FiCalendar } from "react-icons/fi";
 import { getAllCustomers } from "../../api/customer";
 import AddCustomerModal from "../services/AddCustomerModal";
+import { createOrder } from "../../api/order";
+import { formatDateForInput } from "../../utils/formatDateForInput";
 
 function OrderSummary({
   orders,
@@ -16,15 +18,41 @@ function OrderSummary({
   const navigate = useNavigate();
 
   const [orderDate, setOrderDate] = useState(new Date());
-  const [deliveryDate, setDeliveryDate] = useState(new Date());
+  const [deliveryDate, setDeliveryDate] = useState("");
 
   const [customerSearchTerm, setCustomerSearchTerm] = useState("");
   const [filteredCustomerList, setFilteredCustomerList] = useState([]);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
-  const [selectedCustomerName, setSelectedCustomerName] = useState("");
+  // const [selectedCustomerName, setSelectedCustomerName] = useState("");
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
+  const [isSelectingCustomer, setIsSelectingCustomer] = useState(false);
 
   const [openAddCustomerModal, setOpenAddCustomerModal] = useState(false);
+
+  const [errors, setErrors] = useState({
+    deliveryDate: "",
+    customerName: "",
+    items: "",
+    paymentMethod: "",
+    paidAmount: "",
+  });
+
+  const [orderObject, setOrderObject] = useState({
+    orderDate: new Date().toISOString(),
+    deliveryDate: "",
+
+    customerName: "",
+    driverName: "Shubham",
+
+    amount: 0,
+    totalAmount: 0,
+    paidAmount: 0,
+
+    currency: "AED",
+    status: "PENDING",
+    createdBy: "Admin",
+    paymentMethod: "Cash",
+  });
 
   const formatDate = (date) => {
     const d = new Date(date);
@@ -36,14 +64,22 @@ function OrderSummary({
     return `${day}/${month}/${year}`;
   };
 
+  const getNextDay = (date) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + 1);
+    return d;
+  };
+
   useEffect(() => {
     // agar input empty hai → kuch bhi fetch nahi karna
-    if (!customerSearchTerm.trim()) {
+    if (!customerSearchTerm.trim() || isSelectingCustomer) {
       setFilteredCustomerList([]);
       setIsSearchDropdownOpen(false);
+      setIsSelectingCustomer(false);
       return;
     }
 
+    // Debounce the search input
     const timer = setTimeout(async () => {
       try {
         setIsLoadingCustomers(true);
@@ -70,11 +106,76 @@ function OrderSummary({
   const tax = subtotal * 0.05;
   const total = subtotal + tax;
 
+  useEffect(() => {
+    setOrderObject((prev) => ({
+      ...prev,
+      amount: subtotal,
+      totalAmount: total,
+    }));
+  }, [subtotal, total]);
+
+  // Clear items error when items are added
+  useEffect(() => {
+    if (orders.length > 0) {
+      setErrors((prev) => ({ ...prev, items: "" }));
+    }
+  }, [orders.length]);
+ 
+
+    const handleSaveOrder = async () => {
+    const newErrors = {
+      deliveryDate: "",
+      customerName: "",
+      items: "",
+      paymentMethod: "",
+      paidAmount: "",
+    };
+
+    // Validate delivery date
+    if (!deliveryDate) {
+      newErrors.deliveryDate = "Select a delivery date";
+    }
+
+    // Validate customer name
+    if (!orderObject.customerName.trim()) {
+      newErrors.customerName = "Please select a customer";
+    }
+
+    // Validate items
+    if (orders.length === 0) {
+      newErrors.items = "Please add at least one item";
+    }
+
+    // Validate payment method
+    if (!orderObject.paymentMethod || orderObject.paymentMethod === "Cash") {
+      newErrors.paymentMethod = "Please select a payment method";
+    }
+
+    if (parseFloat(orderObject.paidAmount) > orderObject.totalAmount) {
+       newErrors.paidAmount = "Paid amount cannot exceed total";  
+       
+    }
+
+    setErrors(newErrors);
+
+    // If any errors, don't save
+    if (
+      newErrors.deliveryDate ||
+      newErrors.customerName ||
+      newErrors.items ||
+      newErrors.paymentMethod || newErrors.paidAmount
+    ) {
+      return;
+    }
+
+    await createOrder(orderObject);
+    navigate("/orders");
+  };
+
   return (
     <div className="bg-white rounded-xl  p-4 flex flex-col gap-4 h-full">
       {/* Date */}
       <div className="flex justify-between items-center gap-4">
-        
         <div className="flex items-center gap-2 text-[12px] whitespace-nowrap">
           <span className="text-gray-700">Order Date</span>
 
@@ -88,31 +189,49 @@ function OrderSummary({
 
             <input
               type="date"
-              onChange={(e) => setOrderDate(new Date(e.target.value))}
+              value={formatDateForInput(orderDate)}
+              onChange={(e) => {
+                const date = new Date(e.target.value);
+                setOrderDate(date);
+              }}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </div>
         </div>
 
-        
-        <div className="flex items-center gap-2 text-[12px] whitespace-nowrap">
+        <div className="relative flex items-center gap-2 text-[12px] whitespace-nowrap">
           <span className="text-gray-700">Delivery Date</span>
 
           <span className="text-indigo-600 font-semibold">
-            {formatDate(deliveryDate)}
+            {deliveryDate ? formatDate(deliveryDate) : ""}
           </span>
 
           {/* Calendar Icon + Hidden Input */}
-          <div className="relative w-4 h-4 cursor-pointer">
-            <FiCalendar className="text-gray-800" />
+          <div className="w-4 h-4 cursor-pointer">
+            <FiCalendar className="text-gray-800 cursor-pointer" />
 
             <input
               type="date"
-              min={orderDate.toISOString().split("T")[0]}
-              onChange={(e) => setDeliveryDate(new Date(e.target.value))}
+              min={formatDateForInput(getNextDay(orderDate))}
+              value={deliveryDate ? formatDateForInput(deliveryDate) : ""}
+              onChange={(e) => {
+                const date = new Date(e.target.value);
+
+                setDeliveryDate(date);
+                setErrors((prev) => ({ ...prev, deliveryDate: "" }));
+                setOrderObject((prev) => ({
+                  ...prev,
+                  deliveryDate: date.toISOString(),
+                }));
+              }}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </div>
+          {errors.deliveryDate && (
+            <span className="absolute left-0 top-3 text-red-500 font-semibold text-[10px] whitespace-nowrap mt-1">
+              {errors.deliveryDate}
+            </span>
+          )}
         </div>
       </div>
 
@@ -133,7 +252,10 @@ function OrderSummary({
               value={customerSearchTerm}
               placeholder="Search customer"
               onFocus={() => setIsSearchDropdownOpen(true)}
-              onChange={(e) => setCustomerSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setCustomerSearchTerm(e.target.value);
+                setErrors((prev) => ({ ...prev, customerName: "" }));
+              }}
               className="w-full bg-[#E1E3F3] rounded-lg  text-[12px] outline-none font-medium"
             />
           </div>
@@ -151,15 +273,28 @@ function OrderSummary({
                     key={customer.id}
                     className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
                     onClick={() => {
-                      setSelectedCustomerName(customer.name);
-                      setCustomerSearchTerm(customer.name);
                       setIsSearchDropdownOpen(false);
+                      setIsSelectingCustomer(true);
+                      // setSelectedCustomerName(customer.name);
+                      setCustomerSearchTerm(customer.name);
+                      setErrors((prev) => ({ ...prev, customerName: "" }));
+
+                      setOrderObject((prev) => ({
+                        ...prev,
+                        customerName: customer.name,
+                      }));
                     }}
                   >
                     {customer.name}
                   </li>
                 ))}
             </ul>
+          )}
+
+          {errors.customerName && (
+            <span className="absolute left-0 top-7 text-red-500 font-semibold text-[12px] whitespace-nowrap mt-1">
+              {errors.customerName}
+            </span>
           )}
         </div>
 
@@ -182,7 +317,7 @@ function OrderSummary({
       </div>
 
       {/* ORDER ITEMS */}
-      <div className="  rounded-lg min-h-[300px]  text-sm space-y-2 ">
+      <div className="relative rounded-lg min-h-[300px]  text-sm space-y-2 ">
         {orders.length === 0 && (
           <p className="text-gray-400 text-center">No items added</p>
         )}
@@ -223,6 +358,12 @@ function OrderSummary({
             </div>
           </div>
         ))}
+
+        {errors.items && (
+          <span className="absolute left-0 top-full text-red-500 font-semibold text-[12px] whitespace-nowrap mt-1">
+            {errors.items}
+          </span>
+        )}
       </div>
 
       {/* TOTALS */}
@@ -242,14 +383,39 @@ function OrderSummary({
       </div>
 
       {/* PAYMENT */}
-      <div className="flex justify-center gap-1 items-center">
-        <input
-          type="text"
-          placeholder="Enter payment"
-          className="flex-1 h-10 bg-gray-200 rounded-lg px-2 text-sm outline-none"
-        />
+      <div className="relative flex justify-center gap-1 items-center">
+        <div className="relative flex-1">
+          <input
+            type="number"
+            placeholder="Enter payment"
+            value={orderObject.paidAmount}
+            onChange={(e) => {
+              setOrderObject((prev) => ({
+                ...prev,
+                paidAmount: e.target.value,
+              }));
+               setErrors((prev) => ({ ...prev, paidAmount: "" }));
+            }}
+            className="w-full h-10 bg-gray-200 rounded-lg px-2 text-sm outline-none"
+          />
+          {errors.paidAmount && (
+            <span className="absolute left-0 top-full text-red-500 font-semibold text-[10px] whitespace-nowrap mt-1">
+              {errors.paidAmount}
+            </span>
+          )}
+        </div>
 
-        <select className="h-10 bg-gray-200 rounded-lg px-4 text-sm outline-none">
+        <select
+          value={orderObject.paymentMethod}
+          onChange={(e) => {
+            setOrderObject((prev) => ({
+              ...prev,
+              paymentMethod: e.target.value,
+            }));
+            setErrors((prev) => ({ ...prev, paymentMethod: "" }));
+          }}
+          className="h-10 bg-gray-200 rounded-lg px-4 text-sm outline-none"
+        >
           <option>Payment Method</option>
           <option>Settlement</option>
           <option>Advance</option>
@@ -258,12 +424,18 @@ function OrderSummary({
           <option>Card</option>
           <option>Bank Transfer</option>
         </select>
+
+        {errors.paymentMethod && (
+          <span className="absolute right-0 top-full text-red-500 font-semibold text-[12px] whitespace-nowrap mt-1">
+            {errors.paymentMethod}
+          </span>
+        )}
       </div>
 
       {/* ACTIONS */}
       <div className="flex justify-end items-center gap-4 mt-6 mb-6">
         <button
-          onClick={() => navigate("/orders")}
+          onClick={handleSaveOrder}
           className="h-10 bg-green-600 text-white px-4 rounded-full text-sm"
         >
           Save

@@ -6,7 +6,9 @@ import { FiSearch, FiTrash2 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import Status_Screen from "../../assets/Status_Screen.svg";
 import { GrView } from "react-icons/gr";
-import { getAllOrders } from "../../api/order";
+import { getAllOrders, getOrderById, updateOrder } from "../../api/order";
+import Pagination from "../../components/Pagination";
+import DeleteModal from "../../components/models/DeleteModal";
 
 const formatDisplayDate = (value) => {
   if (!value) return "--";
@@ -29,31 +31,65 @@ export default function Order_List() {
   const [driverSelected, setDriverSelected] = useState(" All Drivers");
   const [orderSelected, setOrderSelected] = useState("All Orders");
   // const [edit, setEdit] = useState(false);
-  const [deleteOrder, setDeleteOrder] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const handleDeleteOrder = () => {
-    // Implement delete order logic here
-    setDeleteOrder(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // const handleDeleteOrder = () => {
+  //   // Implement delete order logic here
+  //   setDeleteOrder(false);
+  // };
+
+  const fetchOrders = async (p = page) => {
+    try {
+      setLoading(true);
+      const res = await getAllOrders(p, 10);
+
+      setOrders(res.data.data || []);
+      setTotalPages(res.data.pagination.totalPages);
+    } catch (err) {
+      console.error("Failed to load orders", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const res = await getAllOrders();
+    fetchOrders(page);
+  }, [page]);
 
-        setOrders(res.data.data || []);
-      } catch (err) {
-        console.error("Failed to load orders", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleDelete = async () => {
+    if (!deleteId) return;
 
-    fetchOrders();
-  }, []);
+    try {
+      // Fetch the current order so we send the full payload the API expects
+      const response = await getOrderById(deleteId);
+      const orderData = response.data.data;
+  console.log(orderData);
+      await updateOrder(deleteId, {
+        order_date: orderData.order_date,
+        delivery_date: orderData.delivery_date,
+        customer_name: orderData.customer_name,
+        driver_name: orderData.driver_name,
+        total_amount: orderData.total_amount,
+        paid_amount: orderData.paid_amount,
+        currency: orderData.currency,
+        status:"DELETED",
+      });
+     
+      setShowDeleteModal(false);
+      setDeleteId(null);
+      console.log();
+
+      fetchOrders(page);
+    } catch (error) {
+      console.error("Delete failed:", error);
+    }
+  };
 
   return (
     <div className="py-6 bg-[#f4f7fb]  ">
@@ -294,8 +330,17 @@ export default function Order_List() {
 
                     <td className="px-2 py-2 sm:px-2 border-b whitespace-nowrap  text-[12px] border-gray-400">
                       <div className="flex flex-col gap-1 text-[12px] leading-tight whitespace-normal">
-                        <span className="font-semibold text-[#3A3D51]">Total Amount: <span className="font-bold "> AED {totalAmount} </span></span>
-                        <span className="font-semibold text-[#3A3D51]">Paid Amount: <span className="font-bold "> AED {paidAmount} </span></span>
+                        <span className="font-semibold text-[#3A3D51]">
+                          Total Amount:{" "}
+                          <span className="font-bold ">
+                            {" "}
+                            AED {totalAmount}{" "}
+                          </span>
+                        </span>
+                        <span className="font-semibold text-[#3A3D51]">
+                          Paid Amount:{" "}
+                          <span className="font-bold "> AED {paidAmount} </span>
+                        </span>
                       </div>
                     </td>
 
@@ -318,8 +363,10 @@ export default function Order_List() {
                       </button>
                       <button
                         className="p-2 bg-[#FFD0C6] text-[#C32300] rounded"
-                        onClick={() => setDeleteOrder(true)}
-                        onClose={() => setDeleteOrder(false)}
+                        onClick={() => {
+                          setShowDeleteModal(true);
+                          setDeleteId(item.id);
+                        }}
                       >
                         <FiTrash2 />
                       </button>
@@ -329,29 +376,24 @@ export default function Order_List() {
               })}
           </tbody>
         </table>
-      </div>
-      {/* {deleteOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-80">
-            <h2 className="text-lg font-semibold mb-4">Delete Order</h2>
-            <p className="mb-6">Are you sure you want to delete this order?</p>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setDeleteOrder(false)}
-                className="px-4 py-2 bg-gray-300 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteOrder}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+        <div className="w-full flex justify-center my-6">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage}
+          />
         </div>
-      )} */}
+      </div>
+      {showDeleteModal && (
+        <DeleteModal
+          isOpen={showDeleteModal}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setDeleteId(null);
+          }}
+          onConfirm={handleDelete}
+        />
+      )}
     </div>
   );
 }

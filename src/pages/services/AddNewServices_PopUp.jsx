@@ -3,7 +3,7 @@ import Button from "../../components/ui/Button";
 import { createNewServiceList, updateServiceList } from "../../api/servicelist";
 import ToggleButton from "../../components/ui/ToggleButton";
 import {
-  getAllServiceType,
+  getAllServiceTypes,
   getAllServicesCategory,
 } from "../../api/servicesapi";
 
@@ -93,7 +93,8 @@ const AddServices_PopUp = ({ mode, onClose, serviceData, setRefresh }) => {
 
   useEffect(() => {
     const fetchServiceTypes = async () => {
-      const getAllServicesTypesData = await getAllServicesType();
+      const getAllServicesTypesData = await getAllServiceTypes();
+      // {console.log(getAllServicesTypesData);}
       setServiceTypes(getAllServicesTypesData.data.data || []);
       const getAllServicesCategoriesData = await getAllServicesCategory();
       setServiceCategories(getAllServicesCategoriesData.data.data || []);
