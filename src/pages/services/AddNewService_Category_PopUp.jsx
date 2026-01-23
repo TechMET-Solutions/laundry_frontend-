@@ -5,7 +5,7 @@ import ToggleButton from "../../components/ui/ToggleButton";
 
 export default function AddNewService_Category({ onClose  }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
       {/* Modal */}
       <div className="w-full max-w-lg rounded-2xl bg-white p-10 shadow-2xl">
         {/* Header */}

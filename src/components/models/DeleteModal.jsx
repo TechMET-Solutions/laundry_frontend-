@@ -85,12 +85,17 @@ export default function DeleteModal({
 }) {
   const [confirmed, setConfirmed] = useState(false);
 
-  if (!isOpen) return null;
+  // if (!isOpen) return null;
 
-  const handleConfirm = () => {
-    setConfirmed(true);
-    onConfirm?.(); // optional: parent action
-  };
+  // const handleConfirm = () => {
+  //   setConfirmed(true);
+  //   onConfirm?.(); // optional: parent action
+  // };
+  useEffect(() => {
+    if (!isOpen) {
+      setConfirmed(false);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (confirmed) {
@@ -101,6 +106,13 @@ export default function DeleteModal({
       return () => clearTimeout(timer);
     }
   }, [confirmed, onCancel]);
+
+   if (!isOpen) return null;
+
+  const handleConfirm = () => {
+    setConfirmed(true);
+    onConfirm?.();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
