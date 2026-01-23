@@ -1,13 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
 
 import Setting_img from "../../assets/carbon_settings-services.png";
 import AddNewService_Addon_PopUp from "./AddNewService_Addon_PopUp";
+import { getAllServicesAddon, deleteServiceAddon } from "../../api/servicesapi";
 
 const Addon = () => {
   const [open, setOpen] = useState(false);
+  const [serviceAddons, setServiceAddons] = useState([]); 
+  const [loading, setLoading] = useState(false);
+
+  const fetchServiceAddons = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllServicesAddon();  
+
+      if(res.data.success) {
+        setServiceAddons(res.data.data);
+      }
+    } catch (error) {
+        console.error("Fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchServiceAddons();
+  }, []);
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -35,7 +57,8 @@ const Addon = () => {
         </div>
       </div>
       {open && (
-        <AddNewService_Addon_PopUp  onClose={() => setOpen(false)} />
+        <AddNewService_Addon_PopUp  
+        onClose={() => setOpen(false)} />
       )}
 
       <div className="flex justify-end gap-4 mb-6">
