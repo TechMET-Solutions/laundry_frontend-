@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { FaRegAddressBook } from "react-icons/fa";
@@ -22,27 +22,36 @@ function Customer() {
   const [totalPages, setTotalPages] = useState(1);
   const [editCustomer, setEditCustomer] = useState(null);
 
-  const fetchCustomers = async (p = page) => {
+  // ✅ Fetch customers from server (search + pagination)
+  const fetchCustomers = async (p = page, s = searchTerm) => {
     try {
-      const res = await getAllCustomers(p, 10);
+      const res = await getAllCustomers(p, 10, s);
       setCustomers(res.data.data || []);
       setTotalPages(res.data.pagination.totalPages);
     } catch (error) {
       console.error("API ERROR:", error);
     }
   };
+
+  // ✅ Reset to page 1 when searching
   useEffect(() => {
-    fetchCustomers(page);
-  }, [page]);
-  
- const handleAddCustomer = async () => {
-  await fetchCustomers(page);   
-  setEditCustomer(null);
-  setShowAddModal(false);
-};
+    setPage(1);
+  }, [searchTerm]);
 
+  // ✅ Fetch when page or search changes
+  useEffect(() => {
+    fetchCustomers(page, searchTerm);
+  }, [page, searchTerm]);
 
-  const handleSearch = (e) => setSearchTerm(e.target.value);
+  const handleAddCustomer = async () => {
+    await fetchCustomers(page, searchTerm);
+    setEditCustomer(null);
+    setShowAddModal(false);
+  };
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   const handleViewBilling = (customer) => {
     setSelectedCustomer(customer);
@@ -61,20 +70,12 @@ function Customer() {
 
     try {
       await deleteCustomers(id);
-      setCustomers(customers.filter((c) => c.id !== id));
+      fetchCustomers(page, searchTerm);
     } catch (error) {
       console.error("DELETE ERROR:", error);
       alert("Failed to delete customer");
     }
   };
-
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.mobile_no?.includes(searchTerm) ||
-      customer.address?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -138,12 +139,11 @@ function Customer() {
           </thead>
 
           <tbody>
-            {filteredCustomers.map((customer, index) => (
-              <tr
-                key={customer.id}
-                className="border-b hover:bg-gray-50 transition"
-              >
-                <td className="px-4 py-3 text-center">{index + 1}</td>
+            {customers.map((customer, index) => (
+              <tr key={customer.id} className="border-b hover:bg-gray-50 transition">
+                <td className="px-4 py-3 text-center">
+                  {(page - 1) * 10 + index + 1}
+                </td>
 
                 <td className="px-4 py-3 text-center font-medium">
                   {customer.name}
@@ -207,13 +207,14 @@ function Customer() {
             ))}
           </tbody>
         </table>
-         <div className="w-full flex justify-center my-6">
-                  <Pagination
-                    currentPage={page}
-                    totalPages={totalPages}
-                    onChange={setPage}
-                 />
-                  </div>
+
+        <div className="w-full flex justify-center my-6">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage}
+          />
+        </div>
       </div>
 
       {/* Modals */}
