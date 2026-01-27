@@ -75,6 +75,7 @@
 
 import { useEffect, useState } from "react";
 import GreenCheckIcon from "../../assets/confirmation.gif";
+import Delete from "../../assets/con-delete.gif";
 
 export default function DeleteModal({
   isOpen,
@@ -128,8 +129,9 @@ export default function DeleteModal({
         {!confirmed ? (
           <>
             {/* Icon */}
-            <div className="flex items-center justify-center p-4 bg-red-100 rounded-full">
+            <div className="flex items-center justify-center p-4">
               {/* svg */}
+              <img src={Delete} alt="delete" className="" />
             </div>
 
             {/* Content */}
