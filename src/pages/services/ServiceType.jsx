@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
+import { FiSearch, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
-import { RiArrowDropDownLine } from "react-icons/ri";
 
 import Setting_img from "../../assets/carbon_settings-services.png";
 import AddNewServicesType_PopUp from "../../components/models/AddNewServicesType_PopUp.jsx";
-import { getAllServiceTypes, deleteServiceType } from "../../api/servicesapi"; 
+import { getAllServiceTypes, deleteServiceType } from "../../api/servicesapi";
 import DeleteModal from "../../components/models/DeleteModal.jsx";
+import { API_URL } from "../../api/index.js";
 
 const ServiceType = () => {
   const [open, setOpen] = useState(false);
@@ -34,36 +34,13 @@ const ServiceType = () => {
       console.error("Fetch error:", err);
     } finally {
       setLoading(false);
-    }  
+    }
   };
 
   useEffect(() => {
     fetchServiceTypes();
   }, []);
 
-  // const handleAddNewServiceType = (newType) => {
-  // console.log("Received in parent:", newType);
-  // setServiceTypes((prev) => [newType, ...prev]);
-  // };
-
-
-
-  // delete
-  // const handleDelete = async (id) => {
-  //   if (!window.confirm("Are you sure you want to delete this service type?")) {
-  //     return;
-  //   }
-  //   try {
-  //     const res = await deleteServiceType(id);
-
-  //     if (res.data.success) {
-  //       setServiceTypes((prev) => prev.filter((item) => item.id !== id));
-  //     }
-  //   } catch (error) {
-  //     console.error("Delete failed:", error);
-  //     alert("Failed to delete service type");
-  //   }
-  // };
 
   const handleConfirmDelete = async () => {
     try {
@@ -78,16 +55,16 @@ const ServiceType = () => {
     } catch (error) {
       console.error("Delete failed:", error);
       alert("Failed to delete service type");
-    } 
+    }
   };
 
 
   const filteredServiceTypes = serviceTypes.filter((item) => {
     if (!searchTerm) return true; // show all if search empty
-      return (
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.abbreviation.toLowerCase().includes(searchTerm.toLowerCase())
-      );     
+    return (
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.abbreviation.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   });
 
   return (
@@ -112,14 +89,14 @@ const ServiceType = () => {
           <span className="text-sm font-medium">Add New Service Type</span>
         </div>
 
-        
-          <DeleteModal
-            isOpen={isDeleteOpen}
-            title="Are you sure?"
-            description="Do you really want to continue? This action cannot be undone."
-            onCancel={() => setIsDeleteOpen(false)}
-            onConfirm={handleConfirmDelete}
-          />
+
+        <DeleteModal
+          isOpen={isDeleteOpen}
+          title="Are you sure?"
+          description="Do you really want to continue? This action cannot be undone."
+          onCancel={() => setIsDeleteOpen(false)}
+          onConfirm={handleConfirmDelete}
+        />
 
         {/* popup */}
         {open && (
@@ -139,7 +116,7 @@ const ServiceType = () => {
           />
         )}
       </div>
- 
+
       <div className="flex justify-end gap-4 mb-6">
         {/* Search */}
         <div className="relative w-64 ">
@@ -154,7 +131,7 @@ const ServiceType = () => {
       </div>
 
       {/* Table */}
-        <div className="bg-[#f4f7fb]">
+      <div className="bg-[#f4f7fb]">
         {loading ? (
           <p className="text-center py-10">Loading...</p>
         ) : (
@@ -187,25 +164,28 @@ const ServiceType = () => {
                     <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
                       {index + 1}
                     </td>
-                    <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
-                      {item.name}
-                    </td>
+                    <td className="px-4 py-4 font-medium flex items-center gap-4 text-left border-b border-gray-300">
+                      <img
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                        src={`${API_URL}${item.image}`}
+                        alt={item.name}
+                      />
+                      <span className="text-gray-700">{item.name}</span>
+                   </td>
                     <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
                       {item.abbreviation}
                     </td>
                     <td className="px-4 py-3 border-b text-left border-gray-300">
                       <span className="flex items-center gap-2">
                         <span
-                          className={`h-2.5 w-2.5 rounded-full ${
-                            item.status === 1 ? "bg-green-500" : "bg-red-500"
-                          }`}
+                          className={`h-2.5 w-2.5 rounded-full ${item.status === 1 ? "bg-green-500" : "bg-red-500"
+                            }`}
                         />
                         <span
-                          className={`font-medium ${
-                            item.status === 1
+                          className={`font-medium ${item.status === 1
                               ? "text-green-600"
                               : "text-red-500"
-                          }`}
+                            }`}
                         >
                           {item.status === 1 ? "Active" : "Inactive"}
                         </span>
@@ -216,16 +196,16 @@ const ServiceType = () => {
                         <button
                           className="rounded-md bg-indigo-100 p-2 text-indigo-600 cursor-pointer"
                           onClick={() => {
-                            setEditData(item);  
-                            setOpen(true);      
+                            setEditData(item);
+                            setOpen(true);
                           }} >
                           <FiEdit />
                         </button>
 
                         <button
-                          onClick={() => { 
+                          onClick={() => {
                             setDeleteId(item.id);
-                            setIsDeleteOpen(true); 
+                            setIsDeleteOpen(true);
                           }}
                           className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer"
                         >

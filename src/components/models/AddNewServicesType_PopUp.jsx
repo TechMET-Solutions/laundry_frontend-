@@ -1,35 +1,24 @@
+
 import Button from "../../components/ui/Button";
-import InputWithDropdown from "../../components/ui/DropDownInputField";
 import InputField from "../../components/ui/InputField";
 import ToggleButton from "../../components/ui/ToggleButton";
-import { createServiceType } from "../../api/servicesapi";
-import { updateServiceType } from "../../api/servicesapi";
-import { useState, useEffect, useRef } from "react";
+import { createServiceType, updateServiceType } from "../../api/servicesapi";
+import { useState, useEffect } from "react";
 
-export default function AddNewServicesType_PopUp({
-  onClose,
-  onAdd,
-  editData = null,
-}) {
-  const fileInputRef = useRef(null);
+export default function AddNewServicesType_PopUp({ onClose, onAdd, editData = null }) {
   const [name, setName] = useState(editData?.name || "");
-  const [abbreviation, setAbbreviation] = useState(
-    editData?.abbreviation || "",
-  );
-  const [icon, setIcon] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
+  const [abbreviation, setAbbreviation] = useState(editData?.abbreviation || "");
   const [status, setStatus] = useState(editData?.status ?? 1);
+  const [image, setImage] = useState(null); // Holds the file object
+  const [preview, setPreview] = useState(editData?.image || null); // For UI preview
   const [loading, setLoading] = useState(false);
 
-  const handleIconClick = () => {
-    fileInputRef.current?.click();
-  };
-
+  // Handle file selection
   const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files[0];
     if (file) {
-      setIcon(file);
-      setImagePreview(URL.createObjectURL(file));
+      setImage(file);
+      setPreview(URL.createObjectURL(file)); // Show preview of selected image
     }
   };
 
@@ -39,40 +28,36 @@ export default function AddNewServicesType_PopUp({
       return;
     }
 
-    if (!editData && !icon) {
-      alert("Please select an icon image");
-      return;
-    }
-
     try {
       setLoading(true);
 
+      // USE FORMDATA FOR FILE UPLOADS
       const formData = new FormData();
       formData.append("name", name);
       formData.append("abbreviation", abbreviation);
       formData.append("status", status);
-
-      // Only append icon if it's a File object (new upload)
-      if (icon instanceof File) {
-        formData.append("addIcon", icon);
+      if (image) {
+        formData.append("image", image); // 'image' matches the name in upload.single('image')
       }
 
       const res = editData
-        ? await updateServiceType(editData.id, formData)
-        : await createServiceType(formData);
+        ? await updateServiceType(editData.id, formData) // Pass FormData
+        : await createServiceType(formData); // Pass FormData
 
       if (!res.data.success) throw new Error("API failed");
 
+      console.log("Response Data:", res.data);
+
       if (!editData) {
-        onAdd(res.data.data); // ADD
+        onAdd(res.data.data);
       } else {
-        onAdd(); //Edit
+        onAdd();
       }
 
       onClose();
     } catch (err) {
       console.error("Save failed:", err);
-      alert(err.response?.data?.message || err.message);
+      alert("Error saving data");
     } finally {
       setLoading(false);
     }
@@ -83,26 +68,17 @@ export default function AddNewServicesType_PopUp({
       setName(editData.name);
       setAbbreviation(editData.abbreviation);
       setStatus(editData.status);
-      // For edit mode, set existing icon path if available
-      if (editData.addIcon) {
-        setImagePreview(
-          `http://localhost:5000/uploads/services/${editData.addIcon}`,
-        );
-      }
+      setPreview(editData.image ? `http://localhost:5000/${editData.image}` : null); // Adjust base URL
     }
   }, [editData]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      {/* Modal */}
       <div className="w-full max-w-lg rounded-2xl bg-white p-10 shadow-2xl">
-        {/* Header */}
         <h2 className="mb-8 text-lg font-semibold text-gray-800">
-          {/* Add Service Type */}
           {editData ? "Edit Service Type" : "Add Service Type"}
         </h2>
 
-        {/* Form */}
         <div className="grid grid-cols-2 gap-x-10 gap-y-8">
           <InputField
             label="Service Type Name"
@@ -121,57 +97,33 @@ export default function AddNewServicesType_PopUp({
           />
         </div>
 
-        {/* Icon Upload */}
-        <div className="mt-6 flex items-center gap-6">
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Add Icon {!editData && <span className="text-red-500">*</span>}
-            </label>
-            <button
-              type="button"
-              onClick={handleIconClick}
-              className="w-full rounded-lg border-2 border-sky-200 bg-sky-50 px-4 py-2
-              text-sm font-medium text-sky-600 hover:bg-sky-100
-              focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400
-              flex items-center justify-center gap-2 transition"
-            >
-              <span className="text-lg">+</span>
-              Add Service Type Icon
-            </button>
-
+        {/* IMAGE UPLOAD FIELD */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Service Image</label>
+          <div className="flex items-center gap-4">
             <input
-              ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="hidden"
+              className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-          </div>
-
-          {imagePreview && (
-            <div className="h-20 w-20 rounded-lg border bg-gray-100 p-1">
+            {preview && (
               <img
-                src={imagePreview}
-                alt="Icon Preview"
-                className="h-full w-full object-cover rounded-md"
+                src={preview}
+                alt="Preview"
+                className="h-12 w-12 rounded-md object-cover border"
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3  mt-4 ">
+        <div className="flex items-center gap-3 mt-6">
           <ToggleButton
             label="Is Active"
             checked={status === 1}
             onChange={(val) => setStatus(val ? 1 : 0)}
           />
         </div>
-
-        {/* Footer */}
-        {/* <div className="mt-10 flex items-center justify-center gap-6">
-         <Button btnText="Cancel" variant="outline" onClick={onClose} />
-            <Button btnText="Save" variant="primary" />
-        </div> */}
 
         <div className="mt-10 flex items-center justify-center gap-6">
           <Button btnText="Cancel" variant="outline" onClick={onClose} />
