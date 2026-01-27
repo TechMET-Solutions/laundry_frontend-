@@ -11,6 +11,6 @@ export const getAllOrders = (page = 1, limit = 10) =>
 
 export const getOrderById = (id) => API.get(`/list/${id}`);
 
-export const updateOrder = (id, data) => API.put(`/update/${id}`, data);
+export const softDeleteOrder = (id, data) => API.put(`/update/${id}`, data,);
 
-export const deleteOrder = (id) => API.delete(`/delete/${id}`);
+export const hardDeleteOrder = (id) => API.delete(`/delete/${id}`);

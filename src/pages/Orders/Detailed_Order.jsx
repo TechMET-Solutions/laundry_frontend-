@@ -1,9 +1,27 @@
-import React from "react";
+import React, { use, useEffect, useState } from "react";
 import { IoReturnUpBackOutline } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getOrderById } from "../../api/order";
 
- function DetailedOrderPage() {
+function DetailedOrderPage() {
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  const [orderDetails, setOrderDetails] = useState(null);
+
+  const fetchOrdersData = async () => {
+    if (state.orderId) {
+      const order = await getOrderById(state.orderId);
+      setOrderDetails(order.data.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrdersData();
+  }, []);
+
+  console.log(orderDetails);
+
   return (
     <div className="p-4 sm:p-4 bg-[#f4f7fb] min-h-screen ">
       <div className=" flex items-center gap-4 mb-4">
@@ -16,7 +34,7 @@ import { useNavigate } from "react-router-dom";
         <h2 className="font-semibold text-lg">Order Details</h2>
       </div>
 
-      <div className="bg-[#E9EDFA] rounded-lg p-2 flex flex-col sm:flex-row justify-between gap-6 mb-5    shadow-sm">
+      <div className="bg-[#E9EDFA] rounded-lg p-2 px-4 flex flex-col sm:flex-row justify-between gap-6 mb-5    shadow-sm">
         {/* Left Section */}
         <div className="flex flex-col gap-1 text-[#1F2937]">
           <h3 className="font-semibold text-base">Demo Laundry</h3>
@@ -31,19 +49,26 @@ import { useNavigate } from "react-router-dom";
         </div>
 
         {/* Right Section */}
-        <div className="flex flex-col items-start sm:items-end gap-1">
-          <h2 className="font-bold text-lg text-[#1F2937]">#TMS/ORD-01</h2>
+        {orderDetails && (
+          <div className="flex flex-col items-start sm:items-end gap-1 ">
+            <h2 className="font-bold text-lg text-[#1F2937]">
+              #{orderDetails?.order_code}
+              {console.log(orderDetails)}
+            </h2>
 
-          <div className="text-sm text-gray-700 flex gap-6">
-            <span className="font-medium">Pickup Date</span>
-            <span>04/12/2025</span>
-          </div>
+            <div className="text-sm text-gray-700 flex gap-6">
+              <span className="font-medium">Pickup Date</span>
+              <span>{orderDetails?.order_date.split("T")[0]}</span>
+            </div>
 
-          <div className="text-sm text-gray-700 flex gap-6">
-            <span className="font-medium">Delivery Date</span>
-            <span>04/12/2025</span>
+            <div className="text-sm text-gray-700 flex gap-6">
+              <span className="font-medium">Delivery Date</span>
+              <span>
+                {orderDetails?.delivery_date.split("T")[0]}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
         {/* LEFT SIDE */}
@@ -124,7 +149,7 @@ import { useNavigate } from "react-router-dom";
                     total: "AED 20.00",
                   },
                   {
-                    id: 3,
+                    id: 6,
                     name: "Jacket Men",
                     service: "Pressing & Washing",
                     rate: "AED 20.00",
@@ -132,7 +157,7 @@ import { useNavigate } from "react-router-dom";
                     total: "AED 20.00",
                   },
                   {
-                    id: 3,
+                    id: 4,
                     name: "Jacket Men",
                     service: "Pressing & Washing",
                     rate: "AED 20.00",
@@ -140,7 +165,7 @@ import { useNavigate } from "react-router-dom";
                     total: "AED 20.00",
                   },
                   {
-                    id: 3,
+                    id: 5,
                     name: "Jacket Men",
                     service: "Pressing & Washing",
                     rate: "AED 20.00",
@@ -171,7 +196,6 @@ import { useNavigate } from "react-router-dom";
 
         {/* RIGHT SIDE (VERTICAL SUMMARY PANEL) */}
         <div className="w-full lg:w-72 bg-white rounded-lg border border-blue-200   shadow-lg p-6 flex flex-col gap-6">
-        
           <div>
             <h3 className="font-semibold text-base mb-4">Payment Summary</h3>
 
