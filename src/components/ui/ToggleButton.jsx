@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const ToggleButton = ({ label, checked = false, onChange }) => {
+const ToggleButton = ({ label, label2, checked = false, onChange }) => {
   const [isOn, setIsOn] = useState(checked);
 
   useEffect(() => {
@@ -30,9 +30,9 @@ const ToggleButton = ({ label, checked = false, onChange }) => {
           }`}
         />
       </div>
-      <label htmlFor="active" className="font-medium text-gray-700">
+      <label htmlFor="active" className=" text-gray-700">
         {" "}
-        {isOn ? `${label}` : "not active"}
+        {isOn ? `${label}` : `${label2}`}
       </label>
     </div>
   );

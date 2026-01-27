@@ -9,8 +9,8 @@ import Addon from "./pages/services/Addon";
 import Emirates from "./pages/Location_management/Emirates.jsx";
 import Area from "./pages/Location_management/Area.jsx";
 import Collections from "./pages/Collections.jsx";
- 
-import Daily_reports from "./pages/Reports/Daily_reports.jsx";  
+
+import Daily_reports from "./pages/Reports/Daily_reports.jsx";
 import Cloth_wise_reports from "./pages/Reports/Cloth_wise_report.jsx";
 import Outstanding_reports from "./pages/Reports/Outstanding_report.jsx";
 import Sales_report from "./pages/Reports/Sales_report.jsx";
@@ -38,13 +38,13 @@ import CustomerD from "./pages/CustomerD.jsx";
 import Login from "./pages/Login.jsx";
 
 
-  
+
 
 
 function App() {
   return (
     <Routes>
-              <Route index element={<Login />} />
+      <Route index element={<Login />} />
 
       <Route
         path="/"
@@ -52,15 +52,15 @@ function App() {
       >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="pos" element={<PosPage />} />
-       <Route path="services/list" element={<ServiceList />} />
+        <Route path="services/list" element={<ServiceList />} />
         <Route path="services/type" element={<ServiceType />} />
         <Route path="services/category" element={<ServiceCategory />} />
         <Route path="services/addon" element={<Addon />} />
         <Route path="location_management/emirates" element={<Emirates />} />
         <Route path="location_management/areas" element={<Area />} />
         <Route path="collection" element={<Collections />} />
- 
- 
+
+
         <Route path="reports" element={<Daily_reports />} />
         <Route path="reports/daily_reports" element={<Daily_reports />} />
         <Route path="reports/outstanding_reports" element={<Outstanding_reports />} />
@@ -74,26 +74,26 @@ function App() {
         <Route path="reports/tax_reports" element={<Tax_report />} />
         <Route path="expenses" element={<Expenses />} />
         <Route path="time-slots" element={<TimeSlot />} />
-        <Route path="customers" element= {<Customer/>}/>
+        <Route path="customers" element={<Customer />} />
 
         <Route path="/employees" element={<Employee></Employee>}></Route>
-        
+
         <Route path="/orders" element={<Order_List />} />
-            <Route path="/orders/status_screen" element={<Order_Status_Screen  />} />
-            <Route path="/orders/deleted_orders" element={<Delete_Order />} />
-            <Route path="/orders/add_order" element={<Add_Order />} />
-            <Route path="/orders/detailed_order" element={<DetailedOrderPage />} />
-            <Route path="/payments" element={<Payment/>}/>
+        <Route path="/orders/status_screen" element={<Order_Status_Screen />} />
+        <Route path="/orders/deleted_orders" element={<Delete_Order />} />
+        <Route path="/orders/add_order" element={<Add_Order />} />
+        <Route path="/orders/detailed_order" element={<DetailedOrderPage />} />
+        <Route path="/payments" element={<Payment />} />
 
         {/* ... other routes ... */}
         <Route path="reports/tax_reports" element={<Tax_report />} />
         <Route path="expenses" element={<Expenses />} />
         <Route path="time-slots" element={<TimeSlot />} />
-        
+
         <Route path="customers/:id/details" element={<CustomerD />} /> {/* ADDED ROUTE */}
         <Route path="/employees" element={<Employee />} />
         <Route path="/orders" element={<Order_List />} />
-{/* ... rest of routes ... */}
+        {/* ... rest of routes ... */}
 
 
 

@@ -4,89 +4,83 @@ import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import AddServices_PopUp from "./AddNewServices_PopUp";
 import { deleteServiceList, getAllServicesList } from "../../api/servicelist";
-// import { PiClubLight } from "react-icons/pi";
 import DeleteModal from "../../components/models/DeleteModal";
+import { ImageURL } from "../../api";
+import { getAllServicesCategory } from "../../api/servicesapi";
 
 const ServiceList = () => {
   const [open, setOpen] = useState(false);
-  // const [openDropdown, setOpenDropdown] = useState(false);
   const [mode, setMode] = useState("add");
   const [selectedService, setSelectedService] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(false);
   const [selectedValue, setSelectedValue] = useState("");
 
   const [servicesData, setServicesData] = useState([]);
+  const [categories, setCategories] = useState([]); // Store fetched categories
   const [refresh, setRefresh] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [deleteService, setDeleteService] = useState(false);
-
-   const [searchQuery, setSearchQuery] = useState("");
-
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleCloseModal = () => {
     setOpen(false);
     setSelectedService(null);
   };
 
-  const fetchAllServices = async () => {
+  // 1. Fetch Services and Active Categories
+  const fetchData = async () => {
     try {
-      const reponse = await getAllServicesList();
-      setServicesData(reponse.data.data || []);
+      const [serviceRes, catRes] = await Promise.all([
+        getAllServicesList(),
+        getAllServicesCategory()
+      ]);
+
+      setServicesData(serviceRes.data.data || []);
+
+      // Filter categories to show only status !== 0 (assuming 1 is active)
+      const activeCats = (catRes.data.data || []).filter(cat => cat.status !== 0);
+      setCategories(activeCats);
     } catch (error) {
-      console.error("Error fetching services:", error);
+      console.error("Error fetching data:", error);
     }
   };
 
   useEffect(() => {
-    fetchAllServices();
+    fetchData();
   }, [refresh]);
-
-  //  console.log(servicesData);
 
   const handleDelete = async () => {
     if (!deleteId) return;
-
     try {
       await deleteServiceList(deleteId);
       setDeleteId(null);
-      fetchAllServices();
+      setDeleteService(false);
+      setRefresh(prev => !prev);
     } catch (error) {
       console.error("Delete failed:", error);
     }
   };
 
-
-//Filter Dropdown
-
-  const handleSelection = (value) => {
-    setSelectedValue(value);
-    setOpenDropdown(false);
-  };
-
-  const handleSearch = (query) => {
-  setSearchQuery(query.toLowerCase());
-};
-
-// Common filtering logic search + dropdown
+  // 2. Corrected Filtering Logic
   const filteredServices = servicesData.filter((item) => {
+    const searchLower = searchQuery.toLowerCase();
+
     const matchesSearch =
-    searchQuery === "" ||
-      item.name.toLowerCase().includes(searchQuery) ||
-      item.type.toLowerCase().includes(searchQuery) ||
-      item.category.toLowerCase().includes(searchQuery);
+      searchQuery === "" ||
+      item.name.toLowerCase().includes(searchLower) ||
+      item.category.toLowerCase().includes(searchLower);
 
     const matchesDropdown =
       selectedValue === "" ||
-      selectedValue === "All" ||
-      item.category === selectedValue ||
-      item.type === selectedValue ||
-      item.name === selectedValue;
+      selectedValue === "All Categories" ||
+      item.category === selectedValue;
 
     return matchesSearch && matchesDropdown;
   });
 
+
   return (
-    <div className="p-6 bg-[#f4f7fb] min-h-screen">
+    <div className="p-6 min-h-screen">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3 cursor-pointer">
           <div className="h-8 w-8 flex items-center justify-center bg-blue-600 text-white rounded">
@@ -136,19 +130,25 @@ const ServiceList = () => {
             onClick={() => setOpenDropdown((prev) => !prev)}
             className="flex h-9 w-full items-center justify-between rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700"
           >
-            <span>{selectedValue ? selectedValue : "Select Type"}</span>
+            <span>{selectedValue ? selectedValue : "Sort By Category"}</span>
             <RiArrowDropDownLine className="h-6 w-6 text-gray-600" />
           </button>
 
           {openDropdown && (
-            <ul className="absolute left-0 top-full z-20 mt-1 w-full rounded-lg border border-gray-300 bg-white shadow-md">
-              {["All", "Gendes", "Ladies", "Kids", "Other"].map((item) => (
+            <ul className="absolute left-0 top-full z-20 mt-1 w-full rounded-lg border border-gray-300 bg-white shadow-xl max-h-60 overflow-y-auto">
+              <li
+                onClick={() => { setSelectedValue(""); setOpenDropdown(false); }}
+                className="cursor-pointer px-4 py-2 text-sm hover:bg-indigo-50"
+              >
+                All Categories
+              </li>
+              {categories.map((cat) => (
                 <li
-                  key={item}
-                  onClick={() => handleSelection(item)}
-                  className="cursor-pointer px-4 py-2 text-sm hover:bg-gray-100"
+                  key={cat.id}
+                  onClick={() => { setSelectedValue(cat.name); setOpenDropdown(false); }}
+                  className="cursor-pointer px-4 py-2 text-sm hover:bg-indigo-50"
                 >
-                  {item}
+                  {cat.name}
                 </li>
               ))}
             </ul>
@@ -156,21 +156,14 @@ const ServiceList = () => {
         </div>
       </div>
 
-      <div className="bg-[#f4f7fb]  ">
-        <table className="w-full text-sm border-separate  ">
+      <div className="bg-[#f4f7fb]  rounded-lg ">
+        <table className="w-full text-sm border-separate border-spacing-0">
           <thead>
             <tr>
-              {[
-                "Sr No",
-                "Service",
-                "Service Type",
-                "Service Category",
-                "Status",
-                "Action",
-              ].map((head) => (
+              {["Sr No", "Service", "Service Type", "Service Category", "Status", "Action"].map((head) => (
                 <th
                   key={head}
-                  className="bg-[#56CCFF]  px-4 py-3 text-left font-medium text-gray-800 "
+                  className="bg-[#56CCFF]  px-4 py-3 text-left font-semibold text-gray-800 border-r-2 border-gray-100"
                 >
                   {head}
                 </th>
@@ -179,72 +172,84 @@ const ServiceList = () => {
           </thead>
 
           <tbody>
-            {filteredServices.map((item, index) => (
-              <tr key={item.id} className="bg-[#f1f5fb] text-center">
-                <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
-                  {index + 1}
-                </td>
+            {filteredServices.length > 0 ? (
+              filteredServices.map((item, index) => (
+                <tr key={item.id} className="bg-[#f1f5fb] hover:bg-white transition-colors">
+                  <td className="px-4 py-3 font-medium text-gray-700 border-b border-gray-300 text-center">
+                    {index + 1}
+                  </td>
 
-                <td className="px-4 py-4 font-medium flex items-center gap-4 text-left border-b border-gray-300">
-                  <img
-                    className="w-8 h-8 rounded-full object-cover"
-                    src={`http://localhost:5000/uploads/services/${item.addIcon}`}
-                    alt={item.name}
-                  />
-                  <span className="text-lg text-gray-700">{item.name}</span>
-                </td>
-
-                <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
-                  {item.type}
-                </td>
-
-                <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
-                  {item.category}
-                </td>
-
-                <td className="px-4 py-3  border-b text-left border-gray-300">
-                  <span className="flex items-center justify-start gap-2">
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                        item.status === 1 ? "bg-green-500" : "bg-red-500"
-                      }`}
+                  <td className="px-4 py-4 font-medium flex items-center gap-4 text-left border-b border-gray-300">
+                    <img
+                      className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                      src={`${ImageURL}/services/${item.addIcon}`}
+                      alt={item.name}
+                      onError={(e) => (e.target.src = "https://via.placeholder.com/40")}
                     />
-                    <span
-                      className={`text-md font-semibold ${
-                        item.status === 1 ? "text-green-500" : "text-red-500"
-                      }`}
-                    >
-                      {item.status === 1 ? "Active" : "Inactive"}
+                    <span className="text-gray-700">{item.name}</span>
+                  </td>
+
+                  <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
+                    <div className="flex flex-wrap gap-1">
+                      {Array.isArray(item.service_types) ? (
+                        item.service_types.map((st, i) => (
+                          <span key={i} className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
+                            {st.type}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-400 italic text-xs">No types</span>
+                      )}
+                    </div>
+                  </td>
+
+                  <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
+                    {item.category}
+                  </td>
+
+                  <td className="px-4 py-3 border-b border-gray-300 text-left">
+                    <span className="flex items-center gap-2">
+                      <span className={`h-2.5 w-2.5 rounded-full ${item.status === 1 ? "bg-green-500" : "bg-red-500"}`} />
+                      <span className={`font-semibold ${item.status === 1 ? "text-green-600" : "text-red-600"}`}>
+                        {item.status === 1 ? "Active" : "Inactive"}
+                      </span>
                     </span>
-                  </span>
-                </td>
+                  </td>
 
-                <td className="px-4 py-3  border-b text-left border-gray-300">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setOpen(true);
-                        setMode("edit");
-                        setSelectedService(item);
-                      }}
-                      className="rounded-md bg-indigo-100 p-2 text-indigo-600 cursor-pointer"
-                    >
-                      <FiEdit />
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setDeleteService(true);
-                        setDeleteId(item.id);
-                      }}
-                      className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer"
-                    >
-                      <FiTrash2 />
-                    </button>
+                  <td className="px-4 py-3 border-b border-gray-300 text-left">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => { setOpen(true); setMode("edit"); setSelectedService(item); }}
+                        className="rounded-md bg-indigo-100 p-2 text-indigo-600 cursor-pointer hover:bg-indigo-200"
+                      >
+                        <FiEdit />
+                      </button>
+                      <button
+                        onClick={() => { setDeleteService(true); setDeleteId(item.id); }}
+                        className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer hover:bg-red-200"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              /* DATA NOT FOUND ROW */
+              <tr>
+                <td colSpan="6" className="px-4 py-20 text-center bg-white border-b border-gray-300">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="bg-gray-100 p-4 rounded-full">
+                      <FiSearch className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-lg font-semibold text-gray-500">No Services Found</p>
+                    <p className="text-sm text-gray-400">
+                      Try adjusting your search or category filter.
+                    </p>
                   </div>
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
