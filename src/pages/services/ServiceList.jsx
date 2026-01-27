@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { FiEdit, FiSearch, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine } from "react-icons/ri";
-import AddServices_PopUp from "./AddNewServices_PopUp";
-import { deleteServiceList, getAllServicesList } from "../../api/servicelist";
-import DeleteModal from "../../components/models/DeleteModal";
 import { ImageURL } from "../../api";
+import { deleteServiceList, getAllServicesList } from "../../api/servicelist";
 import { getAllServicesCategory } from "../../api/servicesapi";
+import DeleteModal from "../../components/models/DeleteModal";
+import AddServicesModel from "../../components/models/AddServicesModel";
 
 const ServiceList = () => {
   const [open, setOpen] = useState(false);
@@ -104,7 +104,7 @@ const ServiceList = () => {
         </button>
 
         {open && (
-          <AddServices_PopUp
+          <AddServicesModel
             onClose={handleCloseModal}
             serviceData={selectedService}
             mode={mode}

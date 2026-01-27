@@ -167,7 +167,7 @@ const ServiceType = () => {
                     <td className="px-4 py-4 font-medium flex items-center gap-4 text-left border-b border-gray-300">
                       <img
                         className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                        src={`${API_URL}${item.image}`}
+                        src={`${API_URL}/${item.image}`}
                         alt={item.name}
                       />
                       <span className="text-gray-700">{item.name}</span>

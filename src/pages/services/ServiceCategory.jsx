@@ -1,45 +1,42 @@
-import React, {useEffect, useState } from 'react'
-import { FiSearch, FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
+import { useEffect, useState } from 'react';
+import { FiEdit, FiSearch, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
-import { RiArrowDropDownLine } from "react-icons/ri";
+import { deleteServiceCategory, getAllServicesCategory } from '../../api/servicesapi';
 import Setting_img from "../../assets/carbon_settings-services.png";
-import AddServices_PopUp from './AddNewServices_PopUp';
 import AddNewService_Category from '../../components/models/AddNewService_Category_PopUp';
-import { getAllServicesCategory } from '../../api/servicesapi';
-import { deleteServiceCategory } from '../../api/servicesapi';
 import DeleteModal from '../../components/models/DeleteModal';
 
 
 const ServiceCategory = () => {
   const [open, setOpen] = useState(false);
-  const [categories,setCategories]=useState([]);
+  const [categories, setCategories] = useState([]);
   //edit
-  const [editData,setEditData]=useState(null);
-  
-  
+  const [editData, setEditData] = useState(null);
+
+
   //delete
-  const[isDeleteOpen,setIsDeleteOpen]=useState(false);
-  const[selectedId,setSelectedId]=useState(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
 
   //
   const fetchCategories = async () => {
 
-  try {
-    const res = await getAllServicesCategory();
-    const sortedData = res.data.data.sort((a, b) => b.id - a.id); // ascending by id
-    setCategories(sortedData);
-  } catch (err) {
-    console.error("Error in fetching", err);
-  }
-};
+    try {
+      const res = await getAllServicesCategory();
+      const sortedData = res.data.data.sort((a, b) => b.id - a.id); // ascending by id
+      setCategories(sortedData);
+    } catch (err) {
+      console.error("Error in fetching", err);
+    }
+  };
 
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchCategories();
-  },[]);
+  }, []);
 
 
-   const handleDelete = async (id) => {
+  const handleDelete = async (id) => {
     if (!id) return;
 
     try {
@@ -78,10 +75,10 @@ const ServiceCategory = () => {
           <span className="text-sm font-medium">Add New Category</span>
         </div>
         {open && (
-        <AddNewService_Category onClose={() => setOpen(false)}
-        refreshData={fetchCategories}
-        />
-      )}
+          <AddNewService_Category onClose={() => setOpen(false)}
+            refreshData={fetchCategories}
+          />
+        )}
 
       </div>
 
@@ -96,15 +93,15 @@ const ServiceCategory = () => {
           />
         </div>
 
-               </div>
+      </div>
 
-       <div className="bg-[#f4f7fb]  ">
+      <div className="bg-[#f4f7fb]  ">
         <table className="w-full text-sm border-separate  ">
           <thead>
             <tr>
               {[
-                "Sr No", 
-                "Categorie Name", 
+                "Sr No",
+                "Categorie Name",
                 "Status",
                 "Action",
               ].map((head) => (
@@ -161,84 +158,82 @@ const ServiceCategory = () => {
                 category: "Gents",
                 status: "Inactive",
               },] */
-              categories.map((item,index) => (
-              <tr key={item.id} className="bg-[#f1f5fb] text-center">
-                {/* Sr No */}
-                <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
-                  {index+1}
-                </td>
- 
-                 
+              categories.map((item, index) => (
+                <tr key={item.id} className="bg-[#f1f5fb] text-center">
+                  {/* Sr No */}
+                  <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
+                    {index + 1}
+                  </td>
 
-                
 
-                {/* Category */}
-                <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
-                  {item.name}
-                </td>
 
-                {/* Status */}
-                <td className="px-4 py-3  border-b text-left border-gray-300">
-                  <span className="flex items-center gap-2">
-                    <span
-                      className={`h-2.5 w-2.5 rounded-full ${
-                       item.status === 1 ? "bg-green-500" : "bg-red-500"
-                      }`}
-                    />
-                    <span
-                      className={`font-medium ${
-                        item.status === 1
-                          ? "text-green-600"
-                          : "text-red-500"
-                      }`}
-                    >
-                         {item.status === 1 ? "Active" : "Inactive"}
+
+
+                  {/* Category */}
+                  <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
+                    {item.name}
+                  </td>
+
+                  {/* Status */}
+                  <td className="px-4 py-3  border-b text-left border-gray-300">
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${item.status === 1 ? "bg-green-500" : "bg-red-500"
+                          }`}
+                      />
+                      <span
+                        className={`font-medium ${item.status === 1
+                            ? "text-green-600"
+                            : "text-red-500"
+                          }`}
+                      >
+                        {item.status === 1 ? "Active" : "Inactive"}
+                      </span>
                     </span>
-                  </span>
-                </td>
+                  </td>
 
-                {/* Action */}
-                <td className="px-4 py-3  border-b text-left border-gray-300">
-                  <div className="flex gap-2">
-                    <button className="rounded-md bg-indigo-100 p-2 text-indigo-600 cursor-pointer" onClick={()=>{
-                      setEditData(item);
-                      setOpen(true);
-                    }}>
-                      <FiEdit />
+                  {/* Action */}
+                  <td className="px-4 py-3  border-b text-left border-gray-300">
+                    <div className="flex gap-2">
+                      <button className="rounded-md bg-indigo-100 p-2 text-indigo-600 cursor-pointer" onClick={() => {
+                        setEditData(item);
+                        setOpen(true);
+                      }}>
+                        <FiEdit />
                       </button>
-                         
-                        {open && (
-                            <AddNewService_Category
-                              editData={editData}
-                              refreshData={fetchCategories}
-                              onClose={() => {
-                                setEditData(null);
-                                setOpen(false);
-                              }}
-                            />
-                          )}
+
+                      {open && (
+                        <AddNewService_Category
+                          editData={editData}
+                          refreshData={fetchCategories}
+                          onClose={() => {
+                            setEditData(null);
+                            setOpen(false);
+                          }}
+                        />
+                      )}
 
 
-                    
-                    <button className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer"
-                    onClick={()=>{
-                      // handleDelete(item.id);
-                    
-                      setSelectedId(item.id);
-                      setIsDeleteOpen(true);
-                      }} >
-                      <FiTrash2 />
-                
-                    </button>
-                    
-                  </div>
-                </td>
-              </tr>
-            ))}
+
+                      <button className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer"
+                        onClick={() => {
+                          // handleDelete(item.id);
+
+                          setSelectedId(item.id);
+                          setIsDeleteOpen(true);
+                        }} >
+                        <FiTrash2 />
+
+                      </button>
+
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
-      
+
       <DeleteModal
         isOpen={isDeleteOpen}
         title="Delete Category?"
