@@ -35,6 +35,7 @@ import Payment from "./pages/Payment_Receipt.jsx"
 
 // Add this import with other imports
 import CustomerD from "./pages/CustomerD.jsx";
+import Login from "./pages/Login.jsx";
 
 
   
@@ -43,11 +44,13 @@ import CustomerD from "./pages/CustomerD.jsx";
 function App() {
   return (
     <Routes>
+              <Route index element={<Login />} />
+
       <Route
         path="/"
         element={<Layout />}
       >
-        <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="pos" element={<PosPage />} />
        <Route path="services/list" element={<ServiceList />} />
         <Route path="services/type" element={<ServiceType />} />

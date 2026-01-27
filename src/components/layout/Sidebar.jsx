@@ -19,7 +19,7 @@ import { TbSettingsCode } from "react-icons/tb";
 import { RiArrowDownSLine, RiArrowRightSLine } from 'react-icons/ri';
 
 const menu = [
-  { name: 'Dashboard', icon: LuLayoutDashboard, path: '/' },
+  { name: 'Dashboard', icon: LuLayoutDashboard, path: '/Dashboard' },
   { name: 'POS', icon: LuShoppingCart, path: '/pos' },
   { name: 'Orders', icon: LuClipboardList, path: '/orders' },
   { name: 'Collection', icon: LuBriefcase, path: '/collection' },
