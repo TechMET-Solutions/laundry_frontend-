@@ -11,24 +11,50 @@ import { Pagination, Autoplay, Navigation } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/navigation'
-import { Link } from 'react-router-dom'
-import {loginUser} from '../api/user';
+import { useNavigate } from 'react-router-dom'
+
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  
+  const EMAIL = "admin@gmail.com";
+  const PASSWORD = "admin";
 
-  const handleLogin = async (e) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    setError("");
+    setLoading(true);
 
     try {
-      await loginUser({ email, password });
+      if (email === EMAIL && password === PASSWORD) {
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("userPassword", password);
+        localStorage.setItem("loginTime", new Date().toISOString());
+
+        navigate("/dashboard");
+      } else {
+        setError("Invalid email or password. Please try again.");
+      }
     } catch (error) {
+      setError("Login failed. Please try again.");
       console.error("Login failed:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // const handleLogout = () => {
+  //   localStorage.removeItem("userEmail");
+  //   localStorage.removeItem("userPassword");
+  //   localStorage.removeItem("loginTime");
+  //   navigate("/login");
+  // };
 
   return (
     <>
@@ -48,7 +74,6 @@ const Login = () => {
 
       <div className="flex flex-col md:flex-row bg-[#F3F6FA] min-h-screen p-0 md:p-20 gap-4">
 
-        {/* LEFT SECTION (same styling as old) */}
         <div className="bg-[#56CCF280] p-8 w-full md:w-3/5 flex flex-col items-center justify-center rounded-lg">
 
           <Swiper
@@ -56,7 +81,7 @@ const Login = () => {
             centeredSlides
             autoplay={{ delay: 3000, disableOnInteraction: false }}
              pagination={{ clickable: true }}
-            //  navigation
+            
             modules={[Autoplay, Pagination, Navigation]}
             className="mySwiper"
           >
@@ -77,7 +102,6 @@ const Login = () => {
           </div>
         </div>
 
-        {/* RIGHT SECTION (exact same spacing & styling) */}
         <div className="bg-white p-8 w-full md:w-2/5 flex items-center justify-center">
           <div className="max-w-md w-full">
 
@@ -89,16 +113,19 @@ const Login = () => {
               Login to Continue
             </h2>
 
-            <form>
-              {/* Email */}
+<form onSubmit={handleLogin}>
+              
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Email
                 </label>
                 <input
-                  type="text"
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                   required
                 />
               </div>
@@ -112,6 +139,9 @@ const Login = () => {
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-3 py-2 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Enter your password"
                     required
@@ -126,19 +156,23 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Button */}
-              <Link to="/dashboard"
-                className="w-full bg-[#00A8A280] text-white py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              > <button
-                type="submit"
-                onClick={() => handleLogin(formData.e)}
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                  {error}
+                </div>
+              )}
 
-              >Sign In</button>
-                
-              </Link>
+              <div className="">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-[#00A8A280] text-white py-2 px-4 rounded-full hover:bg-[#00A8A2] focus:outline-none focus:ring-2 focus:ring-blue-900 disabled:opacity-50"
+                >
+                  {loading ? "Signing In..." : "Sign In"}
+                </button>
+              </div>
             </form>
 
-            {/* Remember + Forgot */}
             <div className="flex items-center mt-4">
               <input type="checkbox" className="mr-2 h-4 w-4" />
               <p className="text-sm text-gray-700">Remember Me</p>
