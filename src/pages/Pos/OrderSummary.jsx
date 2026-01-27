@@ -28,6 +28,8 @@ function OrderSummary({
   const [isSelectingCustomer, setIsSelectingCustomer] = useState(false);
 
   const [openAddCustomerModal, setOpenAddCustomerModal] = useState(false);
+  const [allCustomers, setAllCustomers] = useState([]);
+
 
   const [errors, setErrors] = useState({
     deliveryDate: "",
@@ -39,7 +41,10 @@ function OrderSummary({
 
   const [orderObject, setOrderObject] = useState({
     orderDate: new Date().toISOString(),
+    // orderDate: toDubaiISOString(new Date()),
+
     deliveryDate: "",
+    // deliveryDate: toDubaiISOString(date),
 
     customerName: "",
     driverName: "Shubham",
@@ -51,7 +56,7 @@ function OrderSummary({
     currency: "AED",
     status: "PENDING",
     createdBy: "Admin",
-    paymentMethod: "Cash",
+    paymentMethod: "Payment Method",
   });
 
   const formatDate = (date) => {
@@ -70,32 +75,53 @@ function OrderSummary({
     return d;
   };
 
-  useEffect(() => {
-    // agar input empty hai → kuch bhi fetch nahi karna
-    if (!customerSearchTerm.trim() || isSelectingCustomer) {
-      setFilteredCustomerList([]);
-      setIsSearchDropdownOpen(false);
-      setIsSelectingCustomer(false);
-      return;
+  //   const toDubaiISOString = (date) => {
+  //   return new Date(
+  //     date.toLocaleString("en-US", { timeZone: "Asia/Dubai" })
+  //   ).toISOString().replace("Z", "");
+  // };
+
+ useEffect(() => {
+  const fetchCustomers = async () => {
+    try {
+      setIsLoadingCustomers(true);
+      const response = await getAllCustomers();
+      setAllCustomers(response.data.data || []);
+    } catch (error) {
+      console.error("Customer fetch error:", error);
+    } finally {
+      setIsLoadingCustomers(false);
     }
+  };
 
-    // Debounce the search input
-    const timer = setTimeout(async () => {
-      try {
-        setIsLoadingCustomers(true);
-        const response = await getAllCustomers(customerSearchTerm);
+  fetchCustomers();
+}, []);
 
-        setFilteredCustomerList(response.data.data || []);
-        setIsSearchDropdownOpen(true);
-      } catch (error) {
-        console.error("Customer search error:", error);
-      } finally {
-        setIsLoadingCustomers(false);
-      }
-    }, 700);
 
-    return () => clearTimeout(timer);
-  }, [customerSearchTerm]);
+useEffect(() => {
+  // agar search empty hai → kuch bhi mat dikhao
+  if (!customerSearchTerm.trim()) {
+    setFilteredCustomerList([]);
+    setIsSearchDropdownOpen(false);
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    const filtered = allCustomers.filter((customer) =>
+      customer.name
+        .toLowerCase()
+        .includes(customerSearchTerm.toLowerCase())
+    );
+
+    setFilteredCustomerList(filtered);
+    setIsSearchDropdownOpen(filtered.length > 0);
+  }, 700);
+
+  return () => clearTimeout(timer);
+}, [customerSearchTerm, allCustomers]);
+
+
+
 
   // ---- CALCULATIONS ----
   const subtotal = orders.reduce(
@@ -120,9 +146,8 @@ function OrderSummary({
       setErrors((prev) => ({ ...prev, items: "" }));
     }
   }, [orders.length]);
- 
 
-    const handleSaveOrder = async () => {
+  const handleSaveOrder = async () => {
     const newErrors = {
       deliveryDate: "",
       customerName: "",
@@ -147,13 +172,15 @@ function OrderSummary({
     }
 
     // Validate payment method
-    if (!orderObject.paymentMethod || orderObject.paymentMethod === "Cash") {
+    if (
+      !orderObject.paymentMethod ||
+      orderObject.paymentMethod === "Payment Method"
+    ) {
       newErrors.paymentMethod = "Please select a payment method";
     }
 
     if (parseFloat(orderObject.paidAmount) > orderObject.totalAmount) {
-       newErrors.paidAmount = "Paid amount cannot exceed total";  
-       
+      newErrors.paidAmount = "Paid amount cannot exceed total";
     }
 
     setErrors(newErrors);
@@ -163,7 +190,8 @@ function OrderSummary({
       newErrors.deliveryDate ||
       newErrors.customerName ||
       newErrors.items ||
-      newErrors.paymentMethod || newErrors.paidAmount
+      newErrors.paymentMethod ||
+      newErrors.paidAmount
     ) {
       return;
     }
@@ -195,6 +223,15 @@ function OrderSummary({
                 setOrderDate(date);
               }}
               className="absolute inset-0 opacity-0 cursor-pointer"
+              // onChange={(e) => {
+              //   const date = new Date(e.target.value);
+
+              //   setOrderDate(date);
+              //   setOrderObject((prev) => ({
+              //     ...prev,
+              //     orderDate: toDubaiISOString(date),
+              //   }));
+              // }}
             />
           </div>
         </div>
@@ -224,6 +261,17 @@ function OrderSummary({
                   deliveryDate: date.toISOString(),
                 }));
               }}
+              // onChange={(e) => {
+              //   const date = new Date(e.target.value);
+
+              //   setDeliveryDate(date);
+              //   setErrors((prev) => ({ ...prev, deliveryDate: "" }));
+
+              //   setOrderObject((prev) => ({
+              //     ...prev,
+              //     deliveryDate: toDubaiISOString(date),
+              //   }));
+              // }}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
           </div>
@@ -251,7 +299,7 @@ function OrderSummary({
               type="text"
               value={customerSearchTerm}
               placeholder="Search customer"
-              onFocus={() => setIsSearchDropdownOpen(true)}
+              onClick={() => setIsSearchDropdownOpen(true)}
               onChange={(e) => {
                 setCustomerSearchTerm(e.target.value);
                 setErrors((prev) => ({ ...prev, customerName: "" }));
@@ -394,7 +442,7 @@ function OrderSummary({
                 ...prev,
                 paidAmount: e.target.value,
               }));
-               setErrors((prev) => ({ ...prev, paidAmount: "" }));
+              setErrors((prev) => ({ ...prev, paidAmount: "" }));
             }}
             className="w-full h-10 bg-gray-200 rounded-lg px-2 text-sm outline-none"
           />

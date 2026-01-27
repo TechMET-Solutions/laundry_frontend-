@@ -3,12 +3,12 @@ import { IoReturnUpBackOutline, IoAddCircleOutline } from "react-icons/io5";
 import { AiOutlineDelete } from "react-icons/ai";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { FiSearch, FiTrash2 } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Status_Screen from "../../assets/Status_Screen.svg";
 import { GrView } from "react-icons/gr";
-import { getAllOrders, getOrderById, updateOrder } from "../../api/order";
+import { getAllOrders, getOrderById, softDeleteOrder } from "../../api/order";
 import Pagination from "../../components/Pagination";
-import DeleteModal from "../../components/models/DeleteModal";
+ 
 
 const formatDisplayDate = (value) => {
   if (!value) return "--";
@@ -38,17 +38,14 @@ export default function Order_List() {
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  
 
-  // const handleDeleteOrder = () => {
-  //   // Implement delete order logic here
-  //   setDeleteOrder(false);
-  // };
-
+   
   const fetchOrders = async (p = page) => {
     try {
       setLoading(true);
       const res = await getAllOrders(p, 10);
-
+      console.log(res.data.data);
       setOrders(res.data.data || []);
       setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
@@ -62,30 +59,13 @@ export default function Order_List() {
     fetchOrders(page);
   }, [page]);
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
-
+  const handleDelete = async () => { 
     try {
-      // Fetch the current order so we send the full payload the API expects
-      const response = await getOrderById(deleteId);
-      const orderData = response.data.data;
-  console.log(orderData);
-      await updateOrder(deleteId, {
-        order_date: orderData.order_date,
-        delivery_date: orderData.delivery_date,
-        customer_name: orderData.customer_name,
-        driver_name: orderData.driver_name,
-        total_amount: orderData.total_amount,
-        paid_amount: orderData.paid_amount,
-        currency: orderData.currency,
-        status:"DELETED",
+      await softDeleteOrder(deleteId, {
+        status:"DELETED" 
       });
-     
-      setShowDeleteModal(false);
-      setDeleteId(null);
-      console.log();
-
-      fetchOrders(page);
+       fetchOrders(page);
+       
     } catch (error) {
       console.error("Delete failed:", error);
     }
@@ -282,6 +262,8 @@ export default function Order_List() {
 
             {!loading &&
               orders.map((item) => {
+                if(item.status==="DELETED") return null;
+
                 const orderId = item.order_code || "N/A";
                 const orderDate = formatDisplayDate(item.order_date);
                 const deliveryDate = formatDisplayDate(item.delivery_date);
@@ -355,12 +337,12 @@ export default function Order_List() {
                     </td>
 
                     <td className="px-2 py-6 sm:px-2 border-b whitespace-nowrap  text-[12px] border-gray-400 flex gap-2">
-                      <button
+                      <Link to="/orders/detailed_order" 
                         className="p-2 bg-[#56CCF291] rounded"
-                        onClick={() => navigate("/orders/detailed_order")}
+                        state={{orderId: item.id }}
                       >
                         <GrView />
-                      </button>
+                      </Link>
                       <button
                         className="p-2 bg-[#FFD0C6] text-[#C32300] rounded"
                         onClick={() => {
@@ -385,14 +367,36 @@ export default function Order_List() {
         </div>
       </div>
       {showDeleteModal && (
-        <DeleteModal
-          isOpen={showDeleteModal}
-          onCancel={() => {
-            setShowDeleteModal(false);
-            setDeleteId(null);
-          }}
-          onConfirm={handleDelete}
-        />
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setShowDeleteModal(false)}
+          />
+
+          <div className="relative bg-white rounded-xl p-6 w-[400px]">
+            <h2 className="text-xl font-semibold">Delete Order?</h2>
+            <p className="text-gray-600 mt-2">This action cannot be undone.</p>
+
+            <div className="flex gap-4 mt-5">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="border rounded-lg hover:bg-gray-200 hover:border-gray-300 px-4 py-2"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={()=>{
+                  handleDelete();
+                  setShowDeleteModal(false);
+                } }
+                className="bg-red-600 rounded-t-lg text-white px-4 py-2"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
