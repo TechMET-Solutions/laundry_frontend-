@@ -12,6 +12,7 @@ function PosPage() {
     try {
       const reponse = await getAllServicesList();
       setServicesData(reponse.data.data || []);
+      // console.log(reponse.data.data[0]);
     } catch (error) {
       console.error("Error fetching services:", error);
     }
@@ -48,7 +49,7 @@ function PosPage() {
   };
 
   return (
-    <div className="  bg-slate-100 p-4">
+    <div className="    p-4">
       <div className="mt-4 grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-4">
         <Category onSaveOrder={addOrder} servicesData={servicesData} />
         <OrderSummary
