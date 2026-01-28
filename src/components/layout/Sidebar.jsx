@@ -56,9 +56,7 @@ function Sidebar() {
 
   
    const handleLogout = () => {
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("userPassword");
-    localStorage.removeItem("loginTime");
+    localStorage.removeItem("userData");
     navigate("/");
   };
 

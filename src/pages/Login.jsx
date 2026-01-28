@@ -32,15 +32,20 @@ const Login = () => {
     setLoading(true);
 
     try {
-      if (email === EMAIL && password === PASSWORD) {
-        localStorage.setItem("userEmail", email);
-        localStorage.setItem("userPassword", password);
-        localStorage.setItem("loginTime", new Date().toISOString());
+     if (email === EMAIL && password === PASSWORD) {
+    const userData = {
+      email,
+      password,
+      loginTime: new Date().toISOString(),
+    };
 
-        navigate("/dashboard");
-      } else {
-        setError("Invalid email or password. Please try again.");
-      }
+    localStorage.setItem("userData", JSON.stringify(userData));
+
+    navigate("/dashboard");
+  } else {
+    setError("Invalid email or password. Please try again.");
+  }
+
     } catch (error) {
       setError("Login failed. Please try again.");
       console.error("Login failed:", error);
