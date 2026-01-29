@@ -12,6 +12,10 @@ import Pagination from "../components/Pagination";
 import { deleteExpense, getAllExpenses } from "../api/expences";
 
 function Expenses() {
+
+  const userData = JSON.parse(localStorage.getItem("userData"));
+  const loggedInEmail = userData?.email;
+
   const navigate = useNavigate();
 
   // modal & selection
@@ -102,7 +106,7 @@ function Expenses() {
 
       {/* Table */}
       <div className="bg-[#f4f7fb] rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm border-separate">
           <thead>
             <tr>
               {[
@@ -143,7 +147,7 @@ function Expenses() {
                   <td className="px-4 py-3">{item.category}</td>
                   <td className="px-4 py-3">{item.tax}</td>
                   <td className="px-4 py-3">{item.payment_mode}</td>
-                  <td className="px-4 py-3">Admin</td>
+                  <td className="px-4 py-3">{loggedInEmail}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button
