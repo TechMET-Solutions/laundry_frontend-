@@ -19,3 +19,9 @@ export const updateCustomers = (id, data) => API.put(`/update/${id}`, data);
 
 // DELETE
 export const deleteCustomers = (id) => API.delete(`/delete/${id}`);
+
+// EXPORT TO EXCEL
+export const exportCustomersToExcel = () =>
+    API.get("/export-customers", {
+        responseType: "blob",
+    });
