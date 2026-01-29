@@ -70,8 +70,8 @@ const handleDelete = async () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-lg ">
+        <table className="w-full text-sm border-separate">
           <thead>
             <tr className="bg-sky-300 text-left">
               <th className="p-3">Collection ID</th>

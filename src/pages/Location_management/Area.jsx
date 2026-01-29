@@ -9,6 +9,7 @@ import { IoIosClose } from "react-icons/io";
 import { getAllAreas, deleteArea } from "../../api/area";
 import Pagination from "../../components/Pagination";
 import AddArea from "../../components/models/AddArea";
+//import { getAllAreas } from "../../api/location_management";
 
 function Area() {
   const [areas, setAreas] = useState([]);

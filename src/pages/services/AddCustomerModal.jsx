@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,} from "react";
 import { FiX } from "react-icons/fi";
 import { createCustomers, updateCustomers } from "../../api/customer";
+import { getAllEmirates } from "../../api/location_management"; 
+//import { getAllAreas } from "../../api/location_management";
+import { getAllAreas } from "../../api/area";
 
 const capitalize = (str) =>
   str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
@@ -12,7 +15,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
     phonenumber: "",
     whatsappnumber: "",
     email: "",
-    emirates: "",
+    emirate: "",
     area: "",
     appartmentnumber: "",
     buildingname: "",
@@ -22,6 +25,39 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
     notes: "",
     active: true,
   });
+
+  // filtered dropdown data
+  const [emirates, setEmirates] = useState([]);
+  const [areas, setAreas] = useState([]);
+  
+// emirates fetch
+  useEffect(() => {
+    const fetchEmirates = async () => {
+      try {
+        const res = await getAllEmirates(1, 100); // get all
+        console.log("ALL EMIRATES:", res.data.data);
+        setEmirates(res.data.data || []);
+      } catch (error) {
+        console.error("Failed to fetch emirates", error);
+      }
+    }; 
+    fetchEmirates();
+  }, []);
+
+  // areas fetch
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const res = await getAllAreas(1, 100);
+        console.log("ALL AREAS:", res.data.data);
+        setAreas(res.data.data || []);
+      } catch (error) {
+        console.error("Failed to fetch areas", error);
+      }
+    };
+    fetchAreas();
+  }, []);
+
 
   /* ✅ ADDED */
   const [loading, setLoading] = useState(false);
@@ -92,7 +128,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
     mobile_no: formData.phonenumber,
     whatsapp_no: formData.whatsappnumber,
     email: formData.email,
-    emirates: formData.emirates,
+    emirates: formData.emirate,
     area: formData.area,
     apartment_number: formData.appartmentnumber,
     building_name: formData.buildingname,
@@ -111,7 +147,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
       await createCustomers(customerData);
     }
 
-    await onSave();   // 🔥 parent re-fetch
+    await onSave();  
     onClose();
   } catch (error) {
     alert("Failed to save customer");
@@ -122,7 +158,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
 
   const validatePhoneNumbers = () => {
   if (formData.phonenumber.length !== 10) {
-   
+    alert("Phone number must be 10 digits");
     return false;
   }
 
@@ -130,13 +166,10 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
     formData.whatsappnumber &&
     formData.whatsappnumber.length !== 10
   ) {
-    
     return false;
   }
-
   return true;
 };
-
 
   return (
     <>
@@ -216,32 +249,66 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                 />
               </Field>
 
-              <Field label="Emirates" required>
-                <select
-                  name="emirates"
-                  value={formData.emirates}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
-                >
-                  <option value="">Emirates</option>
-                  <option value="Dubai">Dubai</option>
-                  <option value="Abu Dhabi">Abu Dhabi</option>
-                  <option value="Sharjah">Sharjah</option>
-                  <option value="Ajman">Ajman</option>
-                </select>
-              </Field>
+              {/* <Field label="Emirates" required>
+                  <select
+                    name="emirates"
+                    value={formData.emirates}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
+                  >
+                    <option value="">Emirates</option>
+                    <option value="Dubai">Dubai</option>
+                    <option value="Abu Dhabi">Abu Dhabi</option>
+                    <option value="Sharjah">Sharjah</option>
+                    <option value="Ajman">Ajman</option>
+                  </select>
+                </Field> */}
+
+                <Field label="Emirates" required>
+                  <select
+                    name="emirate"
+                    value={formData.emirate}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
+                  >
+                    <option value="">Emirates</option>
+                    {emirates.map((item) => (
+                      <option key={item.id} value={item.emirate}>
+                        {item.emirate}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
             </div>
 
             {/* Row 3 */}
             <div className="grid grid-cols-3 gap-4">
-              <Field label="Area" required>
+              {/* <Field label="Area" required>
                 <input
                   name="area"
                   value={formData.area}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
                 />
+              </Field> */}
+
+              <Field label="Area" required>
+                <select
+                  name="area"
+                  value={formData.area}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
+                >
+                  <option value="">Select Area</option>
+                  {areas.map((item) => (
+                    <option key={item.id} value={item.area}>
+                      {item.area}
+                    </option>
+                  ))}
+                </select>
               </Field>
+
               <Field label="Apartment Number">
                 <input
                   name="appartmentnumber"
@@ -250,6 +317,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                   className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
                 />
               </Field>
+
               <Field label="Building Name">
                 <input
                   name="buildingname"
@@ -270,6 +338,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                   className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
                 />
               </Field>
+
               <Field label="Tax Number (VAT)">
                 <input
                   name="taxnumber"
