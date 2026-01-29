@@ -3,7 +3,8 @@ import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { TbArrowBackUp } from "react-icons/tb";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
+
 
 import AddExpenses from "../components/models/AddExpenses";
 import DeleteModal from "../components/models/DeleteModal";
@@ -12,6 +13,10 @@ import Pagination from "../components/Pagination";
 import { deleteExpense, getAllExpenses } from "../api/expences";
 
 function Expenses() {
+
+  const userData = JSON.parse(localStorage.getItem("userData"));
+  const loggedInEmail = userData?.email;
+
   const navigate = useNavigate();
 
   // modal & selection
@@ -75,7 +80,19 @@ function Expenses() {
           </button>
           <h2 className="text-xl font-semibold">Expenses</h2>
         </div>
-
+        <div>
+          <button
+          className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
+          
+        >
+              <Link
+        to="/expense-categories"
+        className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
+      >
+        Expense Category List
+  </Link>
+        
+        </button>
         <button
           className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
           onClick={() => {
@@ -86,6 +103,7 @@ function Expenses() {
         >
           + Add New Expense
         </button>
+        </div>
       </div>
 
       {/* Search (UI only) */}
@@ -102,7 +120,7 @@ function Expenses() {
 
       {/* Table */}
       <div className="bg-[#f4f7fb] rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm border-separate">
           <thead>
             <tr>
               {[
@@ -143,7 +161,7 @@ function Expenses() {
                   <td className="px-4 py-3">{item.category}</td>
                   <td className="px-4 py-3">{item.tax}</td>
                   <td className="px-4 py-3">{item.payment_mode}</td>
-                  <td className="px-4 py-3">Admin</td>
+                  <td className="px-4 py-3">{loggedInEmail}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button

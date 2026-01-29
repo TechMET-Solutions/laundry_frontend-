@@ -52,6 +52,7 @@ const ServiceCategory = () => {
   // const handleSelect = () => {
   //   setOpen(false);
   // };
+  
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* Header */}
@@ -116,48 +117,8 @@ const ServiceCategory = () => {
           </thead>
 
           <tbody>
-            {/* {[
-              {
-                id: 1,
-                type: "Shoe Cleaning",
-                category: "Other",
-                status: "Active",
-              },
-              {
-                id: 2,
-                service: "Shall",
-                type: "Re-wash",
-                category: "Ladies",
-                status: "Inactive",
-              },
-              {
-                id: 3,
-                service: "New one",
-                type: "Rewash",
-                category: "Kids",
-                status: "Active",
-              },
-              {
-                id: 4,
-                service: "Viewy Service",
-                type: "Pressing",
-                category: "Kids",
-                status: "Inactive",
-              },
-              {
-                id: 5,
-                service: "Ghutra",
-                type: "Pressing, Pressing & Washing",
-                category: "Gents",
-                status: "Active",
-              },
-              {
-                id: 6,
-                service: "Shirt",
-                type: "Pressing, Pressing & Washing",
-                category: "Gents",
-                status: "Inactive",
-              },] */
+            {
+              categories.length > 0 ? (
               categories.map((item, index) => (
                 <tr key={item.id} className="bg-[#f1f5fb] text-center">
                   {/* Sr No */}
@@ -229,7 +190,23 @@ const ServiceCategory = () => {
                     </div>
                   </td>
                 </tr>
-              ))}
+              ))
+            ):(
+              /* DATA NOT FOUND ROW */
+              <tr>
+                <td colSpan="4" className="px-4 py-20 text-center bg-white border-b border-gray-300">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="bg-gray-100 p-4 rounded-full">
+                      <FiSearch className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-lg font-semibold text-gray-500">No Services Found</p>
+                    <p className="text-sm text-gray-400">
+                      Try adjusting your search.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) }
           </tbody>
         </table>
       </div>

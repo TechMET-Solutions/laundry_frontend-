@@ -1,5 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { createCollection, updateCollection } from "../../api/collection";
+import { getAllCustomers } from "../../api/customer";
+import { getAllEmployees } from "../../api/employee";
+import { getAllTimeSlot } from "../../api/timeslot";
+import { FiUser } from "react-icons/fi";
 
 const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
   const isView = mode === "view";
@@ -9,12 +13,165 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
     collection_type: "CLOTH",
     customer_type: "",
     customer_id: "",
+    customer_name: "",
     pickup_date: "",
     time_slot: "",
     phone_number: "",
     driver_id: "",
     comments: "",
   });
+
+  // Customer search state
+  const [allCustomers, setAllCustomers] = useState([]);
+  const [customerSearchTerm, setCustomerSearchTerm] = useState("");
+  const [filteredCustomerList, setFilteredCustomerList] = useState([]);
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
+
+  //employee driver search state
+  const [allEmployees, setAllEmployees] = useState([]);
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState("");
+  const [filteredEmployeeList, setFilteredEmployeeList] = useState([]);
+  const [isEmployeeSearchDropdownOpen, setIsEmployeeSearchDropdownOpen] = useState(false);
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
+
+  const [allTimeSlots, setAllTimeSlots] = useState([]);
+  const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false);
+  const [timeSlotSearchTerm, setTimeSlotSearchTerm] = useState("");
+  const [filteredTimeSlotList, setFilteredTimeSlotList] = useState([]);
+  const [isTimeSlotSearchDropdownOpen, setIsTimeSlotSearchDropdownOpen] = useState(false);
+
+  // Fetch timeslots on mount
+  useEffect(() => {
+    const fetchTimeSlots = async () => {
+      try {
+        setIsLoadingTimeSlots(true);
+        const response = await getAllTimeSlot();
+        console.log("Timeslots fetched:", response.data.data);
+        setAllTimeSlots(response.data.data || []);
+      } catch (error) {
+        console.error("Timeslot fetch error:", error);
+      } finally {
+        setIsLoadingTimeSlots(false);
+      }
+    };
+    fetchTimeSlots();
+  }, []);
+
+  // Filter timeslots as search term changes - show only timeslots with type "time"
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log("All timeslots:", allTimeSlots);
+      const timeSlots = allTimeSlots.filter(
+        (slot) => slot.type && typeof slot.type === "string" && slot.type.toLowerCase() === "time"
+      );
+      console.log("Filtered timeslots (type=time):", timeSlots);
+
+      // if search empty: show all time type slots
+      if (!timeSlotSearchTerm.trim()) {
+        setFilteredTimeSlotList(timeSlots);
+        setIsTimeSlotSearchDropdownOpen(timeSlots.length > 0);
+        return;
+      }
+
+      const filtered = timeSlots.filter((slot) => {
+        const slotName = slot.time_slot || slot.name || "";
+        return slotName.toLowerCase().includes(timeSlotSearchTerm.toLowerCase().trim());
+      });
+      console.log("Filtered timeslots (search):", filtered);
+
+      setFilteredTimeSlotList(filtered);
+      setIsTimeSlotSearchDropdownOpen(filtered.length > 0);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [timeSlotSearchTerm, allTimeSlots]);
+
+  // Fetch employees on mount
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        setIsLoadingEmployees(true);
+        const response = await getAllEmployees();
+        setAllEmployees(response.data.data || []);
+      } catch (error) {
+        console.error("Employee fetch error:", error);
+      } finally {
+        setIsLoadingEmployees(false);
+      }
+    };
+    fetchEmployees();
+  }, []);
+
+  // Filter employees as search term changes - show only drivers and allow empty-search to list all drivers
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const drivers = allEmployees.filter(
+        (emp) => emp.role && typeof emp.role === "string" && emp.role.toLowerCase() === "driver"
+      );
+
+      // if search empty: show all drivers
+      if (!employeeSearchTerm.trim()) {
+        setFilteredEmployeeList(drivers);
+        setIsEmployeeSearchDropdownOpen(drivers.length > 0);
+        return;
+      }
+
+      const filtered = drivers.filter((employee) => {
+        const fullName = `${employee.first_name || ""} ${employee.last_name || ""}`.trim();
+        return (
+          fullName.toLowerCase().includes(employeeSearchTerm.toLowerCase().trim())
+        );
+      });
+
+      setFilteredEmployeeList(filtered);
+      setIsEmployeeSearchDropdownOpen(filtered.length > 0);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [employeeSearchTerm, allEmployees]);
+
+
+  // Fetch customers on mount
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setIsLoadingCustomers(true);
+        const response = await getAllCustomers();
+        setAllCustomers(response.data.data || []);
+      } catch (error) {
+        console.error("Customer fetch error:", error);
+      } finally {
+        setIsLoadingCustomers(false);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
+
+  // Filter customers as search term changes - trim the search
+  useEffect(() => {
+    if (!customerSearchTerm.trim()) {
+      setFilteredCustomerList([]);
+      setIsSearchDropdownOpen(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const filtered = allCustomers.filter((customer) =>
+        customer.name && typeof customer.name === "string"
+          ? customer.name
+              .toLowerCase()
+              .includes(customerSearchTerm.toLowerCase().trim())
+          : false
+      );
+
+      setFilteredCustomerList(filtered);
+      setIsSearchDropdownOpen(filtered.length > 0);
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [customerSearchTerm, allCustomers]);
 
   useEffect(() => {
     if (collection) {
@@ -28,12 +185,26 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
         driver_id: collection.driver_id || "",
         comments: collection.comments || "",
       });
+
+      // Set driver name in search term if driver_id exists
+      if (collection.driver_id && allEmployees.length > 0) {
+        const driver = allEmployees.find((emp) => emp.id === collection.driver_id);
+        if (driver) {
+          const fullName = `${driver.first_name || ""} ${driver.last_name || ""}`.trim();
+          setEmployeeSearchTerm(fullName);
+        }
+      }
     }
-  }, [collection]);
+  }, [collection, allEmployees]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    // Trim string inputs for text fields
+    const trimmedValue = 
+      ["customer_type", "phone_number", "driver_id", "comments"].includes(name) 
+        ? value.trim() 
+        : value;
+    setForm((prev) => ({ ...prev, [name]: trimmedValue }));
   };
 
   const handleTypeChange = (type) => {
@@ -43,20 +214,69 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
       customer_type: type === "PAYMENT" ? "" : prev.customer_type,
     }));
   };
+  useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (!e.target.closest(".relative")) {
+      setIsEmployeeSearchDropdownOpen(false);
+    }
+  };
+  document.addEventListener("click", handleClickOutside);
+  return () => document.removeEventListener("click", handleClickOutside);
+}, []);
+
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setIsSearchDropdownOpen(false);
+      setIsEmployeeSearchDropdownOpen(false);
+      setIsTimeSlotSearchDropdownOpen(false);
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (isEdit) {
-      console.log(collection);
-
-      await updateCollection(collection.id, form);
-    } else {
-      await createCollection(form);
+    
+    // Validation
+    if (!form.customer_name || !form.customer_name.trim()) {
+      alert("Please select a customer");
+      return;
+    }
+    if (!form.phone_number || !form.phone_number.trim()) {
+      alert("Please enter a phone number");
+      return;
+    }
+    if (!form.driver_id) {
+      alert("Please select a driver");
+      return;
+    }
+    if (!form.time_slot) {
+      alert("Please select a time slot");
+      return;
     }
 
-    onSuccess?.();
-    onClose();
+    try {
+      let response;
+      console.log("Form data being submitted:", form);
+
+      if (isEdit) {
+        response = await updateCollection(collection.id, form);
+      } else {
+        response = await createCollection(form);
+      }
+
+      console.log("Response from backend:", response);
+      // send the REAL collection returned by backend
+      onSuccess?.(response.data.data || response.data);
+
+      onClose();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("Error: " + (error.response?.data?.message || error.message || "Failed to save collection"));
+    }
   };
 
   return (
@@ -116,18 +336,63 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
               </div>
             )}
 
-            <div>
+            {/* Customer Search Dropdown */}
+            <div className="relative">
               <label className="block text-gray-600 font-medium mb-1">
-                Customer Id <span className="text-red-500">*</span>
+                Customer <span className="text-red-500">*</span>
               </label>
-              <input
-                name="customer_id"
-                value={form.customer_id}
-                onChange={handleChange}
-                disabled={isView}
-                placeholder="Customer ID"
-                className="border p-2 rounded w-full"
-              />
+              <div
+                onClick={() => setIsSearchDropdownOpen(true)}
+                className="flex items-center gap-2 bg-gray-100 rounded-lg p-2 cursor-pointer border"
+              >
+                <FiUser className="text-gray-600" />
+                <input
+                  type="text"
+                  value={customerSearchTerm}
+                  placeholder="Search customer"
+                  onClick={() => setIsSearchDropdownOpen(true)}
+                  onChange={(e) => {
+                    setCustomerSearchTerm(e.target.value);
+                  }}
+                  disabled={isView}
+                  className="w-full bg-gray-100 rounded-lg text-sm outline-none font-medium"
+                />
+              </div>
+
+              {/* DROPDOWN */}
+              {isSearchDropdownOpen && (
+                <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-lg shadow-lg z-50 max-h-48 overflow-auto border">
+                  {isLoadingCustomers && (
+                    <li className="p-2 text-sm text-gray-400">Searching...</li>
+                  )}
+
+                  {!isLoadingCustomers && filteredCustomerList.length > 0 ? (
+                    filteredCustomerList.map((customer) => (
+                      <li
+                        key={customer.id}
+                        className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                        onClick={() => {
+                          setIsSearchDropdownOpen(false);
+                          setCustomerSearchTerm(customer.name);
+                          setForm((prev) => ({
+                            ...prev,
+                            customer_name: customer.name,
+                            customer_id: customer.id,
+                          }));
+                        }}
+                      >
+                        {customer.name}
+                      </li>
+                    ))
+                  ) : (
+                    !isLoadingCustomers && (
+                      <li className="p-2 text-sm text-gray-400">
+                        No customers found
+                      </li>
+                    )
+                  )}
+                </ul>
+              )}
             </div>
 
             <div>
@@ -144,22 +409,25 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
               />
             </div>
 
-            <div>
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
               <label className="block text-gray-600 font-medium mb-1">
                 Time Slot
               </label>
-              <select
-                name="time_slot"
-                value={form.time_slot}
-                onChange={handleChange}
-                disabled={isView}
-                className="border p-2 rounded w-full"
+              <div
+                onClick={() => setIsTimeSlotSearchDropdownOpen(true)}
+                className="flex items-center gap-2 bg-gray-100 rounded-lg p-2 cursor-pointer border"
               >
-                <option value="">Select Time Slot</option>
-                <option>03 PM - 04 PM</option>
-                <option>04 PM - 05 PM</option>
-                <option>05 PM - 06 PM</option>
-              </select>
+              
+                <select className="w-full bg-gray-100 rounded-lg text-sm outline-none font-medium" name="time_slot" id="time_slot" value={form.time_slot} onChange={handleChange} disabled={isView}>
+                  <option value="">Select Time Slot</option>
+                  {allTimeSlots.map((slot) => (
+                    <option key={slot.id} value={slot.id}>
+                      {slot.time_slot || slot.name}
+                    </option>
+                  ))}
+                </select>
+               
+              </div>
             </div>
 
             <div>
@@ -184,17 +452,52 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
 
             <div>
               <label className="block text-gray-600 font-medium mb-1">
-                Driver Id <span className="text-red-500">*</span>
+                Driver <span className="text-red-500">*</span>
               </label>
-              <input
-                name="driver_id"
-                value={form.driver_id}
-                onChange={handleChange}
-                disabled={isView}
-                placeholder="Driver ID"
-                className="border p-2 rounded w-full"
-              />
+
+              {/* THIS becomes positioning parent */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={employeeSearchTerm}
+                  placeholder="Search driver"
+                  onFocus={() => setIsEmployeeSearchDropdownOpen(true)}
+                  onChange={(e) => setEmployeeSearchTerm(e.target.value)}
+                  disabled={isView}
+                  className="w-full bg-gray-100 rounded-lg text-sm outline-none font-medium p-2 border cursor-pointer"
+                />
+
+                {/* DROPDOWN */}
+                {isEmployeeSearchDropdownOpen && (
+                  <ul className="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg z-50 max-h-48 overflow-auto border">
+                    {isLoadingEmployees ? (
+                      <li className="p-2 text-sm text-gray-400">Searching...</li>
+                    ) : filteredEmployeeList.length > 0 ? (
+                      filteredEmployeeList.map((employee) => (
+                        <li
+                          key={employee.id}
+                          className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            const fullName = `${employee.first_name || ""} ${employee.last_name || ""}`;
+                            setEmployeeSearchTerm(fullName);
+                            setForm((prev) => ({
+                              ...prev,
+                              driver_id: employee.id,
+                            }));
+                            setIsEmployeeSearchDropdownOpen(false);
+                          }}
+                        >
+                          {`${employee.first_name || ""} ${employee.last_name || ""}`.trim()}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="p-2 text-sm text-gray-400">No drivers found</li>
+                    )}
+                  </ul>
+                )}
+              </div>
             </div>
+
           </div>
 
           <div className="mt-4">

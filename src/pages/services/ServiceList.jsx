@@ -53,8 +53,8 @@ const ServiceList = () => {
     if (!deleteId) return;
     try {
       await deleteServiceList(deleteId);
-      setDeleteId(null);
-      setDeleteService(false);
+      // setDeleteId(null);
+      // setDeleteService(false);
       setRefresh(prev => !prev);
     } catch (error) {
       console.error("Delete failed:", error);

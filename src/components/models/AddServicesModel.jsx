@@ -142,8 +142,12 @@ const AddServicesModel = ({ mode, onClose, serviceData, setRefresh }) => {
     fetchServiceTypes();
   }, []);
 
+  const arr=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
+36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55, 56,57,58,59,60, 61,62,63,64,
+  ];
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
       <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-lg">
         <h2 className="mb-6 text-lg font-semibold text-gray-800">
           {isEditMode ? "Edit Service" : "Add Service"}
@@ -252,18 +256,29 @@ const AddServicesModel = ({ mode, onClose, serviceData, setRefresh }) => {
                 className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               >
                 <option value="" disabled>Choose Shorting Order</option>
-                <option value="51">51</option>
+                {/* <option value="51">51</option>
                 <option value="52">52</option>
                 <option value="53">53</option>
                 <option value="54">54</option>
-                <option value="55">55</option>
+                <option value="55">55</option> */}
+                {
+                  arr.map((num)=>{
+                    return(
+                      <option key={num} value={num}>{num}</option>
+                    )
+                  })
+                }
               </select>
             </div>
-            <ToggleButton
+            
+            <div className="mt-8">
+              <ToggleButton
+              
               label="Active SQF"
               checked={formData.sqf_status === 1}
               onChange={(isOn) => setFormData(p => ({ ...p, sqf_status: isOn ? 1 : 0 }))}
             />
+            </div>
           </div>
 
 

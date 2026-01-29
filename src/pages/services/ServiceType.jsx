@@ -152,13 +152,27 @@ const ServiceType = () => {
             </thead>
 
             <tbody>
-              {filteredServiceTypes.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-4">
-                    No service types found
-                  </td>
-                </tr>
-              ) : (
+             {filteredServiceTypes.length === 0 ? (
+                  /* DATA NOT FOUND ROW */
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-4 py-20 text-center bg-white border-b border-gray-300"
+                    >
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <div className="bg-gray-100 p-4 rounded-full">
+                          <FiSearch className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <p className="text-lg font-semibold text-gray-500">
+                          No Service Type Found
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          Try adjusting your search or category filter.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
                 filteredServiceTypes.map((item, index) => (
                   <tr key={item.id} className="bg-[#f1f5fb] text-center">
                     <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">

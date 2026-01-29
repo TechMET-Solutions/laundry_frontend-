@@ -42,8 +42,8 @@ const Addon = () => {
             setServiceAddons((prev) =>
               prev.filter((item) => item.id !== deleteId)
             );
-            setDeleteId(null);
-            setIsDeleteOpen(false);
+            // setDeleteId(null);
+            // setIsDeleteOpen(false);
           }
         } catch (error) {
           console.error("Delete failed:", error);
@@ -136,8 +136,16 @@ const Addon = () => {
           <tbody>
             {serviceAddons.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-4 text-gray-500">
-                  No service addons found
+                <td colSpan="6" className="px-4 py-20 text-center bg-white border-b border-gray-300">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="bg-gray-100 p-4 rounded-full">
+                      <FiSearch className="h-8 w-8 text-gray-400" />
+                    </div>
+                    <p className="text-lg font-semibold text-gray-500">No Services Found</p>
+                    <p className="text-sm text-gray-400">
+                      Try adjusting your search or category filter.
+                    </p>
+                  </div>
                 </td>
               </tr>
             ) : (
