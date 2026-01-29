@@ -13,6 +13,7 @@ import { MdOutlineEdit } from "react-icons/md";
 
 function OrderSummary({
   orders,
+  setOrders,
   increaseQuantity,
   decreaseQuantity,
   removeItem,
@@ -41,11 +42,12 @@ function OrderSummary({
   const [allCustomers, setAllCustomers] = useState([]);
   const [allDrivers, setAllDrivers] = useState([]);
 
-  const [orderColors, setOrderColors] = useState({}); // index -> color
   const [openPickerIndex, setOpenPickerIndex] = useState(null);
+  const [orderColors, setOrderColors] = useState("");
 
   const [errors, setErrors] = useState({
     deliveryDate: "",
+    driverName: "",
     customerName: "",
     items: "",
     paymentMethod: "",
@@ -61,6 +63,7 @@ function OrderSummary({
 
     customerName: "",
     driverName: "",
+    colorCodes: "#2563eb", // default blue
 
     amount: 0,
     totalAmount: 0,
@@ -70,6 +73,7 @@ function OrderSummary({
     status: "PENDING",
     createdBy: "Admin",
     paymentMethod: "Payment Method",
+    allItems: [],
   });
 
   const formatDate = (date) => {
@@ -211,6 +215,7 @@ function OrderSummary({
   const handleSaveOrder = async () => {
     const newErrors = {
       deliveryDate: "",
+      driverName: "",
       customerName: "",
       items: "",
       paymentMethod: "",
@@ -225,6 +230,11 @@ function OrderSummary({
     // Validate customer name
     if (!orderObject.customerName.trim()) {
       newErrors.customerName = "Please select a customer";
+    }
+
+    // Validate driver name
+    if (!orderObject.driverName.trim()) {
+      newErrors.driverName = "Please select a driver";
     }
 
     // Validate items
@@ -249,6 +259,7 @@ function OrderSummary({
     // If any errors, don't save
     if (
       newErrors.deliveryDate ||
+      newErrors.driverName ||
       newErrors.customerName ||
       newErrors.items ||
       newErrors.paymentMethod ||
@@ -257,9 +268,28 @@ function OrderSummary({
       return;
     }
 
+    console.log("Saving order:", orderObject); // allItems included
     await createOrder(orderObject);
     navigate("/orders");
   };
+
+  // backend me update ho jb qutity or color change ho
+  useEffect(() => {
+    const updatedAllItems = orders.map((item) => ({
+      id: item.id,
+      itemName: item.name || item.category.name,
+      serviceType: item.serviceType || [],
+      color: item.color || "#2563eb",
+      rate: item.pricePerItem,
+      qty: item.quantity,
+      total: item.quantity * item.pricePerItem,
+    }));
+
+    setOrderObject((prev) => ({
+      ...prev,
+      allItems: updatedAllItems,
+    }));
+  }, [orders]);
 
   const handleCustomerData = (customerData) => {
     // Handle new customer data if needed
@@ -408,6 +438,11 @@ function OrderSummary({
                 ))}
             </ul>
           )}
+          {errors.driverName && (
+            <span className="absolute left-0 top-7 text-red-500 font-semibold text-[12px] whitespace-nowrap mt-1">
+              {errors.driverName}
+            </span>
+          )}
         </div>
 
         {/* Customer Search */}
@@ -495,7 +530,6 @@ function OrderSummary({
 
         <div>
           {orders.map((item, index) => {
-            const color = orderColors[index] || "#2563eb"; // default blue
             const totalPrice = item.quantity * Number(item.pricePerItem); // quantity × pricePerItem
             {
               console.log(orders);
@@ -551,7 +585,7 @@ function OrderSummary({
                     {/* COLOR PREVIEW */}
                     <div
                       className="w-16 h-7 rounded-lg border"
-                      style={{ backgroundColor: color }}
+                      style={{ backgroundColor: orderObject.colorCodes }}
                     />
 
                     {/* EDIT BUTTON */}
@@ -567,15 +601,30 @@ function OrderSummary({
                     </button>
 
                     {/* COLOR PICKER */}
+                    {/* COLOR PICKER */}
                     {openPickerIndex === index && (
                       <input
                         type="color"
-                        value={color}
+                        value={orders[index].color || "#2563eb"} // item color
                         onChange={(e) => {
-                          setOrderColors((prev) => ({
+                          const updatedOrders = [...orders];
+                          updatedOrders[index].color = e.target.value;
+                          setOrders(updatedOrders);
+
+                          // also update orderObject.allItems
+                          setOrderObject((prev) => ({
                             ...prev,
-                            [index]: e.target.value,
+                            allItems: updatedOrders.map((item) => ({
+                              id: item.id,
+                              itemName: item.name || item.category.name,
+                              serviceType: item.serviceType || [],
+                              color: item.color || "#2563eb",
+                              rate: item.pricePerItem,
+                              qty: item.quantity,
+                              total: item.quantity * item.pricePerItem,
+                            })),
                           }));
+
                           setOpenPickerIndex(null); // auto close
                         }}
                         className="absolute top-8 right-0 cursor-pointer"

@@ -178,7 +178,7 @@ function Category({ onSaveOrder, servicesData }) {
 
     // Get delivery price (remove "AED " and convert to number)
     const deliveryPrice = parseFloat(
-      deliveryType?.price 
+      deliveryType?.price || 0
     );
 
     // Calculate price per item (ensure both are numbers)
@@ -312,7 +312,7 @@ function Category({ onSaveOrder, servicesData }) {
           <div className="bg-white rounded-2xl w-full max-w-md shadow-xl p-6">
             {/* Title */}
             <h2 className="text-lg font-bold text-slate-800 mb-6">
-              Shirt - Select Service Type
+              {selectedCategory.name}
             </h2>
 
             {/* Service Type */}
@@ -330,11 +330,11 @@ function Category({ onSaveOrder, servicesData }) {
                 return (
                   <label
                     key={value}
-                    className={`border p-2 cursor-pointer flex flex-col items-center gap-3 rounded-2xl
+                    className={`   cursor-pointer flex flex-col items-center gap-3 rounded-2xl
               ${
                 isSelected
-                  ? "border-indigo-600 ring-2 ring-indigo-300 bg-indigo-50"
-                  : "border-slate-200 hover:border-indigo-300"
+                  ? "border-indigo-700 ring-2 ring-indigo-400 bg-indigo-50"
+                  : "border-slate-300 hover:border-indigo-400"
               }
           `}
                   >

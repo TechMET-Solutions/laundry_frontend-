@@ -54,6 +54,7 @@ function PosPage() {
         <Category onSaveOrder={addOrder} servicesData={servicesData} />
         <OrderSummary
           orders={orders}
+          setOrders={setOrders}
           increaseQuantity={increaseQuantity}
           decreaseQuantity={decreaseQuantity}
           removeItem={removeItem}
