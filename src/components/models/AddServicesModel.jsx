@@ -147,7 +147,7 @@ const AddServicesModel = ({ mode, onClose, serviceData, setRefresh }) => {
   ];
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40">
       <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-lg">
         <h2 className="mb-6 text-lg font-semibold text-gray-800">
           {isEditMode ? "Edit Service" : "Add Service"}
