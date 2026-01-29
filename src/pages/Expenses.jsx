@@ -3,7 +3,8 @@ import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { TbArrowBackUp } from "react-icons/tb";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
+
 
 import AddExpenses from "../components/models/AddExpenses";
 import DeleteModal from "../components/models/DeleteModal";
@@ -79,7 +80,19 @@ function Expenses() {
           </button>
           <h2 className="text-xl font-semibold">Expenses</h2>
         </div>
-
+        <div>
+          <button
+          className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
+          
+        >
+              <Link
+        to="/expense-categories"
+        className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
+      >
+        Expense Category List
+  </Link>
+        
+        </button>
         <button
           className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
           onClick={() => {
@@ -90,6 +103,7 @@ function Expenses() {
         >
           + Add New Expense
         </button>
+        </div>
       </div>
 
       {/* Search (UI only) */}

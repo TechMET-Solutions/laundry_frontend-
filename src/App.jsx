@@ -36,7 +36,8 @@ import Payment from "./pages/Payment_Receipt.jsx"
 import CustomerD from "./pages/CustomerD.jsx";
 import Login from "./pages/Login.jsx";
 
-
+//expenses
+import ExpenseCategories from "./pages/expense-categories.jsx";
 
 
 
@@ -93,7 +94,8 @@ function App() {
         <Route path="/orders" element={<Order_List />} />
         {/* ... rest of routes ... */}
 
-
+        // In your router configuration
+        <Route path="/expense-categories" element={<ExpenseCategories />} />
 
       </Route>
 
