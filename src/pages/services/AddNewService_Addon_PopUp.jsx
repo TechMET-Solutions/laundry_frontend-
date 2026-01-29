@@ -12,6 +12,7 @@ export default function AddNewService_Addon_PopUp({ onClose, onAdd, editData = n
 
   const [name, setName] = useState(editData?.name ||"");
   const [price, setPrice] = useState(editData?.price !== undefined ? String(editData.price) : "");
+  const [addonMessage, setAddonMessage] = useState(editData?.addonMessage ||""); 
   const [status, setStatus] = useState(editData?.status ?? 1);
   const [loading, setLoading] = useState(false);
 
@@ -32,8 +33,8 @@ export default function AddNewService_Addon_PopUp({ onClose, onAdd, editData = n
 
     
         const res = editData
-          ? await updateServiceAddon(editData.id, { name, price, status })
-          : await createNewServiceAddon({ name,price, status });
+          ? await updateServiceAddon(editData.id, { name, price, addonMessage, status })
+          : await createNewServiceAddon({ name,price, addonMessage, status });
     
         if (!res.data.success) throw new Error("API failed");
        
@@ -55,6 +56,7 @@ export default function AddNewService_Addon_PopUp({ onClose, onAdd, editData = n
       if (editData) {
         setName(editData.name || "");
         setPrice(String(editData.price || ""));
+        setAddonMessage(editData.addonMessage || "");
         setStatus(editData.status ?? 1);
       }
     }, [editData]);
@@ -86,6 +88,13 @@ export default function AddNewService_Addon_PopUp({ onClose, onAdd, editData = n
             onChange={(e) => setPrice(e.target.value)}
           />
         </div>
+        <InputField
+            label="Addon Message"
+            placeholder="Addon Message"
+            required
+            value={addonMessage}
+            onChange={(e) => setAddonMessage(e.target.value)}
+          />
 
           
           <div className="flex items-center gap-3 mt-3">

@@ -30,7 +30,6 @@ import Order_List from "./pages/Orders/OrdersList.jsx";
 import Order_Status_Screen from "./pages/Orders/Order_Status_Screen.jsx";
 import Delete_Order from "./pages/Orders/Delete_Order.jsx";
 import DetailedOrderPage from "./pages/Orders/Detailed_Order.jsx";
-import Add_Order from "./pages/Orders/Add_Order.jsx";
 import Payment from "./pages/Payment_Receipt.jsx"
 
 // Add this import with other imports
@@ -81,7 +80,6 @@ function App() {
         <Route path="/orders" element={<Order_List />} />
         <Route path="/orders/status_screen" element={<Order_Status_Screen />} />
         <Route path="/orders/deleted_orders" element={<Delete_Order />} />
-        <Route path="/orders/add_order" element={<Add_Order />} />
         <Route path="/orders/detailed_order" element={<DetailedOrderPage />} />
         <Route path="/payments" element={<Payment />} />
 

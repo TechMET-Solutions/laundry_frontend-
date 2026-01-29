@@ -1,21 +1,27 @@
 import { FiUser } from "react-icons/fi";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MdOutlinePersonAddAlt } from "react-icons/md";
 import { GrCycle } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
 import { FiCalendar } from "react-icons/fi";
 import { getAllCustomers } from "../../api/customer";
+import { getAllEmployees } from "../../api/employee";
 import AddCustomerModal from "../services/AddCustomerModal";
 import { createOrder } from "../../api/order";
 import { formatDateForInput } from "../../utils/formatDateForInput";
+import { MdOutlineEdit } from "react-icons/md";
 
 function OrderSummary({
   orders,
+  setOrders,
   increaseQuantity,
   decreaseQuantity,
   removeItem,
 }) {
   const navigate = useNavigate();
+
+  const isSelectingCustomerRef = useRef(false);
+  const isSelectingDriverRef = useRef(false);
 
   const [orderDate, setOrderDate] = useState(new Date());
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -25,14 +31,23 @@ function OrderSummary({
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   // const [selectedCustomerName, setSelectedCustomerName] = useState("");
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
-  const [isSelectingCustomer, setIsSelectingCustomer] = useState(false);
+
+  const [driverSearchTerm, setDriverSearchTerm] = useState("");
+  const [filteredDriverList, setFilteredDriverList] = useState([]);
+  const [isDriverSearchDropdownOpen, setIsDriverSearchDropdownOpen] =
+    useState(false);
+  const [isLoadingDrivers, setIsLoadingDrivers] = useState(false);
 
   const [openAddCustomerModal, setOpenAddCustomerModal] = useState(false);
   const [allCustomers, setAllCustomers] = useState([]);
+  const [allDrivers, setAllDrivers] = useState([]);
 
+  const [openPickerIndex, setOpenPickerIndex] = useState(null);
+  const [orderColors, setOrderColors] = useState("");
 
   const [errors, setErrors] = useState({
     deliveryDate: "",
+    driverName: "",
     customerName: "",
     items: "",
     paymentMethod: "",
@@ -47,7 +62,8 @@ function OrderSummary({
     // deliveryDate: toDubaiISOString(date),
 
     customerName: "",
-    driverName: "Shubham",
+    driverName: "",
+    colorCodes: "#2563eb", // default blue
 
     amount: 0,
     totalAmount: 0,
@@ -57,6 +73,7 @@ function OrderSummary({
     status: "PENDING",
     createdBy: "Admin",
     paymentMethod: "Payment Method",
+    allItems: [],
   });
 
   const formatDate = (date) => {
@@ -81,47 +98,95 @@ function OrderSummary({
   //   ).toISOString().replace("Z", "");
   // };
 
- useEffect(() => {
-  const fetchCustomers = async () => {
-    try {
-      setIsLoadingCustomers(true);
-      const response = await getAllCustomers();
-      setAllCustomers(response.data.data || []);
-    } catch (error) {
-      console.error("Customer fetch error:", error);
-    } finally {
-      setIsLoadingCustomers(false);
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setIsLoadingCustomers(true);
+        const response = await getAllCustomers();
+        setAllCustomers(response.data.data || []);
+      } catch (error) {
+        console.error("Customer fetch error:", error);
+      } finally {
+        setIsLoadingCustomers(false);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
+
+  // Fetch all drivers (employees with role = driver)
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        setIsLoadingDrivers(true);
+        const response = await getAllEmployees();
+
+        const drivers = response.data.data.filter(
+          (employee) => employee.role === "Driver",
+        );
+
+        setAllDrivers(drivers);
+      } catch (error) {
+        console.error("Driver fetch error:", error);
+      } finally {
+        setIsLoadingDrivers(false);
+      }
+    };
+
+    fetchDrivers();
+  }, []);
+
+  // Filter customers based on search term
+  useEffect(() => {
+    if (!customerSearchTerm.trim()) {
+      setFilteredCustomerList([]);
+      setIsSearchDropdownOpen(false);
+      return;
     }
-  };
 
-  fetchCustomers();
-}, []);
+    // Don't reopen dropdown if user just selected
+    if (isSelectingCustomerRef.current) {
+      isSelectingCustomerRef.current = false;
+      return;
+    }
 
+    const timer = setTimeout(() => {
+      const filtered = allCustomers.filter((customer) =>
+        customer.name.toLowerCase().includes(customerSearchTerm.toLowerCase()),
+      );
+      setFilteredCustomerList(filtered);
+      setIsSearchDropdownOpen(filtered.length > 0);
+    }, 700);
 
-useEffect(() => {
-  // agar search empty hai → kuch bhi mat dikhao
-  if (!customerSearchTerm.trim()) {
-    setFilteredCustomerList([]);
-    setIsSearchDropdownOpen(false);
-    return;
-  }
+    return () => clearTimeout(timer);
+  }, [customerSearchTerm, allCustomers]);
 
-  const timer = setTimeout(() => {
-    const filtered = allCustomers.filter((customer) =>
-      customer.name
-        .toLowerCase()
-        .includes(customerSearchTerm.toLowerCase())
-    );
+  // Filter drivers based on search term
+  useEffect(() => {
+    if (!driverSearchTerm.trim()) {
+      setFilteredDriverList([]);
+      setIsDriverSearchDropdownOpen(false);
+      return;
+    }
 
-    setFilteredCustomerList(filtered);
-    setIsSearchDropdownOpen(filtered.length > 0);
-  }, 700);
+    // Don't reopen dropdown if user just selected
+    if (isSelectingDriverRef.current) {
+      isSelectingDriverRef.current = false;
+      return;
+    }
 
-  return () => clearTimeout(timer);
-}, [customerSearchTerm, allCustomers]);
+    const timer = setTimeout(() => {
+      const filtered = allDrivers.filter((driver) => {
+        const fullName =
+          `${driver.first_name} ${driver.last_name}`.toLowerCase();
+        return fullName.includes(driverSearchTerm.toLowerCase());
+      });
+      setFilteredDriverList(filtered);
+      setIsDriverSearchDropdownOpen(filtered.length > 0);
+    }, 700);
 
-
-
+    return () => clearTimeout(timer);
+  }, [driverSearchTerm, allDrivers]);
 
   // ---- CALCULATIONS ----
   const subtotal = orders.reduce(
@@ -150,6 +215,7 @@ useEffect(() => {
   const handleSaveOrder = async () => {
     const newErrors = {
       deliveryDate: "",
+      driverName: "",
       customerName: "",
       items: "",
       paymentMethod: "",
@@ -164,6 +230,11 @@ useEffect(() => {
     // Validate customer name
     if (!orderObject.customerName.trim()) {
       newErrors.customerName = "Please select a customer";
+    }
+
+    // Validate driver name
+    if (!orderObject.driverName.trim()) {
+      newErrors.driverName = "Please select a driver";
     }
 
     // Validate items
@@ -188,6 +259,7 @@ useEffect(() => {
     // If any errors, don't save
     if (
       newErrors.deliveryDate ||
+      newErrors.driverName ||
       newErrors.customerName ||
       newErrors.items ||
       newErrors.paymentMethod ||
@@ -196,8 +268,32 @@ useEffect(() => {
       return;
     }
 
+    console.log("Saving order:", orderObject); // allItems included
     await createOrder(orderObject);
     navigate("/orders");
+  };
+
+  // backend me update ho jb qutity or color change ho
+  useEffect(() => {
+    const updatedAllItems = orders.map((item) => ({
+      id: item.id,
+      itemName: item.name || item.category.name,
+      serviceType: item.serviceType || [],
+      color: item.color || "#2563eb",
+      rate: item.pricePerItem,
+      qty: item.quantity,
+      total: item.quantity * item.pricePerItem,
+    }));
+
+    setOrderObject((prev) => ({
+      ...prev,
+      allItems: updatedAllItems,
+    }));
+  }, [orders]);
+
+  const handleCustomerData = (customerData) => {
+    // Handle new customer data if needed
+    console.log("New customer added:", customerData);
   };
 
   return (
@@ -284,10 +380,72 @@ useEffect(() => {
       </div>
 
       <div className="flex gap-4 items-center">
-        <button className="flex flex-1 items-center cursor-pointer gap-2 text-[12px]  bg-[#E1E3F3] rounded-lg p-2 font-medium">
-          <FiUser /> <span>Shubham</span>
-        </button>
+        {/* Driver Search */}
+        <div className="relative w-full">
+          <div
+            onClick={() => setIsDriverSearchDropdownOpen(true)}
+            className="flex items-center gap-2 bg-[#E1E3F3] rounded-lg p-2 cursor-pointer"
+          >
+            <FiUser />
 
+            <input
+              type="text"
+              value={driverSearchTerm}
+              placeholder="Search driver"
+              onClick={() => setIsDriverSearchDropdownOpen(true)}
+              onChange={(e) => {
+                setDriverSearchTerm(e.target.value);
+              }}
+              className="w-full bg-[#E1E3F3] rounded-lg  text-[12px] outline-none font-medium"
+            />
+          </div>
+
+          {/* DRIVER DROPDOWN */}
+          {isDriverSearchDropdownOpen && (
+            <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-lg shadow-lg z-50 max-h-48 overflow-auto">
+              {isLoadingDrivers && (
+                <li className="p-2 text-sm text-gray-400">
+                  Loading drivers...
+                </li>
+              )}
+
+              {!isLoadingDrivers &&
+                filteredDriverList.length === 0 &&
+                driverSearchTerm && (
+                  <li className="p-2 text-sm text-gray-400">
+                    No drivers found
+                  </li>
+                )}
+
+              {!isLoadingDrivers &&
+                filteredDriverList.map((driver) => (
+                  <li
+                    key={driver.id}
+                    className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      const fullName = `${driver.first_name} ${driver.last_name}`;
+                      isSelectingDriverRef.current = true;
+                      setIsDriverSearchDropdownOpen(false);
+                      setDriverSearchTerm(fullName);
+                      setOrderObject((prev) => ({
+                        ...prev,
+                        driverName: fullName,
+                      }));
+                    }}
+                  >
+                    {driver.first_name} {driver.last_name}
+                  </li>
+                ))}
+            </ul>
+          )}
+          {errors.driverName && (
+            <span className="absolute left-0 top-7 text-red-500 font-semibold text-[12px] whitespace-nowrap mt-1">
+              {errors.driverName}
+            </span>
+          )}
+        </div>
+
+        {/* Customer Search */}
         <div className="relative w-full ">
           <div
             onClick={() => setIsSearchDropdownOpen(true)}
@@ -308,7 +466,7 @@ useEffect(() => {
             />
           </div>
 
-          {/* DROPDOWN */}
+          {/* CUSTOMER DROPDOWN */}
           {isSearchDropdownOpen && (
             <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-lg shadow-lg z-50 max-h-48 overflow-auto">
               {isLoadingCustomers && (
@@ -321,8 +479,8 @@ useEffect(() => {
                     key={customer.id}
                     className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
                     onClick={() => {
+                      isSelectingCustomerRef.current = true;
                       setIsSearchDropdownOpen(false);
-                      setIsSelectingCustomer(true);
                       // setSelectedCustomerName(customer.name);
                       setCustomerSearchTerm(customer.name);
                       setErrors((prev) => ({ ...prev, customerName: "" }));
@@ -365,47 +523,119 @@ useEffect(() => {
       </div>
 
       {/* ORDER ITEMS */}
-      <div className="relative rounded-lg min-h-[300px]  text-sm space-y-2 ">
+      <div className="relative rounded-lg min-h-[300px] text-sm  ">
         {orders.length === 0 && (
           <p className="text-gray-400 text-center">No items added</p>
         )}
 
-        {orders.map((item, index) => (
-          <div
-            key={index}
-            className="grid grid-cols-[1fr_auto] gap-4 bg-[#E5E9FF] h-[70px] rounded p-3"
-          >
-            <div>
-              <span className="font-medium text-lg">{item.name}</span>
-              <p>{item.price}</p>
-            </div>
-            <div className="flex items-center gap-2 ">
-              <button
-                onClick={() => decreaseQuantity(index)}
-                className="w-7 h-7 bg-[#D2D5E8] rounded shadow cursor-pointer"
-                disabled={item.quantity === 1}
+        <div>
+          {orders.map((item, index) => {
+            const totalPrice = item.quantity * Number(item.pricePerItem); // quantity × pricePerItem
+            {
+              console.log(orders);
+            }
+            return (
+              <div
+                key={index}
+                className="grid grid-cols-[1fr_auto] gap-4 bg-[#E5E9FF] mb-6 rounded p-3"
               >
-                -
-              </button>
+                {/* LEFT */}
+                <div>
+                  <span className="font-medium text-lg">
+                    {item.category.name}
+                  </span>
+                  <p className="text-[12px] mt-2 felx gap-1 font-semibold">
+                    <span>AED </span>
 
-              <span className="font-medium">{item.quantity}</span>
+                    <span className=" ">{totalPrice.toFixed(2)}</span>
+                  </p>
+                </div>
 
-              <button
-                onClick={() => increaseQuantity(index)}
-                className="w-7 h-7 bg-[#D2D5E8] rounded shadow cursor-pointer"
-              >
-                +
-              </button>
+                {/* RIGHT */}
+                <div className="flex flex-col items-end gap-2">
+                  {/* qty + delete */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => decreaseQuantity(index)}
+                      disabled={item.quantity === 1}
+                      className="w-7 h-7 bg-[#D2D5E8] rounded"
+                    >
+                      -
+                    </button>
 
-              <button
-                onClick={() => removeItem(index)}
-                className="text-red-500 text-lg cursor-pointer"
-              >
-                🗑
-              </button>
-            </div>
-          </div>
-        ))}
+                    <span className="font-medium">{item.quantity}</span>
+
+                    <button
+                      onClick={() => increaseQuantity(index)}
+                      className="w-7 h-7 bg-[#D2D5E8] rounded"
+                    >
+                      +
+                    </button>
+
+                    <button
+                      onClick={() => removeItem(index)}
+                      className="text-red-500 text-lg"
+                    >
+                      🗑
+                    </button>
+                  </div>
+
+                  {/* color + edit */}
+                  <div className="flex items-center gap-2 relative">
+                    {/* COLOR PREVIEW */}
+                    <div
+                      className="w-16 h-7 rounded-lg border"
+                      style={{ backgroundColor: orderObject.colorCodes }}
+                    />
+
+                    {/* EDIT BUTTON */}
+                    <button
+                      onClick={() =>
+                        setOpenPickerIndex(
+                          openPickerIndex === index ? null : index,
+                        )
+                      }
+                      className="px-2 py-1 bg-white rounded shadow text-sm"
+                    >
+                      <MdOutlineEdit />
+                    </button>
+
+                    {/* COLOR PICKER */}
+                    {/* COLOR PICKER */}
+                    {openPickerIndex === index && (
+                      <input
+                        type="color"
+                        value={orders[index].color || "#2563eb"} // item color
+                        onChange={(e) => {
+                          const updatedOrders = [...orders];
+                          updatedOrders[index].color = e.target.value;
+                          setOrders(updatedOrders);
+
+                          // also update orderObject.allItems
+                          setOrderObject((prev) => ({
+                            ...prev,
+                            allItems: updatedOrders.map((item) => ({
+                              id: item.id,
+                              itemName: item.name || item.category.name,
+                              serviceType: item.serviceType || [],
+                              color: item.color || "#2563eb",
+                              rate: item.pricePerItem,
+                              qty: item.quantity,
+                              total: item.quantity * item.pricePerItem,
+                            })),
+                          }));
+
+                          setOpenPickerIndex(null); // auto close
+                        }}
+                        className="absolute top-8 right-0 cursor-pointer"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
         {errors.items && (
           <span className="absolute left-0 top-full text-red-500 font-semibold text-[12px] whitespace-nowrap mt-1">
