@@ -10,6 +10,7 @@ import AddCustomerModal from "../services/AddCustomerModal";
 import { createOrder } from "../../api/order";
 import { formatDateForInput } from "../../utils/formatDateForInput";
 import { MdOutlineEdit } from "react-icons/md";
+import { getAllServicesAddon } from "../../api/servicesapi";
 
 function OrderSummary({
   orders,
@@ -44,6 +45,10 @@ function OrderSummary({
 
   const [openPickerIndex, setOpenPickerIndex] = useState(null);
   const [orderColors, setOrderColors] = useState("");
+
+  const [addonEdit, setAddonEdit] = useState(false);
+  const [addonData, setAddonData] = useState([]);
+  const [discountEdit, setDiscountEdit] = useState(false);
 
   const [errors, setErrors] = useState({
     deliveryDate: "",
@@ -268,7 +273,7 @@ function OrderSummary({
       return;
     }
 
-    console.log("Saving order:", orderObject); // allItems included
+    // console.log("Saving order:", orderObject); // allItems included
     await createOrder(orderObject);
     navigate("/orders");
   };
@@ -278,7 +283,7 @@ function OrderSummary({
     const updatedAllItems = orders.map((item) => ({
       id: item.id,
       itemName: item.name || item.category.name,
-      serviceType: item.serviceType || [],
+      serviceType: item.services || [],
       color: item.color || "#2563eb",
       rate: item.pricePerItem,
       qty: item.quantity,
@@ -295,6 +300,15 @@ function OrderSummary({
     // Handle new customer data if needed
     console.log("New customer added:", customerData);
   };
+
+  useEffect(() => {
+    const fetchAddons = async () => {
+      const res = await getAllServicesAddon();
+      setAddonData(res.data.data || []);
+    };
+
+    fetchAddons();
+  }, []);
 
   return (
     <div className="bg-white rounded-xl  p-4 flex flex-col gap-4 h-full">
@@ -531,9 +545,7 @@ function OrderSummary({
         <div>
           {orders.map((item, index) => {
             const totalPrice = item.quantity * Number(item.pricePerItem); // quantity × pricePerItem
-            {
-              console.log(orders);
-            }
+
             return (
               <div
                 key={index}
@@ -585,7 +597,7 @@ function OrderSummary({
                     {/* COLOR PREVIEW */}
                     <div
                       className="w-16 h-7 rounded-lg border"
-                      style={{ backgroundColor: orderObject.colorCodes }}
+                      style={{ backgroundColor: item.color || "#2563eb" }}
                     />
 
                     {/* EDIT BUTTON */}
@@ -600,32 +612,20 @@ function OrderSummary({
                       <MdOutlineEdit />
                     </button>
 
-                    {/* COLOR PICKER */}
-                    {/* COLOR PICKER */}
                     {openPickerIndex === index && (
                       <input
                         type="color"
-                        value={orders[index].color || "#2563eb"} // item color
+                        value={item.color || "#2563eb"}
                         onChange={(e) => {
-                          const updatedOrders = [...orders];
-                          updatedOrders[index].color = e.target.value;
-                          setOrders(updatedOrders);
+                          setOrders((prev) =>
+                            prev.map((it, i) =>
+                              i === index
+                                ? { ...it, color: e.target.value }
+                                : it,
+                            ),
+                          );
 
-                          // also update orderObject.allItems
-                          setOrderObject((prev) => ({
-                            ...prev,
-                            allItems: updatedOrders.map((item) => ({
-                              id: item.id,
-                              itemName: item.name || item.category.name,
-                              serviceType: item.serviceType || [],
-                              color: item.color || "#2563eb",
-                              rate: item.pricePerItem,
-                              qty: item.quantity,
-                              total: item.quantity * item.pricePerItem,
-                            })),
-                          }));
-
-                          setOpenPickerIndex(null); // auto close
+                          setOpenPickerIndex(null);
                         }}
                         className="absolute top-8 right-0 cursor-pointer"
                       />
@@ -650,12 +650,73 @@ function OrderSummary({
           <span>Sub Total</span>
           <span className="text-right">{subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between ">
+          <div className="flex gap-2 items-center">
+            <span>Addon</span>
+            <button
+              className="cursor-pointer"
+              onClick={() => setAddonEdit(true)}
+            >
+              {" "}
+              <MdOutlineEdit />
+            </button>
+          </div>
+          <span className="text-right"> {tax.toFixed(2)}</span>
+        </div>
+        {addonEdit && (
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white w-[400px] rounded-xl shadow-lg p-5">
+              <h2 className="text-lg font-semibold mb-4">Edit Addon</h2>
+
+              <div className="mb-3">
+                <label className="text-sm font-medium">Addon Name</label>
+                <div>
+                  {addonData.map((addon) => (
+                    <div key={addon.id} className="flex gap-2 justify-between">
+                      <div>
+                        <input type="radio" />
+                        <span>{addon.name}</span>
+                        
+                      </div>
+                      <div>
+                        <span>AED {addon.price}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-4">
+                {/* Cancel */}
+                <button
+                  onClick={() => setAddonEdit(false)}
+                  className="px-4 py-2 bg-gray-300 rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="flex justify-between gap-1">
           <span>Tax (5%)</span>
           <span className="text-right">{tax.toFixed(2)}</span>
         </div>
+        <div className="flex justify-between">
+          <div className="flex gap-2 items-center">
+            <span>Discount</span>
+            <button
+              className="cursor-pointer"
+              onClick={() => setDiscountEdit(true)}
+            >
+              {" "}
+              <MdOutlineEdit />
+            </button>
+          </div>
+          <span className="text-right">{tax.toFixed(2)}</span>
+        </div>
         <div className="flex justify-between font-semibold">
-          <span>Total</span>
+          <span> Gross Total</span>
           <span className="text-right">{total.toFixed(2)}</span>
         </div>
       </div>

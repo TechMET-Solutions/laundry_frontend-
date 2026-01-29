@@ -20,7 +20,7 @@ function DetailedOrderPage() {
     fetchOrdersData();
   }, []);
 
-  console.log(orderDetails);
+  // console.log(orderDetails);
 
   return (
     <div className="p-4 sm:p-4 bg-[#f4f7fb] min-h-screen ">
@@ -53,7 +53,6 @@ function DetailedOrderPage() {
           <div className="flex flex-col items-start sm:items-end gap-1 ">
             <h2 className="font-bold text-lg text-[#1F2937]">
               #{orderDetails?.order_code}
-              {console.log(orderDetails)}
             </h2>
 
             <div className="text-sm text-gray-700 flex gap-6">
@@ -63,9 +62,7 @@ function DetailedOrderPage() {
 
             <div className="text-sm text-gray-700 flex gap-6">
               <span className="font-medium">Delivery Date</span>
-              <span>
-                {orderDetails?.delivery_date.split("T")[0]}
-              </span>
+              <span>{orderDetails?.delivery_date.split("T")[0]}</span>
             </div>
           </div>
         )}
@@ -121,68 +118,32 @@ function DetailedOrderPage() {
                   ))}
                 </tr>
               </thead>
-
+              {/* {console.log(orderDetails)} */}
               <tbody>
-                {[
-                  {
-                    id: 1,
-                    name: "Shirt",
-                    service: "Pressing",
-                    rate: "AED 3.50",
-                    qty: 1,
-                    total: "AED 3.50",
-                  },
-                  {
-                    id: 2,
-                    name: "T-shirt",
-                    service: "Pressing & Washing",
-                    rate: "AED 6.50",
-                    qty: 1,
-                    total: "AED 6.50",
-                  },
-                  {
-                    id: 3,
-                    name: "Jacket Men",
-                    service: "Pressing & Washing",
-                    rate: "AED 20.00",
-                    qty: 1,
-                    total: "AED 20.00",
-                  },
-                  {
-                    id: 6,
-                    name: "Jacket Men",
-                    service: "Pressing & Washing",
-                    rate: "AED 20.00",
-                    qty: 1,
-                    total: "AED 20.00",
-                  },
-                  {
-                    id: 4,
-                    name: "Jacket Men",
-                    service: "Pressing & Washing",
-                    rate: "AED 20.00",
-                    qty: 1,
-                    total: "AED 20.00",
-                  },
-                  {
-                    id: 5,
-                    name: "Jacket Men",
-                    service: "Pressing & Washing",
-                    rate: "AED 20.00",
-                    qty: 1,
-                    total: "AED 20.00",
-                  },
-                ].map((item) => (
-                  <tr key={item.id} className="bg-[#EEF2F8]">
-                    <td className="px-3 py-2">{item.id}</td>
-                    <td className="px-3 py-2">{item.name}</td>
-                    <td className="px-3 py-2">{item.service}</td>
-                    <td className="px-3 py-2"></td>
-                    <td className="px-3 py-2">{item.rate}</td>
-                    <td className="px-3 py-2">{item.qty}</td>
-                    <td className="px-3 py-2">{item.total}</td>
-                  </tr>
-                ))}
+                 
+                {orderDetails?.all_items &&
+                  JSON.parse(orderDetails.all_items).map((item, index) => (
+                    <tr key={index} className="bg-[#EEF2F8]">
+                      <td className="px-3 py-2">{index + 1}</td>
+                      <td className="px-3 py-2">{item.itemName}</td>
+
+                       <td className="px-3 py-2 flex gap-1 ">
+                        {item.serviceType.length > 0
+                          ? item.serviceType.map((s) => <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs " key={s.type}>{s.type}</div>)
+                          : "--"}
+                      </td>
+
+                       <td className="px-3 py-2">
+                        <div
+                          className="w-5 h-5 text-black rounded"
+                         >{item.color}</div>
+                      </td>
+
+                      <td className="px-3 py-2">{item.rate}</td>
+                      <td className="px-3 py-2">{item.qty}</td>
+                      <td className="px-3 py-2">{item.total}</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
