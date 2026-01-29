@@ -7,8 +7,9 @@ import { useNavigate } from "react-router-dom";
 import Excel from "../assets/excel.png";
 import AddCustomerModal from "./services/AddCustomerModal";
 import BillingDetailsModal from "./services/BillingDetailsModal";
-import { getAllCustomers, deleteCustomers } from "../api/customer";
+import { getAllCustomers, deleteCustomers, exportCustomersToExcel } from "../api/customer";
 import Pagination from "../components/Pagination";
+import DeleteModal from "../components/models/DeleteModal";
 
 function Customer() {
   const navigate = useNavigate();
@@ -21,6 +22,11 @@ function Customer() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [editCustomer, setEditCustomer] = useState(null);
+
+  // State for delete confirmation modal
+  const [showDeleteModel, setShowDeleteModel] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
 
   // ✅ Fetch customers from server (search + pagination)
   const fetchCustomers = async (p = page, s = searchTerm) => {
@@ -65,17 +71,57 @@ function Customer() {
   };
 
   // ✅ Delete customer
-  const handleDeleteCustomer = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this customer?")) return;
+  // const handleDeleteCustomer = async (id) => {
+  //   if (!window.confirm("Are you sure you want to delete this customer?")) return;
 
+  //   try {
+  //     await deleteCustomers(id);
+  //     fetchCustomers(page, searchTerm);
+  //   } catch (error) {
+  //     console.error("DELETE ERROR:", error);
+  //     alert("Failed to delete customer");
+  //   }
+  // };
+
+  const handleDelete = async () => {
     try {
-      await deleteCustomers(id);
+      await deleteCustomers(deleteId);
+      setShowDeleteModel(false);
+      setDeleteId(null);
       fetchCustomers(page, searchTerm);
     } catch (error) {
       console.error("DELETE ERROR:", error);
       alert("Failed to delete customer");
     }
   };
+
+
+
+  const handleExportExcel = async () => {
+    try {
+      const response = await exportCustomersToExcel();
+
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "customers.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert("Failed to download Excel file");
+    }
+  };
+
+
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -101,12 +147,16 @@ function Customer() {
             + Add New Customer
           </button>
 
-          <button className="bg-white text-green-600 border border-green-600 px-4 py-2 rounded-lg text-sm hover:bg-green-50">
+          <button
+            onClick={handleExportExcel}
+            className="bg-white text-green-600 border border-green-600 px-4 py-2 rounded-lg text-sm hover:bg-green-50"
+          >
             <div className="flex items-center gap-2">
               <img src={Excel} alt="Excel" className="w-5 h-5" />
               Export Excel Sheet
             </div>
           </button>
+
         </div>
       </div>
 
@@ -151,11 +201,10 @@ function Customer() {
 
                 <td className="px-4 py-3 text-center">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      customer.type === "Corporate"
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${customer.type === "Corporate"
                         ? "bg-blue-100 text-blue-800"
                         : "bg-green-100 text-green-800"
-                    }`}
+                      }`}
                   >
                     {customer.type}
                   </span>
@@ -197,10 +246,14 @@ function Customer() {
 
                     <button
                       className="p-2 bg-red-200 text-red-700 rounded"
-                      onClick={() => handleDeleteCustomer(customer.id)}
+                      onClick={() => {
+                        setDeleteId(customer.id);
+                        setShowDeleteModel(true);
+                      }}
                     >
                       <FiTrash2 />
                     </button>
+
                   </div>
                 </td>
               </tr>
@@ -235,6 +288,18 @@ function Customer() {
           onClose={() => setShowBillingModal(false)}
         />
       )}
+
+      {showDeleteModel && (
+        <DeleteModal
+          isOpen={showDeleteModel}
+          onCancel={() => {
+            setShowDeleteModel(false);
+            setDeleteId(null);
+          }}
+          onConfirm={handleDelete}
+        />
+      )}
+
     </div>
   );
 }
