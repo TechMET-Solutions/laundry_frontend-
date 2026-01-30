@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/layout/Layout";
-import PosPage from "./pages/Pos/PosPage.jsx"
+// import PosPage from "./pages/Pos/PosPage.jsx"
 import ServiceList from "./pages/services/ServiceList";
 import ServiceType from "./pages/services/ServiceType";
 import ServiceCategory from "./pages/services/ServiceCategory";
@@ -38,6 +38,7 @@ import Login from "./pages/Login.jsx";
 
 //expenses
 import ExpenseCategories from "./pages/Expense_categories.jsx";
+import POS from "./pages/POS.jsx";
 
 
 
@@ -51,7 +52,7 @@ function App() {
         element={<Layout />}
       >
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="pos" element={<PosPage />} />
+        <Route path="pos" element={<POS />} />
         <Route path="services/list" element={<ServiceList />} />
         <Route path="services/type" element={<ServiceType />} />
         <Route path="services/category" element={<ServiceCategory />} />
