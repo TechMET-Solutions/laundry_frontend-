@@ -10,17 +10,19 @@ import DeleteModal from '../../components/models/DeleteModal';
 const ServiceCategory = () => {
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState([]);
+
   //edit
   const [editData, setEditData] = useState(null);
-
 
   //delete
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  //
-  const fetchCategories = async () => {
+  //search
+  const [searchTerm, setSearchTerm] = useState("");
 
+  
+  const fetchCategories = async () => {
     try {
       const res = await getAllServicesCategory();
       const sortedData = res.data.data.sort((a, b) => b.id - a.id); // ascending by id
@@ -49,10 +51,11 @@ const ServiceCategory = () => {
     }
   };
 
-  // const handleSelect = () => {
-  //   setOpen(false);
-  // };
-  
+  const filteredCategories = categories.filter((item) => {
+    if (!searchTerm) return true; 
+    return item.name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* Header */}
@@ -80,7 +83,6 @@ const ServiceCategory = () => {
             refreshData={fetchCategories}
           />
         )}
-
       </div>
 
       <div className="flex justify-end gap-4 mb-6">
@@ -90,10 +92,11 @@ const ServiceCategory = () => {
           <input
             type="text"
             placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
           />
         </div>
-
       </div>
 
       <div className="bg-[#f4f7fb]  ">
@@ -117,17 +120,14 @@ const ServiceCategory = () => {
           </thead>
 
           <tbody>
-            {
-              categories.length > 0 ? (
-              categories.map((item, index) => (
+            {            
+              filteredCategories.length > 0 ? (
+              filteredCategories.map((item, index) => (
                 <tr key={item.id} className="bg-[#f1f5fb] text-center">
                   {/* Sr No */}
                   <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
                     {index + 1}
                   </td>
-
-
-
 
 
                   {/* Category */}
@@ -174,12 +174,9 @@ const ServiceCategory = () => {
                         />
                       )}
 
-
-
                       <button className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer"
                         onClick={() => {
                           // handleDelete(item.id);
-
                           setSelectedId(item.id);
                           setIsDeleteOpen(true);
                         }} >

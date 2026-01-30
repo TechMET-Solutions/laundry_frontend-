@@ -66,9 +66,8 @@ const handleSave = async () => {
   }
 };
 
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/2.5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10">
 
       <div className="w-full max-w-lg rounded-2xl bg-white p-10 ">
         {/* Header */}

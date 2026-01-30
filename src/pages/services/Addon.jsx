@@ -14,8 +14,12 @@ const Addon = () => {
   const [loading, setLoading] = useState(false);
   const [editData, setEditData] = useState();
 
+  // delete
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  // search
+  const [searchAddon, setSearchAddon] = useState("");
 
   const fetchServiceAddons = async () => {
     try {
@@ -42,14 +46,19 @@ const Addon = () => {
             setServiceAddons((prev) =>
               prev.filter((item) => item.id !== deleteId)
             );
-            // setDeleteId(null);
-            // setIsDeleteOpen(false);
           }
         } catch (error) {
           console.error("Delete failed:", error);
           alert("Failed to delete addon");
         }
-      };
+    };
+
+    const filteredServiceAddon = serviceAddons.filter((item) => {
+      if (!searchAddon) return true;
+      return (
+        item.name.toLowerCase().includes(searchAddon.toLowerCase())
+      );
+    });
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -112,6 +121,8 @@ const Addon = () => {
           <input
             type="text"
             placeholder="Search..."
+            value = {searchAddon}
+            onChange={(e) => setSearchAddon(e.target.value)}
             className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
           />
         </div>
@@ -134,7 +145,7 @@ const Addon = () => {
           </thead>
 
           <tbody>
-            {serviceAddons.length === 0 ? (
+            {filteredServiceAddon.length === 0 ? (
               <tr>
                 <td colSpan="6" className="px-4 py-20 text-center bg-white border-b border-gray-300">
                   <div className="flex flex-col items-center justify-center gap-2">
@@ -149,7 +160,7 @@ const Addon = () => {
                 </td>
               </tr>
             ) : (
-              serviceAddons.map((item, index) => (
+              filteredServiceAddon.map((item, index) => (
                 <tr key={item.id} className="bg-[#f1f5fb] text-center">
                   <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
                     {index + 1}
