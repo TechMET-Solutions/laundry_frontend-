@@ -32,6 +32,7 @@ function Expenses() {
   const [expensesData, setExpensesData] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [search , setSearch] = useState("");
 
   // ---------------- FETCH ----------------
   const fetchAllExpenses = async (p = 1) => {
@@ -80,29 +81,27 @@ function Expenses() {
           </button>
           <h2 className="text-xl font-semibold">Expenses</h2>
         </div>
-        <div>
+        <div className="flex gap-4">
           <button
-          className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
-          
-        >
-              <Link
-        to="/expense_categories"
-        className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
-      >
-        Expense Category List
-  </Link>
-        
-        </button>
-        <button
-          className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
-          onClick={() => {
-            setExpenseModal(true);
-            setMode("add");
-            setSelectedExpense(null);
-          }}
-        >
-          + Add New Expense
-        </button>
+          className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm">
+            <Link
+            to="/expense_categories"
+            className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
+            >
+            Expense Category List
+            </Link>
+            
+            </button>
+            <button
+              className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm"
+              onClick={() => {
+                setExpenseModal(true);
+                setMode("add");
+                setSelectedExpense(null);
+              }}
+            >
+              + Add New Expense
+            </button>
         </div>
       </div>
 
@@ -114,6 +113,7 @@ function Expenses() {
             type="text"
             placeholder="Search..."
             className="bg-transparent outline-none w-full"
+            onChange={(e)=>setSearch(e.target.value)}
           />
         </div>
       </div>
@@ -150,7 +150,7 @@ function Expenses() {
                 </td>
               </tr>
             ) : (
-              expensesData.map((item) => (
+              expensesData.filter((expensesData)=>expensesData.category.toLowerCase().includes(search)||expensesData.payment_mode.toLowerCase().includes(search)).map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50">
                   <td className="px-4 py-3">
                     {item.date?.split("T")[0]}
