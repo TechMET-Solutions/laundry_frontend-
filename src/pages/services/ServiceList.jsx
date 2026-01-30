@@ -7,6 +7,7 @@ import { deleteServiceList, getAllServicesList } from "../../api/servicelist";
 import { getAllServicesCategory } from "../../api/servicesapi";
 import DeleteModal from "../../components/models/DeleteModal";
 import AddServicesModel from "../../components/models/AddServicesModel";
+import Pagination from "../../components/Pagination";
 
 const ServiceList = () => {
   const [open, setOpen] = useState(false);
@@ -22,22 +23,49 @@ const ServiceList = () => {
   const [deleteService, setDeleteService] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
+
   const handleCloseModal = () => {
     setOpen(false);
     setSelectedService(null);
   };
 
   // 1. Fetch Services and Active Categories
-  const fetchData = async () => {
+  // const fetchData = async () => {
+  //   try {
+  //     const [serviceRes, catRes] = await Promise.all([
+  //       getAllServicesList(),
+  //       getAllServicesCategory()
+  //     ]);
+
+  //     setServicesData(serviceRes.data.data || []);
+
+  //     // Filter categories to show only status !== 0 (assuming 1 is active)
+  //     const activeCats = (catRes.data.data || []).filter(cat => cat.status !== 0);
+  //     setCategories(activeCats);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
+
+  
+
+const fetchData = async (
+    p = page,
+    s = searchQuery,
+    c = selectedValue
+  ) => {
     try {
       const [serviceRes, catRes] = await Promise.all([
-        getAllServicesList(),
+        getAllServicesList(p, limit, s, c),
         getAllServicesCategory()
       ]);
 
       setServicesData(serviceRes.data.data || []);
+      setTotalPages(serviceRes.data.pagination.totalPages);
 
-      // Filter categories to show only status !== 0 (assuming 1 is active)
       const activeCats = (catRes.data.data || []).filter(cat => cat.status !== 0);
       setCategories(activeCats);
     } catch (error) {
@@ -45,9 +73,22 @@ const ServiceList = () => {
     }
   };
 
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setPage(1); // 🔥 VERY IMPORTANT
+  };
+
+
+
+  // useEffect(() => {
+  //   fetchData();
+  // }, [refresh]);
+
   useEffect(() => {
-    fetchData();
-  }, [refresh]);
+    fetchData(page, searchQuery, selectedValue);
+  }, [page, searchQuery, selectedValue, refresh]);
+
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -62,21 +103,21 @@ const ServiceList = () => {
   };
 
   // 2. Corrected Filtering Logic
-  const filteredServices = servicesData.filter((item) => {
-    const searchLower = searchQuery.toLowerCase();
+  // const filteredServices = servicesData.filter((item) => {
+  //   const searchLower = searchQuery.toLowerCase();
 
-    const matchesSearch =
-      searchQuery === "" ||
-      item.name.toLowerCase().includes(searchLower) ||
-      item.category.toLowerCase().includes(searchLower);
+  //   const matchesSearch =
+  //     searchQuery === "" ||
+  //     item.name.toLowerCase().includes(searchLower) ||
+  //     item.category.toLowerCase().includes(searchLower);
 
-    const matchesDropdown =
-      selectedValue === "" ||
-      selectedValue === "All Categories" ||
-      item.category === selectedValue;
+  //   const matchesDropdown =
+  //     selectedValue === "" ||
+  //     selectedValue === "All Categories" ||
+  //     item.category === selectedValue;
 
-    return matchesSearch && matchesDropdown;
-  });
+  //   return matchesSearch && matchesDropdown;
+  // });
 
 
   return (
@@ -118,6 +159,7 @@ const ServiceList = () => {
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
           <input
             onChange={(e) => handleSearch(e.target.value)}
+            
             type="text"
             placeholder="Search..."
             className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
@@ -172,11 +214,13 @@ const ServiceList = () => {
           </thead>
 
           <tbody>
-            {filteredServices.length > 0 ? (
-              filteredServices.map((item, index) => (
+            {servicesData.length > 0 ? (
+              servicesData.map((item, index) => (
                 <tr key={item.id} className="bg-[#f1f5fb] hover:bg-white transition-colors">
                   <td className="px-4 py-3 font-medium text-gray-700 border-b border-gray-300 text-center">
-                    {index + 1}
+                    {/* {index + 1} */}
+                    {(page - 1) * limit + index + 1}
+
                   </td>
 
                   <td className="px-4 py-4 font-medium flex items-center gap-4 text-left border-b border-gray-300">
@@ -253,6 +297,16 @@ const ServiceList = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      <div className="w-full flex justify-center my-6">
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onChange={setPage}
+        />
+      </div>
+      
       {deleteService && (
         <DeleteModal
           isOpen={deleteService}
