@@ -192,17 +192,11 @@ const ServiceType = () => {
                     <td className="px-4 py-3 border-b text-left border-gray-300">
                       <span className="flex items-center gap-2">
                         <span
-                          className={`h-2.5 w-2.5 rounded-full ${item.status === 1 ? "bg-green-500" : "bg-red-500"
+                          className={`h-2.5 w-2.5 rounded-full ${Number(item.status) ? "bg-green-500" : "bg-red-500"
                             }`}
                         />
-                        <span
-                          className={`font-medium ${item.status === 1
-                              ? "text-green-600"
-                              : "text-red-500"
-                            }`}
-                        >
-                          {item.status === 1 ? "Active" : "Inactive"}
-                        </span>
+                          {Number(item.status) === 1 ? "Active" : "Inactive"}
+                      
                       </span>
                     </td>
                     <td className="px-4 py-3 border-b text-left border-gray-300">
