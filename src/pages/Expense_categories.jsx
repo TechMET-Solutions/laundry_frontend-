@@ -4,6 +4,7 @@ import { TbArrowBackUp } from "react-icons/tb";
 import { FiEdit } from "react-icons/fi";
 import { MdDeleteOutline } from "react-icons/md";
 import { BiSearchAlt2 } from "react-icons/bi";
+import {getAllExpensesCategories, createExpenseCategory, updateExpenseCategory, deleteExpenseCategory} from "../api/expences"
 
 function ExpenseCategories() {
   const userData = JSON.parse(localStorage.getItem("userData"));
@@ -29,23 +30,17 @@ function ExpenseCategories() {
   // Delete states
   const [deletingCategoryId, setDeletingCategoryId] = useState(null);
 
-  // Mock data - replace with your actual API calls
-  const mockCategories = [
-    { id: 1, name: 'Office Supplies', status: 'Liability', createdBy: 'Shop' },
-    { id: 2, name: 'Travel', status: 'Liability', createdBy: 'Shop' },
-    { id: 3, name: 'Utilities', status: 'Assets', createdBy: 'Shop' },
-    { id: 4, name: 'Marketing', status: 'Liability', createdBy: 'Shop' },
-  ];
 
   // Fetch existing categories
   const fetchCategories = async () => {
     try {
-      // Using mock data for now
-      setCategories(mockCategories);
+      const res = await getAllExpensesCategories()
+      setCategories(res.data.data|| [])
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     }
   };
+
 
   useEffect(() => {
     fetchCategories();
@@ -65,7 +60,7 @@ function ExpenseCategories() {
   // Edit Category Modal Functions
   const openEditModal = (category) => {
     setEditingCategory(category);
-    setEditCategoryName(category.name);
+    setEditCategoryName(category.expense_category);
     setEditCategoryType(category.status);
     setShowEditModal(true);
   };
@@ -96,15 +91,14 @@ function ExpenseCategories() {
     }
     
     try {
-      // For now, add locally
-      const newCat = {
-        id: categories.length + 1,
-        name: newCategoryName,
+      const data = {
+        expense_category: newCategoryName,
         status: newCategoryType,
-        createdBy: 'Shop'
+        created_by: loggedInEmail || 'Admin'
       };
       
-      setCategories([...categories, newCat]);
+      await createExpenseCategory(data);
+      fetchCategories(); // Refresh the list
       closeAddModal();
     } catch (error) {
       console.error('Failed to add category:', error);
@@ -116,13 +110,14 @@ function ExpenseCategories() {
     if (!editCategoryName.trim() || !editingCategory) return;
     
     try {
-      // Update locally
-      setCategories(categories.map(cat => 
-        cat.id === editingCategory.id 
-          ? { ...cat, name: editCategoryName, status: editCategoryType } 
-          : cat
-      ));
+      const data = {
+        expense_category: editCategoryName,
+        status: editCategoryType,
+        created_by: loggedInEmail || 'Admin'
+      };
       
+      await updateExpenseCategory(editingCategory.id, data);
+      fetchCategories(); // Refresh the list
       closeEditModal();
     } catch (error) {
       console.error('Failed to update category:', error);
@@ -134,8 +129,8 @@ function ExpenseCategories() {
     if (!deletingCategoryId) return;
     
     try {
-      // Delete locally
-      setCategories(categories.filter(cat => cat.id !== deletingCategoryId));
+      await deleteExpenseCategory(deletingCategoryId);
+      fetchCategories(); // Refresh the list
       closeDeleteModal();
     } catch (error) {
       console.error('Failed to delete category:', error);
@@ -374,7 +369,7 @@ function ExpenseCategories() {
                   
                   {/* Expense Category */}
                   <td className="px-4 py-3 font-medium">
-                    {item.name}
+                    {item.expense_category}
                   </td>
                   
                   {/* Status */}
@@ -390,7 +385,7 @@ function ExpenseCategories() {
                   
                   {/* Created by */}
                   <td className="px-4 py-3">
-                    {item.createdBy}
+                    {item.created_by}
                   </td>
                   
                   {/* Action */}

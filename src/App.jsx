@@ -37,7 +37,7 @@ import CustomerD from "./pages/CustomerD.jsx";
 import Login from "./pages/Login.jsx";
 
 //expenses
-import ExpenseCategories from "./pages/expense-categories.jsx";
+import ExpenseCategories from "./pages/Expense_categories.jsx";
 
 
 
@@ -95,7 +95,7 @@ function App() {
         {/* ... rest of routes ... */}
 
         // In your router configuration
-        <Route path="/expense-categories" element={<ExpenseCategories />} />
+        <Route path="/expense_categories" element={<ExpenseCategories />} />
 
       </Route>
 
