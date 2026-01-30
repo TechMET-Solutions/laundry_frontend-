@@ -22,7 +22,7 @@ const API2 = axios.create({
 export const createExpenseCategory = (data) => API2.post("/create", data);
 
 export const getAllExpensesCategories = (page = 1, limit = 10) =>
-    API.get(`/list?page=${page}&limit=${limit}`);
+    API2.get(`/list?page=${page}&limit=${limit}`);
 
 export const getExpenseCategoryById = (id) => API2.get(`/list/${id}`);
 

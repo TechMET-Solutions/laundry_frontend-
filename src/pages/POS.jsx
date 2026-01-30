@@ -1,87 +1,100 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useMemo } from 'react';
 import {
     Search, ChevronDown, Calendar, User, UserPlus,
-    Trash2, Edit3, RotateCcw, ArrowLeft
+    Trash2, Edit3, RotateCcw, ArrowLeft, X
 } from 'lucide-react';
 import axios from 'axios';
 
-
-
 const POS = () => {
-    const [cart, setCart] = useState([]);
-
-    const categories = [
-        { name: 'Ghutra', icon: '👳‍♂️' }, { name: 'Under T-Shirt', icon: '👕' },
-        { name: 'Designer Saree', icon: '👗' }, { name: 'Hoodies', icon: '🧥' },
-        { name: 'Blanket', icon: '🛌' }, { name: 'Long Dress', icon: '👗' },
-        { name: 'Underwear & Socks', icon: '🧦' }, { name: 'Sweater', icon: '🧥' },
-        { name: 'Scarf', icon: '🧣' }, { name: 'Bedsheet single', icon: '🛏️' },
-        { name: '3PC Suit', icon: '👔' }, { name: '2PC Suit', icon: '👔' },
-        { name: 'Pajama', icon: '👖' }, { name: 'Jacket', icon: '🧥' },
-        { name: 'Hand Towel', icon: '🧼' }, { name: 'Shoe', icon: '👠' },
-        { name: 'Trouser', icon: '👖' }, { name: 'T-Shirt', icon: '👕' },
-        { name: 'Shirt', icon: '👔' }, { name: 'Pillow Case', icon: '🛌' },
-    ];
-
+    // --- State Management ---
     const [services, setServices] = useState([]);
+    const [cart, setCart] = useState([]);
     const [loading, setLoading] = useState(true);
 
-
+    // Selection State
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedService, setSelectedService] = useState(null);
     const [selectedType, setSelectedType] = useState(null);
+    const [deliveryType, setDeliveryType] = useState("normal");
     const [qty, setQty] = useState(1);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
+    // Pricing/Addon State
+    const [prices, setPrices] = useState({ normal: 0, express: 0, urgent: 0 });
+    const [editingType, setEditingType] = useState(null);
+    const [addons, setAddons] = useState([]);
+    const [selectedAddon, setSelectedAddon] = useState(null);
+    const [addonModal, setAddonModal] = useState(false);
 
+    // Remarks
+    const [remarkModal, setRemarkModal] = useState(false);
+    const [remarks, setRemarks] = useState("");
+
+    // --- Fetch Data ---
     useEffect(() => {
-        fetchServices();
+        const fetchData = async () => {
+            try {
+                const [srvRes, addonRes] = await Promise.all([
+                    axios.get("http://localhost:5000/api/service_list/list"),
+                    axios.get("http://localhost:5000/api/service/service_addon/list")
+                ]);
+                setServices(srvRes.data.data || []);
+                setAddons(addonRes.data.data.filter(a => a.status === 1) || []);
+            } catch (error) {
+                console.error("Fetch error:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
     }, []);
 
-    const fetchServices = async () => {
-        try {
-            const res = await axios.get("http://localhost:5000/api/service_list/list");
-            setServices(res.data.data);
-            console.log(res.data);
-        } catch (error) {
-            console.error("Error fetching services", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Logic: Update pricing grid when a service type is selected
+    useEffect(() => {
+        if (!selectedType) return;
+        const base = Number(selectedType.price);
+        setPrices({
+            normal: base,
+            express: base * 1.5,
+            urgent: base * 2.0,
+        });
+        setEditingType(null);
+    }, [selectedType]);
 
+    // --- Actions ---
     const handleServiceClick = (service) => {
+        const firstType = service.service_types?.[0];
         setSelectedService(service);
-        setSelectedType(service.service_types[0]); // default
+        setSelectedType(firstType);
+        setDeliveryType("normal");
         setQty(1);
         setIsModalOpen(true);
     };
-
-
-
 
     const addToCart = () => {
         const item = {
             id: Date.now(),
             name: selectedService.name,
             type: selectedType.type,
-            price: Number(selectedType.price),
+            deliveryType,
+            price: prices[deliveryType],
             qty,
         };
-
         setCart((prev) => [...prev, item]);
         setIsModalOpen(false);
     };
 
+    const updateQty = (id, direction) => {
+        setCart(prev => prev.map(item =>
+            item.id === id ? { ...item, qty: direction === "inc" ? item.qty + 1 : Math.max(1, item.qty - 1) } : item
+        ));
+    };
 
-    // calculation
-    const subTotal = cart.reduce(
-        (sum, item) => sum + item.price * item.qty,
-        0
-    );
-
+    // --- Calculations ---
+    const subTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.qty), 0), [cart]);
     const tax = subTotal * 0.05;
-    const grandTotal = subTotal + tax;
-
+    const addonPrice = selectedAddon ? Number(selectedAddon.price) : 0;
+    const grandTotal = subTotal + tax + addonPrice;
 
 
     return (
@@ -95,93 +108,68 @@ const POS = () => {
             </div>
 
             <div className="grid grid-cols-12 gap-6">
-
                 {/* Left Side: Product Selection */}
                 <div className="col-span-8">
                     <div className="flex gap-4 mb-6">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                className="w-full pl-10 pr-4 py-2 rounded-lg border-none bg-white shadow-sm focus:ring-2 focus:ring-indigo-400 outline-none"
-                            />
+                            <input type="text" placeholder="Search services..." className="w-full pl-10 pr-4 py-2 rounded-lg bg-white shadow-sm outline-none focus:ring-2 focus:ring-indigo-400" />
                         </div>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm border-none font-medium">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm font-medium hover:bg-slate-50">
                             Sort By Category <ChevronDown size={16} />
                         </button>
                     </div>
 
-                    {loading ? (
-                        <p>Loading...</p>
-                    ) : services.length > 0 ? (
-                        <ServiceGrid
-                            services={services}
-                            onServiceClick={handleServiceClick}
-                        />
-                    ) : (
-                        <p>No services found</p>
+                    {loading ? <div className="text-center py-20">Loading services...</div> : (
+                        <ServiceGrid services={services} onServiceClick={handleServiceClick} />
                     )}
-
                 </div>
 
                 {/* Right Side: Order Summary */}
-                <div className="col-span-4 flex flex-col gap-4">
-                    <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col h-full">
-
-                        {/* Dates & Users */}
-                        <div className="grid grid-cols-2 gap-4 mb-6 text-xs">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-slate-400">Order Date</span>
-                                <div className="flex items-center gap-2 font-bold text-indigo-700">
-                                    28/11/2025 <Calendar size={14} />
-                                </div>
-                            </div>
-                            <div className="flex flex-col gap-1 text-right">
-                                <span className="text-slate-400">Delivery Date</span>
-                                <div className="flex items-center justify-end gap-2 font-bold text-indigo-700">
-                                    02/12/2025 <Calendar size={14} />
-                                </div>
-                            </div>
+                <div className="col-span-4">
+                    <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col h-[calc(100vh-120px)]">
+                        {/* Dates */}
+                        <div className="flex justify-between mb-6 text-xs uppercase tracking-wider font-semibold text-slate-400">
+                            <div>Order Date: <span className="text-indigo-600 block text-sm">{new Date().toLocaleDateString()}</span></div>
+                            <div className="text-right">Delivery Date: <span className="text-indigo-600 block text-sm">TBD</span></div>
                         </div>
 
-                        <div className="flex gap-2 mb-6">
-                            <button className="flex-1 flex items-center gap-2 px-3 py-2 bg-indigo-50 text-slate-500 rounded-lg text-sm">
-                                <User size={16} /> Select Driver
+                        {/* Customer & Driver Selection */}
+                        <div className="flex gap-2 mb-4">
+                            <button className="flex-1 flex items-center gap-2 px-3 py-2 bg-slate-50 text-slate-600 rounded-lg text-sm border border-slate-100 hover:bg-indigo-50 transition">
+                                <User size={16} /> Driver
                             </button>
-                            <div className="flex-[1.2] flex items-center bg-indigo-50 rounded-lg pr-1">
-                                <button className="flex-1 flex items-center gap-2 px-3 py-2 text-slate-500 text-sm">
-                                    <User size={16} /> Select Customer
+                            <div className="flex-[1.5] flex items-center bg-slate-50 border border-slate-100 rounded-lg pr-1">
+                                <button className="flex-1 flex items-center gap-2 px-3 py-2 text-slate-600 text-sm">
+                                    <User size={16} /> Customer
                                 </button>
-                                <button className="p-1.5 bg-indigo-600 text-white rounded-md">
+                                <button className="p-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
                                     <UserPlus size={16} />
                                 </button>
                             </div>
                         </div>
 
                         {/* Cart Items */}
-                        <div className="flex-1 overflow-y-auto mb-6 space-y-3">
+                        <div className="flex-1 overflow-y-auto space-y-3 mb-4 pr-2">
+                            {cart.length === 0 && <p className="text-center text-slate-400 mt-10 text-sm">No items in cart</p>}
                             {cart.map((item) => (
-                                <div key={item.id} className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <h4 className="font-bold text-slate-800">{item.name} <span className="text-indigo-400 font-normal text-sm">({item.type})</span></h4>
-                                            <p className="text-sm font-bold mt-1 uppercase">AMD {item.price.toFixed(2)}</p>
+                                <div key={item.id} className="bg-indigo-50/40 p-3 rounded-xl border border-indigo-100 relative group">
+                                    <div className="flex justify-between items-start">
+                                        <div className="max-w-[60%]">
+                                            <h4 className="font-bold text-slate-800 text-sm truncate">{item.name}</h4>
+                                            <span className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full uppercase">{item.type}</span>
+                                            <p className="text-xs font-bold mt-1">AED {item.price.toFixed(2)}</p>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            <button className="w-6 h-6 flex items-center justify-center bg-slate-200 rounded text-slate-600">-</button>
-                                            <span className="w-8 text-center font-bold">{item.qty}</span>
-                                            <button className="w-6 h-6 flex items-center justify-center bg-slate-200 rounded text-slate-600">+</button>
-                                            <button className="ml-2 text-orange-400 hover:text-red-500">
-                                                <Trash2 size={18} />
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex items-center bg-white rounded-lg border border-slate-200">
+                                                <button onClick={() => updateQty(item.id, "dec")} className="px-2 py-1 hover:bg-slate-100">-</button>
+                                                <span className="px-2 font-bold text-sm">{item.qty}</span>
+                                                <button onClick={() => updateQty(item.id, "inc")} className="px-2 py-1 hover:bg-slate-100">+</button>
+                                            </div>
+                                            <button onClick={() => setCart(cart.filter(c => c.id !== item.id))} className="text-red-400 hover:text-red-600">
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
-                                    </div>
-                                    <div className="flex justify-end gap-2 mt-2">
-                                        <div className={`w-12 h-6 rounded ${item.color} border border-slate-200`}></div>
-                                        <button className="p-1 border border-indigo-300 text-indigo-500 rounded hover:bg-indigo-50">
-                                            <Edit3 size={14} />
-                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -191,10 +179,19 @@ const POS = () => {
                         <div className="bg-indigo-50/30 p-4 rounded-xl space-y-2 text-sm mb-4 border border-indigo-50">
                             <div className="flex justify-between">
                                 <span className="text-slate-500">Order ID:</span>
-                                <span className="font-bold">Addon: <span className="ml-4">AED 25.00</span></span>
+                                <span className="font-bold">Addon:
+
+                                    <span className="ml-4">
+                                        <button onClick={() => setAddonModal(true)} className="text-indigo-600 font-bold hover:underline">
+                                            {selectedAddon ? `AED ${addonPrice.toFixed(2)}` : <Edit3 size={14} />}
+                                        </button></span></span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-slate-500">Remarks:</span>
+                                <span className="text-slate-500">Remarks:
+                                    <button onClick={() => setRemarkModal(true)} className="ml-2 text-indigo-600 font-bold hover:underline">
+                                        <Edit3 size={14} />
+                                    </button>
+                                </span>
                                 <div className="text-right">
                                     <div className="flex justify-between w-40"><span>Sub Total:</span> <b>AED {subTotal.toFixed(2)}</b></div>
                                     <div className="flex justify-between w-40"><span>Tax (5%):</span> <b>AED {tax.toFixed(2)}</b></div>
@@ -219,101 +216,148 @@ const POS = () => {
                                 <RotateCcw size={20} />
                             </button>
                         </div>
-
                     </div>
                 </div>
             </div>
-{isModalOpen && selectedService && selectedType && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-6 w-[420px]">
 
-                        <h3 className="text-lg font-bold mb-4">
-                            {selectedService.name}
-                        </h3>
+            {/* MODAL: Service Configuration */}
+            {isModalOpen && selectedService && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative overflow-hidden">
+                        <button onClick={() => setIsModalOpen(false)} className="absolute right-6 top-6 text-slate-400 hover:text-slate-600">
+                            <X size={24} />
+                        </button>
 
-                        {/* Service Types */}
-                        <div className="space-y-2 mb-4">
+                        <h3 className="text-2xl font-bold mb-6 text-slate-800">{selectedService.name}</h3>
+
+                        <div className="grid grid-cols-2 gap-4 mb-8">
                             {selectedService.service_types.map((type) => (
                                 <button
                                     key={type.type}
                                     onClick={() => setSelectedType(type)}
-                                    className={`w-full flex justify-between items-center p-3 rounded-lg border 
-              ${selectedType.type === type.type
-                                            ? "border-indigo-500 bg-indigo-50"
-                                            : "border-slate-200"
+                                    className={`p-4 rounded-2xl border-2 transition-all flex items-center gap-4 ${selectedType?.type === type.type ? "border-indigo-600 bg-indigo-50 shadow-inner" : "border-slate-100 hover:border-indigo-200"
                                         }`}
                                 >
-                                    <span className="capitalize font-medium">{type.type}</span>
-                                    <span className="font-bold">AED {type.price}</span>
+                                    <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center border border-slate-100">
+                                        <img src={`http://localhost:5000/${type.image}`} alt="" className="h-10 object-contain" />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-bold text-slate-800 capitalize">{type.type}</div>
+                                        <div className="text-indigo-600 font-bold">AED {type.price}</div>
+                                    </div>
                                 </button>
                             ))}
                         </div>
 
-                        {/* Quantity */}
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="font-medium">Quantity</span>
-                            <div className="flex items-center gap-2">
-                                <button onClick={() => qty > 1 && setQty(qty - 1)}>-</button>
-                                <span className="font-bold">{qty}</span>
-                                <button onClick={() => setQty(qty + 1)}>+</button>
+                        <div className="space-y-3 mb-8">
+                            {["normal", "express", "urgent"].map((key) => (
+                                <div key={key} className={`flex items-center justify-between p-4 rounded-xl border ${deliveryType === key ? 'bg-indigo-50 border-indigo-200' : 'border-slate-100'}`}>
+                                    <label className="flex items-center gap-3 cursor-pointer flex-1">
+                                        <input type="radio" name="delivery" checked={deliveryType === key} onChange={() => setDeliveryType(key)} className="w-5 h-5 accent-indigo-600" />
+                                        <span className="font-bold capitalize">{key} Delivery</span>
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="number"
+                                            disabled={editingType !== key}
+                                            value={prices[key]}
+                                            onChange={(e) => setPrices(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                                            className={`w-20 text-right font-bold p-1 rounded ${editingType === key ? 'border-indigo-400 bg-white' : 'bg-transparent border-transparent'}`}
+                                        />
+                                        <button onClick={() => setEditingType(key)} className="text-slate-400 hover:text-indigo-600"><Edit3 size={16} /></button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex items-center justify-between bg-slate-50 p-4 rounded-2xl">
+                            <div className="flex items-center gap-4">
+                                <span className="font-bold text-slate-500">Quantity:</span>
+                                <div className="flex items-center bg-white border rounded-xl overflow-hidden">
+                                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="px-4 py-2 hover:bg-slate-50">-</button>
+                                    <span className="px-4 font-bold">{qty}</span>
+                                    <button onClick={() => setQty(qty + 1)} className="px-4 py-2 hover:bg-slate-50">+</button>
+                                </div>
                             </div>
-                        </div>
-
-                        {/* Total */}
-                        <div className="flex justify-between text-lg font-bold mb-4">
-                            <span>Total</span>
-                            <span>
-                                AED {(qty * Number(selectedType.price)).toFixed(2)}
-                            </span>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="flex-1 border rounded-lg py-2"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={addToCart}
-                                className="flex-1 bg-indigo-600 text-white rounded-lg py-2"
-                            >
-                                Add to Cart
+                            <button onClick={addToCart} className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition">
+                                Add to Cart — AED {(prices[deliveryType] * qty).toFixed(2)}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
 
+            {remarkModal && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+                    <div className="bg-white p-5 rounded-xl w-96">
+                        <textarea
+                            value={remarks}
+                            onChange={e => setRemarks(e.target.value)}
+                            className="w-full border p-2"
+                            placeholder="Enter remarks"
+                        />
+                        <button onClick={() => setRemarkModal(false)}>Save</button>
+                    </div>
+                </div>
+            )}
+
+
+            {/* MODAL: Addon Selection */}
+            {addonModal && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
+                    <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-lg">Select Addon</h3>
+                            <button onClick={() => setAddonModal(false)}><X size={20} /></button>
+                        </div>
+                        <div className="space-y-2 mb-6">
+                            <label className="flex items-center justify-between p-3 border rounded-xl hover:bg-slate-50 cursor-pointer">
+                                <div className="flex items-center gap-2">
+                                    <input type="radio" name="addon" onChange={() => setSelectedAddon(null)} checked={!selectedAddon} />
+                                    <span>None</span>
+                                </div>
+                            </label>
+                            {addons.map(a => (
+                                <label key={a.id} className="flex items-center justify-between p-3 border rounded-xl hover:bg-slate-50 cursor-pointer">
+                                    <div className="flex items-center gap-2">
+                                        <input type="radio" name="addon" onChange={() => setSelectedAddon(a)} checked={selectedAddon?.id === a.id} />
+                                        <span>{a.name}</span>
+                                    </div>
+                                    <b className="text-indigo-600">AED {a.price}</b>
+                                </label>
+                            ))}
+                        </div>
+                        <button onClick={() => setAddonModal(false)} className="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Apply Addon</button>
                     </div>
                 </div>
             )}
         </div>
-
     );
 };
 
 const ServiceGrid = ({ services = [], onServiceClick }) => {
     const BASE_URL = "http://localhost:5000/uploads/services";
-
     return (
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {services.map((item) => (
                 <div
                     key={item.id}
                     onClick={() => onServiceClick(item)}
-                    className="bg-white p-4 rounded-xl shadow hover:shadow-md cursor-pointer text-center"
+                    className="bg-white p-4 rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer text-center group"
                 >
-                    <img
-                        src={`${BASE_URL}/${item.addIcon}`}
-                        alt={item.name}
-                        className="w-14 h-14 mx-auto mb-2 object-contain"
-                        onError={(e) => (e.target.src = "/placeholder.png")}
-                    />
-                    <p className="font-semibold text-sm">{item.name}</p>
+                    <div className="w-16 h-16 mx-auto mb-3 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-indigo-50 transition-colors">
+                        <img
+                            src={`${BASE_URL}/${item.addIcon}`}
+                            alt={item.name}
+                            className="w-10 h-10 object-contain"
+                            onError={(e) => (e.target.src = "https://via.placeholder.com/150")}
+                        />
+                    </div>
+                    <p className="font-bold text-sm text-slate-700">{item.name}</p>
                 </div>
             ))}
         </div>
     );
 };
-
 
 export default POS;
