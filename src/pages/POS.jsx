@@ -69,7 +69,9 @@ const POS = () => {
     useState(false);
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
   const isSelectingCustomerRef = useRef(false);
-  // const [selectedCustomer, setSelectedCustomer] = useState(null);
+
+  // Selected Customer/Driver
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   // Payment State
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -225,10 +227,10 @@ const POS = () => {
     if (!deliveryDate) {
       newErrors.deliveryDate = "Select a delivery date";
     }
-    if (!customerSearchTerm.trim()) {
+    if (!customerSearchTerm.trim() || !selectedCustomer?.id) {
       newErrors.customerName = "Please select a customer";
     }
-    if (!driverSearchTerm.trim()) {
+    if (!driverSearchTerm.trim() || !selectedDriver?.id) {
       newErrors.driverName = "Please select a driver";
     }
     if (cart.length === 0) {
@@ -254,7 +256,50 @@ const POS = () => {
       return;
     }
 
-    // console.log("Saving order:", orderObject); // allItems included
+    const orderObject = {
+      orderDate,
+      deliveryDate,
+      customerName: selectedCustomer?.name || customerSearchTerm,
+      customerId: selectedCustomer?.id || null,
+      driverName: selectedDriver
+        ? `${selectedDriver.first_name} ${selectedDriver.last_name}`
+        : driverSearchTerm,
+      driverId: selectedDriver?.id || null,
+      subTotal,
+      addon: selectedAddon
+        ? {
+            addonId: selectedAddon.id,
+            addonName: selectedAddon.name,
+            addonPrice: Number(selectedAddon.price),
+          }
+        : null,
+      tax,
+      discount: 0,
+      grossTotal: grandTotal,
+      paidAmount: paidAmount ? Number(paidAmount) : 0,
+      paymentMethod,
+      status: "Pending",
+      itemList: cart.map((item) => {
+        const sqftFactor = item.sqft ? Number(item.sqft) : 1;
+        const rate = Number(item.price);
+        const qtyValue = Number(item.qty);
+        return {
+          name: item.name,
+          type: item.type,
+          color: item.color,
+          rate,
+          qty: qtyValue,
+          total: rate * qtyValue * sqftFactor,
+          height: item.length ? Number(item.length) : null,
+          width: item.width ? Number(item.width) : null,
+        };
+      }),
+      remark: remarks,
+      height: null,
+      width: null,
+    };
+
+    console.log("Saving order:", orderObject);
     //   await createOrder(orderObject);
     //   navigate("/orders");
   };
@@ -266,6 +311,27 @@ const POS = () => {
     setDeliveryType("normal");
     setQty(1);
     setIsModalOpen(true);
+  };
+
+  const handleResetOrder = () => {
+    setCart([]);
+    setSelectedAddon(null);
+    setRemarks("");
+    setPaidAmount("");
+    setPaymentMethod("");
+    setDriverSearchTerm("");
+    setCustomerSearchTerm("");
+    setSelectedDriver(null);
+    setSelectedCustomer(null);
+    setDeliveryDate("");
+    setErrors({
+      deliveryDate: "",
+      driverName: "",
+      customerName: "",
+      items: "",
+      paymentMethod: "",
+      paidAmount: "",
+    });
   };
 
   const addToCart = () => {
@@ -467,6 +533,7 @@ const POS = () => {
                             }));
 
                             setDriverSearchTerm(fullName);
+                            setSelectedDriver(driver);
                             // setOrderObject((prev) => ({
                             //   ...prev,
                             //   driverName: fullName,
@@ -521,11 +588,11 @@ const POS = () => {
                             isSelectingCustomerRef.current = true;
                             setIsCustomerSearchDropdownOpen(false);
                             setCustomerSearchTerm(customer.name);
+                            setSelectedCustomer(customer);
                             // setErrors((prev) => ({
                             //   ...prev,
                             //   customerName: "",
                             // }));
-
                             //   setOrderObject((prev) => ({
                             //     ...prev,
                             //     customerName: customer.name,
@@ -786,7 +853,10 @@ const POS = () => {
               <button className="flex-1 bg-emerald-500 text-white py-2 md:py-3 rounded-xl font-bold hover:bg-emerald-600 shadow-md text-sm md:text-base">
                 Print
               </button>
-              <button className="flex-1 md:flex-none p-2 md:p-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 shadow-md">
+              <button
+                onClick={handleResetOrder}
+                className="flex-1 md:flex-none p-2 md:p-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 shadow-md"
+              >
                 <RotateCcw size={20} />
               </button>
             </div>
