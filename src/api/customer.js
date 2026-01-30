@@ -14,6 +14,8 @@ export const getAllCustomers = (page = 1, limit = 10, search = "") =>
 // GET BY ID
 export const getCustomersById = (id) => API.get(`/list/${id}`);
 
+export const getCustomersSearch = () => API.get(`/list`);
+
 // UPDATE
 export const updateCustomers = (id, data) => API.put(`/update/${id}`, data);
 

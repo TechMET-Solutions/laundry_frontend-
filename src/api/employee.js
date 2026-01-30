@@ -11,8 +11,11 @@ export const createEmployee = (data) => API.post("/create", data);
 export const getAllEmployees = (page = 1, limit = 10) =>
     API.get(`/list?page=${page}&limit=${limit}`);
 
+
 // GET BY ID
 export const getEmployeeById = (id) => API.get(`/list/${id}`);
+
+export const getEmployeeSearch = ( ) => API.get(`/list`);
 
 // UPDATE
 export const updateEmployee = (id, data) => API.put(`/update/${id}`, data);
