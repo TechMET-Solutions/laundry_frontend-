@@ -3,6 +3,7 @@ import Button from "../../components/ui/Button";
 import InputField from "../../components/ui/InputField";
 import ToggleButton from "../../components/ui/ToggleButton";
 import { createServiceType, updateServiceType } from "../../api/servicesapi";
+import { API_URL } from "../../api/index.js";
 import { useState, useEffect } from "react";
 
 export default function AddNewServicesType_PopUp({ onClose, onAdd, editData = null }) {
@@ -21,6 +22,7 @@ export default function AddNewServicesType_PopUp({ onClose, onAdd, editData = nu
       setPreview(URL.createObjectURL(file)); // Show preview of selected image
     }
   };
+
 
   const handleSave = async () => {
     if (!name || !abbreviation) {
@@ -51,7 +53,7 @@ export default function AddNewServicesType_PopUp({ onClose, onAdd, editData = nu
       if (!editData) {
         onAdd(res.data.data);
       } else {
-        onAdd();
+        onAdd(res.data.data); // Pass updated data for edits too
       }
 
       onClose();
@@ -68,7 +70,7 @@ export default function AddNewServicesType_PopUp({ onClose, onAdd, editData = nu
       setName(editData.name);
       setAbbreviation(editData.abbreviation);
       setStatus(editData.status);
-      setPreview(editData.image ? `http://localhost:5000/${editData.image}` : null); // Adjust base URL
+      setPreview(editData.image ? `${API_URL}/${editData.image}` : null); // Use API_URL for consistency
     }
   }, [editData]);
 
@@ -112,6 +114,9 @@ export default function AddNewServicesType_PopUp({ onClose, onAdd, editData = nu
                 src={preview}
                 alt="Preview"
                 className="h-12 w-12 rounded-md object-cover border"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/48x48?text=No+Image";
+                }}
               />
             )}
           </div>

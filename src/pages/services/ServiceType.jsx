@@ -6,7 +6,7 @@ import Setting_img from "../../assets/carbon_settings-services.png";
 import AddNewServicesType_PopUp from "../../components/models/AddNewServicesType_PopUp.jsx";
 import { getAllServiceTypes, deleteServiceType } from "../../api/servicesapi";
 import DeleteModal from "../../components/models/DeleteModal.jsx";
-import { API_URL } from "../../api/index.js";
+import { API_URL, ImageURL } from "../../api/index.js";
 
 const ServiceType = () => {
   const [open, setOpen] = useState(false);
@@ -105,15 +105,24 @@ const ServiceType = () => {
               setOpen(false);
               setEditData(null);
             }}
-            onAdd={(newData) => {
-              if (newData) {
-                setServiceTypes((prev) => [newData, ...prev]); // ADD
-              } else {
-                fetchServiceTypes(); // EDIT
-              }
+            onAdd={(itemFromServer) => {
+              setServiceTypes((prev) => {
+                const exists = prev.find((p) => p.id === itemFromServer.id);
+
+                if (exists) {
+                  // EDIT → replace
+                  return prev.map((p) =>
+                    p.id === itemFromServer.id ? itemFromServer : p
+                  );
+                }
+
+                // CREATE → add to top
+                return [itemFromServer, ...prev];
+              });
             }}
             editData={editData}
           />
+
         )}
       </div>
 
@@ -125,6 +134,8 @@ const ServiceType = () => {
             type="text"
             placeholder="Search..."
             className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
@@ -179,11 +190,20 @@ const ServiceType = () => {
                       {index + 1}
                     </td>
                     <td className="px-4 py-4 font-medium flex items-center gap-4 text-left border-b border-gray-300">
-                      <img
+                      {/* <img
                         className="w-10 h-10 rounded-full object-cover border border-gray-200"
                         src={`${API_URL}/${item.image}`}
                         alt={item.name}
-                      />
+                      /> */}
+                        <img
+                            className="w-10 h-10 rounded-full object-cover border"
+                            src={item.image ? `${API_URL}/${item.image}` : "https://via.placeholder.com/40x40?text=No+Image"}
+                            alt={item.name}
+                            onError={(e) => {
+                              e.target.src = "https://via.placeholder.com/40x40?text=No+Image";
+                            }}
+                          />
+
                       <span className="text-gray-700">{item.name}</span>
                    </td>
                     <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
@@ -196,7 +216,6 @@ const ServiceType = () => {
                             }`}
                         />
                           {Number(item.status) === 1 ? "Active" : "Inactive"}
-                      
                       </span>
                     </td>
                     <td className="px-4 py-3 border-b text-left border-gray-300">
