@@ -4,6 +4,7 @@ import { createCustomers, updateCustomers } from "../../api/customer";
 import { getAllEmirates } from "../../api/location_management"; 
 //import { getAllAreas } from "../../api/location_management";
 import { getAllAreas } from "../../api/area";
+import { useAsyncError } from "react-router-dom";
 
 const capitalize = (str) =>
   str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
@@ -29,7 +30,9 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
   // filtered dropdown data
   const [emirates, setEmirates] = useState([]);
   const [areas, setAreas] = useState([]);
-  
+
+  const [errors, setErrors] = useState({});
+
 // emirates fetch
   useEffect(() => {
     const fetchEmirates = async () => {
@@ -49,7 +52,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
     const fetchAreas = async () => {
       try {
         const res = await getAllAreas(1, 100);
-        console.log("ALL AREAS:", res.data.data);
+        // console.log("ALL AREAS:", res.data.data);
         setAreas(res.data.data || []);
       } catch (error) {
         console.error("Failed to fetch areas", error);
@@ -73,7 +76,8 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
         phonenumber: editData.mobile_no || "",
         whatsappnumber: editData.whatsapp_no || "",
         email: editData.email || "",
-        emirates: editData.emirates || "",
+        //emirates: editData.emirates || "",
+        emirate: editData.emirates || "",
         area: editData.area || "",
         appartmentnumber: editData.apartment_number || "",
         buildingname: editData.building_name || "",
@@ -85,6 +89,34 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
       });
     }
   }, [editData]);
+
+  const validateForm = () => {
+    let newErrors = {};
+
+    if(!formData.name.trim()) {
+      newErrors.name = "Customer name Required";
+    }
+
+    if(!formData.emirate.trim()) {
+      newErrors.emirate = "Emirates required"
+    }
+
+    if(!formData.area.trim()) {
+      newErrors.area = "Area required"
+    }
+
+    if(!formData.email.trim()) {
+      newErrors.email = "email required"
+    }
+
+    if(!formData.typeofcustomer.trim()) {
+      newErrors.typeofcustomer = "Customer type required"
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+
+  }
 
   /* ===============================
      EXISTING LOGIC (UNCHANGED)
@@ -102,6 +134,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
         alert("Mobile number must be 10 digits only.");
         return;
       }
+
       updatedValue = numericValue;
     }
 
@@ -109,14 +142,64 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
       ...prev,
       [name]: updatedValue,
     }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name] : "",
+    }))
   };
 
   const handleSwitchToggle = () => {
     setFormData({ ...formData, active: !formData.active });
   };
 
- const handleSubmit = async (e) => {
+//  const handleSubmit = async (e) => {
+//   e.preventDefault();
+
+//   if (!validatePhoneNumbers()) {
+//     return;
+//   }
+
+//   const customerData = {
+//     name: formData.name,
+//     type: formData.typeofcustomer.toLowerCase(),
+//     mobile_no: formData.phonenumber,
+//     whatsapp_no: formData.whatsappnumber,
+//     email: formData.email,
+//     emirates: formData.emirate,
+//     area: formData.area,
+//     apartment_number: formData.appartmentnumber,
+//     building_name: formData.buildingname,
+//     map_location: formData.maplocation,
+//     tax_number: formData.taxnumber,
+//     address: formData.address,
+//     status: formData.active ? 1 : 0,
+//   };
+
+//   try {
+//     setLoading(true);
+
+//     if (editData) {
+//       await updateCustomers(editData.id, customerData);
+//     } else {
+//       await createCustomers(customerData);
+//     }
+
+//     await onSave();  
+//     onClose();
+//   } catch (error) {
+//     alert("Failed to save customer");
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+const handleSubmit = async (e) => {
   e.preventDefault();
+
+  if (!validateForm()) {
+    return; // Stop API call
+  }
 
   if (!validatePhoneNumbers()) {
     return;
@@ -139,22 +222,23 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
   };
 
   try {
-    setLoading(true);
+      setLoading(true);
 
-    if (editData) {
-      await updateCustomers(editData.id, customerData);
-    } else {
-      await createCustomers(customerData);
+      if (editData) {
+        await updateCustomers(editData.id, customerData);
+      } else {
+        await createCustomers(customerData);
+      }
+
+      await onSave();
+      onClose();
+    } catch (error) {
+      alert("Failed to save customer");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    await onSave();  
-    onClose();
-  } catch (error) {
-    alert("Failed to save customer");
-  } finally {
-    setLoading(false);
-  }
-};
 
   const validatePhoneNumbers = () => {
   if (formData.phonenumber.length !== 10) {
@@ -188,6 +272,7 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
               <FiX className="text-gray-500 text-lg" />
             </button>
           </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Row 1 */}
             <div className="grid grid-cols-3 gap-4">
@@ -200,6 +285,9 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                   placeholder="Customer Name"
                   className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
                 />
+                {errors.name && (
+                  <span className="text-xs text-red-500">{errors.name}</span>
+                )}
               </Field>
 
               <Field label="Type of Customer" required>
@@ -214,6 +302,9 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                   <option value="Corporate">Corporate</option>
                   <option value="Retail">Retail</option>
                 </select>
+                {errors.typeofcustomer && (
+                  <span className="text-xs text-red-500">{errors.typeofcustomer}</span>
+                )}
               </Field>
 
               <Field label="Phone Number" required>
@@ -247,6 +338,9 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
                 />
+                {errors.email && (
+                  <span className="text-xs text-red-500">{errors.email}</span>
+                )}
               </Field>
 
               {/* <Field label="Emirates" required>
@@ -278,6 +372,9 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                       </option>
                     ))}
                   </select>
+                  {errors.emirate && (
+                    <span className="text-xs text-red-500">{errors.emirate}</span>
+                  )}
                 </Field>
 
             </div>
@@ -307,6 +404,9 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
                     </option>
                   ))}
                 </select>
+                {errors.area && (
+                  <span className="text-xs text-red-500">{errors.area}</span>
+                )}
               </Field>
 
               <Field label="Apartment Number">

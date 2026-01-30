@@ -86,8 +86,8 @@ function Customer() {
   const handleDelete = async () => {
     try {
       await deleteCustomers(deleteId);
-      setShowDeleteModel(false);
-      setDeleteId(null);
+      // setShowDeleteModel(false);
+      // setDeleteId(null);
       fetchCustomers(page, searchTerm);
     } catch (error) {
       console.error("DELETE ERROR:", error);
@@ -95,8 +95,7 @@ function Customer() {
     }
   };
 
-
-
+  
   const handleExportExcel = async () => {
     try {
       const response = await exportCustomersToExcel();
