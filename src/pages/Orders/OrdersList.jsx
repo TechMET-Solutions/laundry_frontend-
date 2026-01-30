@@ -8,7 +8,7 @@ import Status_Screen from "../../assets/Status_Screen.svg";
 import { GrView } from "react-icons/gr";
 import { getAllOrders, getOrderById, softDeleteOrder } from "../../api/order";
 import Pagination from "../../components/Pagination";
- 
+import AddPaymentModal from "../../components/models/PaymentModel"; 
 
 const formatDisplayDate = (value) => {
   if (!value) return "--";
@@ -19,6 +19,7 @@ const formatDisplayDate = (value) => {
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 };
+
 
 export default function Order_List() {
   const navigate = useNavigate();
@@ -39,6 +40,10 @@ export default function Order_List() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   
+  //for payment module 
+
+const [showPaymentModal, setShowPaymentModal] = useState(false);
+const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
 
    
   const fetchOrders = async (p = page) => {
@@ -109,6 +114,23 @@ export default function Order_List() {
             <IoAddCircleOutline />
             Add New Order
           </button>
+          
+        {/* <button
+          onClick={() => {
+            setSelectedOrderForPayment({
+              id: "DEMO-123",
+              details: "Sample order for testing payment module",
+              totalAmount: 1500,
+              deliveryDate: "2024-12-25",
+              paidAmount: 500
+            });
+            setShowPaymentModal(true);
+          }}
+          className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+        >
+          Test Payment Popup
+        </button> */}
+         
         </div>
       </div>
 
@@ -331,8 +353,20 @@ export default function Order_List() {
                     </td>
 
                     <td className="px-2 py-2 border-b whitespace-nowrap  text-[12px] border-gray-400">
-                      <button className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap">
-                        Add Payment
+                      <button 
+                          onClick={() => {
+                            setSelectedOrderForPayment({
+                              id: item.order_code || item.id,
+                              details: `Order for ${item.customer_name}`,
+                              totalAmount: item.total_amount || 0,
+                              deliveryDate: item.delivery_date || "",
+                              paidAmount: item.paid_amount || 0
+                            });
+                            setShowPaymentModal(true);
+                          }}
+                          className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap hover:bg-[#219653]"
+                        >
+                          Add Payment
                       </button>
                     </td>
 
@@ -396,8 +430,28 @@ export default function Order_List() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+          
+        </div>)}
+        
+
+        
+    
+    {showPaymentModal && (
+      <AddPaymentModal
+        onClose={() => {
+          setShowPaymentModal(false);
+          setSelectedOrderForPayment(null);
+        }}
+        onSave={() => {
+          fetchOrders(page);
+          setShowPaymentModal(false);
+          setSelectedOrderForPayment(null);
+        }}
+        orderData={selectedOrderForPayment}
+      />
+    )}
+  
     </div>
+    
   );
 }
