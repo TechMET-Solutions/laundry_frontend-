@@ -29,6 +29,17 @@ function ExpenseCategories() {
   
   // Delete states
   const [deletingCategoryId, setDeletingCategoryId] = useState(null);
+  
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
+
+
+  // Filter categories based on search term
+  const filteredCategories = categories.filter(category =>
+    category.expense_category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.created_by.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
 
   // Fetch existing categories
@@ -202,7 +213,6 @@ function ExpenseCategories() {
         </div>
       )}
 
-      {/* Edit Category Modal */}
       {showEditModal && editingCategory && (
         <div className="fixed inset-0  bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
@@ -325,14 +335,27 @@ function ExpenseCategories() {
       </div>
 
       {/* Search Bar */}
-      <div className="flex justify-end mb-4 gap-4">
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-sm text-gray-600">
+          {searchTerm && `Showing ${filteredCategories.length} of ${categories.length} categories`}
+        </div>
         <div className="flex items-center gap-2 bg-slate-200 px-3 py-2 rounded-lg w-64">
           <BiSearchAlt2 />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="bg-transparent outline-none w-full"
           />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="text-gray-500 hover:text-gray-700 ml-1"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
@@ -353,14 +376,14 @@ function ExpenseCategories() {
           </thead>
         
           <tbody>
-            {categories.length === 0 ? (
+            {filteredCategories.length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center py-6">
-                  No categories found
+                  {searchTerm ? `No categories found matching "${searchTerm}"` : 'No categories found'}
                 </td>
               </tr>
             ) : (
-              categories.map((item, index) => (
+              filteredCategories.map((item, index) => (
                 <tr key={item.id} className="hover:bg-slate-50">
                   {/* Sr no */}
                   <td className="px-4 py-3">
