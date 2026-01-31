@@ -11,6 +11,8 @@ export const getAllOrders = (page = 1, limit = 10) =>
 
 export const getOrderById = (id) => API.get(`/list/${id}`);
 
+export const getTodaysOrdesrs = ()=> API.get(`/list`);
+
 export const softDeleteOrder = (id, data) => API.put(`/update/${id}`, data,);
 
 export const revokeOrder = (id) => {return API.put(`/revoke/${id}`);};
