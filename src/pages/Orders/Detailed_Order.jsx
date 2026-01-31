@@ -153,15 +153,15 @@ function DetailedOrderPage() {
               </thead>
               {/* {console.log(orderDetails)} */}
               <tbody>
-                {orderDetails?.all_items &&
-                  JSON.parse(orderDetails.all_items).map((item, index) => (
+                {orderDetails?.item_list &&
+                  orderDetails.item_list?.map((item, index) => (
                     <tr key={index} className="bg-[#EEF2F8]">
                       <td className="px-3 py-2">{index + 1}</td>
-                      <td className="px-3 py-2">{item.itemName}</td>
+                      <td className="px-3 py-2">{item.name}</td>
 
-                      <td className="px-3 py-2 flex gap-1 ">
-                        {item.serviceType.length > 0
-                          ? item.serviceType.map((s) => (
+                      <td className="px-3 py-2 flex gap-1  ">
+                        {/* {item.item_list.length > 0
+                          ? item.item_list.map((s) => (
                               <div
                                 className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs "
                                 key={s.type}
@@ -169,7 +169,11 @@ function DetailedOrderPage() {
                                 {s.type}
                               </div>
                             ))
-                          : "--"}
+                          : "--"} */}
+                          <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
+                            {item.type}
+                          </div>
+                          
                       </td>
 
                       <td className="px-3 py-2">
@@ -202,7 +206,7 @@ function DetailedOrderPage() {
             <div className=" text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Addon:</span>
-                <span className="font-medium">AED 25.00</span>
+                <span className="font-medium">AED {orderDetails?.addon?.addonPrice}</span>
               </div>
 
               <div className="flex justify-between">
