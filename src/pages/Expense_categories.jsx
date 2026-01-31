@@ -322,10 +322,7 @@ function ExpenseCategories() {
           </button>
           <h2 className="text-xl font-semibold">Expense Categories</h2>
         </div>
-      </div>
-    
-      {/* Add Category Button */}
-      <div className="flex justify-end mb-4">
+        <div className="flex justify-end mb-4">
         <button
           onClick={openAddModal}
           className="bg-indigo-800 text-white px-4 py-2 rounded-full text-sm hover:bg-indigo-900"
@@ -333,6 +330,8 @@ function ExpenseCategories() {
           Add Category
         </button>
       </div>
+      </div>
+    
 
       {/* Search Bar */}
       <div className="flex justify-between items-center mb-4">

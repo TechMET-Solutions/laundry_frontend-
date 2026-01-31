@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Button from "../ui/Button";
-import { createExpense, updateExpense } from "../../api/expences";
+import { createExpense, updateExpense, getAllExpensesCategories } from "../../api/expences";
 
 const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
   const isEditMode = mode === "edit";
@@ -13,6 +13,9 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
     tax: "",
     note: "",
   });
+
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   // 🔹 If edit mode → prefill data
   useEffect(() => {
@@ -35,27 +38,59 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
     
   };
 
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await getAllExpensesCategories();
+      if (response.data.success) {
+        setCategories(response.data.data || []);
+       
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };                   
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   
 
  const handleSubmit = async (e) => {
-    // debugger
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    if (mode === "edit") {
-        //  console.log(expenseData);
-      await updateExpense(expenseData.id, formData);
-
-    } else {
-      await createExpense(formData);
+    // Validation
+    if (!formData.date || !formData.category || !formData.amount || !formData.payment_mode || !formData.taxIncluded) {
+      alert("Please fill in all required fields");
+      return;
     }
 
-    onSuccess();
-    onClose();
-  } catch (error) {
-    console.error("Expense save error:", error);
-  }
-};
+    if (parseFloat(formData.amount) <= 0) {
+      alert("Expense amount must be greater than 0");
+      return;
+    }
+
+    if (formData.taxIncluded === "Yes" && (!formData.tax || parseFloat(formData.tax) < 0)) {
+      alert("Please enter a valid tax percentage");
+      return;
+    }
+
+    try {
+      if (mode === "edit") {
+        await updateExpense(expenseData.id, formData);
+      } else {
+        await createExpense(formData);
+      }
+
+      onSuccess();
+      onClose();
+    } catch (error) {
+      console.error("Expense save error:", error);
+      alert("Failed to save expense. Please try again.");
+    }
+  };
 
 
   return (
@@ -92,28 +127,34 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
+                disabled={loadingCategories}
               >
-                <option value="" disabled>Choose Expense Category</option>
-                <option value="Item Purchase">Item Purchase</option>
-                <option value="Internet">Internet</option>
-                <option value="Dewa Bill">Dewa Bill</option>
-                <option value="Petty Cash">Petty Cash</option>
+                <option value="" disabled>
+                  {loadingCategories ? "Loading categories..." : "Choose Expense Category"}
+                </option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.expense_category}>
+                    {category.expense_category}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Expense Amount
+                Expense Amount<span className="text-red-500">*</span>
               </label>
               <input
-               pattern="^[0-9]+(\.[0-9]+)?$"
-               title="Enter the Valid Amount"
-                type="text"
+                type="number"
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
+                placeholder="0.00"
+                min="0.01"
+                step="0.01"
                 className="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-              ></input>
+                required
+              />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -126,8 +167,7 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
                 onChange={handleChange}
                 className="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               >
-                 <option value="" disabled  >Choose Payment Mode</option>
-                 <option value="Choose Whatsapp Number" >Choose Whatsapp Number</option>
+                 <option value="" disabled>Choose Payment Mode</option>
                 <option value="Cash">Cash</option>
                 <option value="UPI">UPI</option>
                 <option value="Card">Card</option>
@@ -135,53 +175,59 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
                 <option value="Bank Transfer">Bank Transfer</option>
               </select>
             </div>
-            <div className="md:col-span-2">
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+            <div className="md:col-span-2 flex items-center gap-6">
+              <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                 Tax Include<span className="text-red-500">*</span>
               </label>
-              <div className="flex items-center gap-10">
-                <label className="flex items-center gap-2 text-sm text-gray-700">
+
+              <div className="flex items-center gap-4">
+                <label className="flex items-center text-sm text-gray-700">
                   <input
-                  required
-                    type="radio"
-                    name="taxIncluded"
-                    value="Yes"
-                    checked={formData.taxIncluded === "Yes"}
-                    onChange={handleChange}
-                    className="h-4 w-4 accent-gray-600"
-                  />
-                  Yes
-                </label>
-                <label className="flex items-center gap-2 text-sm text-gray-700">
-                  <input
-                  required
+                    required
                     type="radio"
                     name="taxIncluded"
                     value="No"
                     checked={formData.taxIncluded === "No"}
                     onChange={handleChange}
-                    className="h-4 w-4 accent-indigo-600"
+                    className="h-4 w-4 accent-indigo-600 mr-2"
                   />
                   No
                 </label>
-              </div>
-            </div>
-            {(formData.taxIncluded === "Yes" )&& (
-              <div className="md:col-span-2 mt-4">
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Tax Percentage<span className="text-red-500">*</span>
+
+                <label className="flex items-center text-sm text-gray-700">
+                  <input
+                    required
+                    type="radio"
+                    name="taxIncluded"
+                    value="Yes"
+                    checked={formData.taxIncluded === "Yes"}
+                    onChange={handleChange}
+                    className="h-4 w-4 accent-indigo-600 mr-2"
+                  />
+                  Yes
                 </label>
-                <input
-                  type="number"
-                  name="tax"
-                  value={formData.tax}
-                  onChange={handleChange}
-                  placeholder="Enter tax %"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2"
-                  required
-                />
               </div>
-            )}
+
+              {formData.taxIncluded === "Yes" && (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Tax %<span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="tax"
+                    value={formData.tax}
+                    onChange={handleChange}
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                    className="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    required={formData.taxIncluded === "Yes"}
+                  />
+                </div>
+              )}
+            </div>
+
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
