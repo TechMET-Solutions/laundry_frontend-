@@ -9,6 +9,7 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
     category: "",
     amount: "",
     payment_mode: "",
+    taxIncluded:"",
     tax: "",
     note: "",
   });
@@ -21,6 +22,7 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
         category: expenseData.category,
         amount: expenseData.amount,
         payment_mode: expenseData.payment_mode,
+        taxIncluded: expenseData.taxIncluded,
         tax: expenseData.tax,
         note: expenseData.note || "",
       });
@@ -100,7 +102,7 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
             </div>
 
             <div>
-              <label class="mb-1 block text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Expense Amount
               </label>
               <input
@@ -110,12 +112,12 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
-                class="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               ></input>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Choose Payment Method<span class="text-red-500">*</span>
+                Choose Payment Method<span className="text-red-500">*</span>
               </label>
               <select
               required
@@ -142,9 +144,9 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
                   <input
                   required
                     type="radio"
-                    name="tax"
+                    name="taxIncluded"
                     value="Yes"
-                    checked={formData.tax === "Yes"}
+                    checked={formData.taxIncluded === "Yes"}
                     onChange={handleChange}
                     className="h-4 w-4 accent-gray-600"
                   />
@@ -154,16 +156,32 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
                   <input
                   required
                     type="radio"
-                    name="tax"
+                    name="taxIncluded"
                     value="No"
-                    checked={formData.tax === "No"}
+                    checked={formData.taxIncluded === "No"}
                     onChange={handleChange}
-                    class="h-4 w-4 accent-indigo-600"
+                    className="h-4 w-4 accent-indigo-600"
                   />
                   No
                 </label>
               </div>
             </div>
+            {(formData.taxIncluded === "Yes" )&& (
+              <div className="md:col-span-2 mt-4">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Tax Percentage<span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="tax"
+                  value={formData.tax}
+                  onChange={handleChange}
+                  placeholder="Enter tax %"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2"
+                  required
+                />
+              </div>
+            )}
 
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -175,7 +193,7 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
                 placeholder={`Enter ${mode==="edit"?"Updated":""} Note`}
                 value={formData.note}
                 onChange={handleChange}
-                class="w-130 rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 "
+                className="w-130 rounded-lg border border-gray-300 border-2 px-4 py-2 text-sm text-gray-600 "
               />
             </div>
 

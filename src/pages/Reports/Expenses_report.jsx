@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
+import { getAllExpenses } from "../../api/expences";
 
 const reportitems = [
   { name: "Daily Reports", path: "/reports/daily_reports" },
@@ -18,14 +19,43 @@ const reportitems = [
 function Expenses_report() {
   const navigate = useNavigate();
   const location = useLocation();
- const [startDate, setStartDate] = useState("2025-12-01");
-const [endDate, setEndDate] = useState("2025-12-01");
+  const [startDate, setStartDate] = useState("2025-12-01");
+  const [endDate, setEndDate] = useState("2025-12-01");
+  
+  // State for expenses data
+  const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   // find active report from URL
   const activeReport =
     reportitems.find((item) => item.path === location.pathname) ||
     reportitems[0];
 
   const [selectedReport, setSelectedReport] = useState(activeReport);
+
+
+  const fetchExpenses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getAllExpenses();
+      if (res.data.success) {
+        setExpenses(res.data.data || []);
+      } else {
+        setError("Failed to fetch expenses data");
+      }
+    } catch (error) {
+      console.error("API ERROR:", error);
+      setError("Failed to fetch expenses data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExpenses();
+  }, []);
 
   const handleReportChange = (e) => {
     const report = reportitems.find(
@@ -82,17 +112,20 @@ const [endDate, setEndDate] = useState("2025-12-01");
       {/* Total Debit */}
       <div className=" bg-white rounded-lg shadow-sm w-56">
         <div className="flex gap-4 px-4 py-3 border-b border-green-400">
-          <p className="text-sm text-gray-600">Total Debit</p>
-                <span className="text-2xl font-semibold text-gray-800">03</span>
-    
+          <p className="text-sm text-gray-600">Total Expenses</p>
+          <span className="text-2xl font-semibold text-gray-800">
+            {expenses.length}
+          </span>
         </div>
       </div> 
     
       {/* Total Credit */}
       <div className="bg-white rounded-lg shadow-sm w-56">
         <div className=" flex gap-4 px-4 py-3 border-b border-yellow-400">
-          <p className="text-sm text-gray-600">Total Credit</p>
-                <span className="text-2xl font-semibold text-gray-800">04</span>
+          <p className="text-sm text-gray-600">Total Amount</p>
+          <span className="text-2xl font-semibold text-gray-800">
+            AED {expenses.reduce((total, expense) => total + parseFloat(expense.amount || 0), 0).toFixed(2)}
+          </span>
         </div>
       </div>
     </div>
@@ -149,46 +182,55 @@ const [endDate, setEndDate] = useState("2025-12-01");
               </tr>
             </thead>
               <tbody>
-          {[
-            {
-              "Sr No":1,
-                  Date:"3/12/2025",
-                  "Towards":"Item Purchase",
-                  "Expense Amount":"AED 11.00",
-                  "Tax%":"-",
-                  "Tax amount":"AED 0.00",
-                  "Payment Mode":"Cash",
-            },
-            
-          ].map((item, index) => (
-            <tr
-              key={index}
-              className="bg-[#f1f5fb] border-b"
-            >
-              <td className="px-4 py-3 text-left">
-                {item["Sr No"]}
-              </td>
-              <td className="px-4 py-3 text-left font-medium">
-                {item.Date}
-              </td>
-             <td className="px-4 py-3 text-left font-medium">
-                {item.Towards}
-              </td>
-              <td className="px-4 py-3 text-left font-medium">
-                {item["Expense Amount"]}
-              </td>
-              <td className="px-4 py-3 text-left font-medium">
-                {item["Tax%"]}
-              </td>
-               <td className="px-4 py-3 text-left font-medium">
-                {item["Tax amount"]}
-              </td>
-               <td className="px-4 py-3 text-left font-medium">
-                {item["Payment Mode"]}
-              </td>
-            </tr>
-          ))}
-        </tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                      Loading expenses data...
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan="7" className="px-4 py-8 text-center text-red-500">
+                      {error}
+                    </td>
+                  </tr>
+                ) : expenses.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                      No expenses found
+                    </td>
+                  </tr>
+                ) : (
+                  expenses.map((expense, index) => (
+                    <tr
+                      key={expense.id}
+                      className="bg-[#f1f5fb] border-b"
+                    >
+                      <td className="px-4 py-3 text-left">
+                        {index + 1}
+                      </td>
+                      <td className="px-4 py-3 text-left font-medium">
+                        {new Date(expense.date).toLocaleDateString('en-GB')}
+                      </td>
+                      <td className="px-4 py-3 text-left font-medium">
+                        {expense.category}
+                      </td>
+                      <td className="px-4 py-3 text-left font-medium">
+                        AED {parseFloat(expense.amount).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 text-left font-medium">
+                        {expense.tax ? `${expense.tax}%` : '-'}
+                      </td>
+                      <td className="px-4 py-3 text-left font-medium">
+                        AED {expense.tax ? (parseFloat(expense.amount) * parseFloat(expense.tax) / 100).toFixed(2) : '0.00'}
+                      </td>
+                      <td className="px-4 py-3 text-left font-medium">
+                        {expense.payment_mode}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
     
                   </table>
                 </div>
