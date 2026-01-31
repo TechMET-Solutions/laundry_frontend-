@@ -7,6 +7,7 @@ import Setting_img from "../../assets/carbon_settings-services.png";
 import AddNewService_Addon_PopUp from "./AddNewService_Addon_PopUp";
 import { getAllServicesAddon, deleteServiceAddon } from "../../api/servicesapi";
 import DeleteModal from "../../components/models/DeleteModal";
+import Pagination from '../../components/Pagination';
 
 const Addon = () => {
   const [open, setOpen] = useState(false);
@@ -14,30 +15,33 @@ const Addon = () => {
   const [loading, setLoading] = useState(false);
   const [editData, setEditData] = useState();
 
-  // delete
+  //pagination
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // search
-  const [searchAddon, setSearchAddon] = useState("");
+  const fetchServiceAddons = async (p = page) => {
+  try {
+    setLoading(true);
+    const res = await getAllServicesAddon(p, 10);
+    if (res.data.success) {
+      setServiceAddons(res.data.data || []);
+      setTotalPages(res.data.pagination.totalPages);
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
-  const fetchServiceAddons = async () => {
-    try {
-      setLoading(true);
-      const res = await getAllServicesAddon();
-      if (res.data.success) {
-        setServiceAddons(res.data.data);
-      }} catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);
-        }
-    };
 
     useEffect(() => {
-      fetchServiceAddons();
-    }, []);
-  
+  fetchServiceAddons(page);
+}, [page]);
+
 
     const handleConfirmDelete = async () => {
       try {
@@ -46,19 +50,14 @@ const Addon = () => {
             setServiceAddons((prev) =>
               prev.filter((item) => item.id !== deleteId)
             );
+            // setDeleteId(null);
+            // setIsDeleteOpen(false);
           }
         } catch (error) {
           console.error("Delete failed:", error);
           alert("Failed to delete addon");
         }
-    };
-
-    const filteredServiceAddon = serviceAddons.filter((item) => {
-      if (!searchAddon) return true;
-      return (
-        item.name.toLowerCase().includes(searchAddon.toLowerCase())
-      );
-    });
+      };
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -121,8 +120,6 @@ const Addon = () => {
           <input
             type="text"
             placeholder="Search..."
-            value = {searchAddon}
-            onChange={(e) => setSearchAddon(e.target.value)}
             className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
           />
         </div>
@@ -145,7 +142,7 @@ const Addon = () => {
           </thead>
 
           <tbody>
-            {filteredServiceAddon.length === 0 ? (
+            {serviceAddons.length === 0 ? (
               <tr>
                 <td colSpan="6" className="px-4 py-20 text-center bg-white border-b border-gray-300">
                   <div className="flex flex-col items-center justify-center gap-2">
@@ -160,10 +157,10 @@ const Addon = () => {
                 </td>
               </tr>
             ) : (
-              filteredServiceAddon.map((item, index) => (
+              serviceAddons.map((item, index) => (
                 <tr key={item.id} className="bg-[#f1f5fb] text-center">
                   <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
-                    {index + 1}
+                    {(page - 1) * 10 + index + 1}
                   </td>
 
                   <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
@@ -218,6 +215,16 @@ const Addon = () => {
           </tbody>
 
         </table>
+
+        <div className="w-full flex justify-center my-6">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage}
+          />
+        </div>
+
+        
       </div>
     </div>
   );

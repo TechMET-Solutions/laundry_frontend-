@@ -7,6 +7,7 @@ import AddNewServicesType_PopUp from "../../components/models/AddNewServicesType
 import { getAllServiceTypes, deleteServiceType } from "../../api/servicesapi";
 import DeleteModal from "../../components/models/DeleteModal.jsx";
 import { API_URL, ImageURL } from "../../api/index.js";
+import Pagination from "../../components/Pagination.jsx";
 
 const ServiceType = () => {
   const [open, setOpen] = useState(false);
@@ -19,6 +20,11 @@ const ServiceType = () => {
   // delete
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  let limit = 10;
 
 
   // Fetch all service types on component mount

@@ -5,37 +5,44 @@ import { deleteServiceCategory, getAllServicesCategory } from '../../api/service
 import Setting_img from "../../assets/carbon_settings-services.png";
 import AddNewService_Category from '../../components/models/AddNewService_Category_PopUp';
 import DeleteModal from '../../components/models/DeleteModal';
+import Pagination from '../../components/Pagination';
 
 
 const ServiceCategory = () => {
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState([]);
-
   //edit
   const [editData, setEditData] = useState(null);
+
+  //pagination
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [editCustomer, setEditCustomer] = useState(null);
+
 
   //delete
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  //search
-  const [searchTerm, setSearchTerm] = useState("");
+  //
+  const fetchCategories = async (p = page) => {
+  try {
+    const res = await getAllServicesCategory(p, 10);
+    setCategories(res.data.data || []);
+    setTotalPages(res.data.pagination.totalPages);
+  } catch (err) {
+    console.error("Error in fetching", err);
+  }
+};
 
+
+  //reset to page 1 when searching
   
-  const fetchCategories = async () => {
-    try {
-      const res = await getAllServicesCategory();
-      const sortedData = res.data.data.sort((a, b) => b.id - a.id); // ascending by id
-      setCategories(sortedData);
-    } catch (err) {
-      console.error("Error in fetching", err);
-    }
-  };
 
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+  fetchCategories(page);
+}, [page]);
 
 
   const handleDelete = async (id) => {
@@ -51,11 +58,10 @@ const ServiceCategory = () => {
     }
   };
 
-  const filteredCategories = categories.filter((item) => {
-    if (!searchTerm) return true; 
-    return item.name.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-
+  // const handleSelect = () => {
+  //   setOpen(false);
+  // };
+  
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* Header */}
@@ -83,6 +89,7 @@ const ServiceCategory = () => {
             refreshData={fetchCategories}
           />
         )}
+
       </div>
 
       <div className="flex justify-end gap-4 mb-6">
@@ -92,11 +99,10 @@ const ServiceCategory = () => {
           <input
             type="text"
             placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
           />
         </div>
+
       </div>
 
       <div className="bg-[#f4f7fb]  ">
@@ -120,14 +126,17 @@ const ServiceCategory = () => {
           </thead>
 
           <tbody>
-            {            
-              filteredCategories.length > 0 ? (
-              filteredCategories.map((item, index) => (
+            {
+              categories.length > 0 ? (
+              categories.map((item, index) => (
                 <tr key={item.id} className="bg-[#f1f5fb] text-center">
                   {/* Sr No */}
                   <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
-                    {index + 1}
+                    {(page - 1) * 10 + index + 1}
                   </td>
+
+
+
 
 
                   {/* Category */}
@@ -174,9 +183,12 @@ const ServiceCategory = () => {
                         />
                       )}
 
+
+
                       <button className="rounded-md bg-red-100 p-2 text-red-500 cursor-pointer"
                         onClick={() => {
                           // handleDelete(item.id);
+
                           setSelectedId(item.id);
                           setIsDeleteOpen(true);
                         }} >
@@ -206,6 +218,14 @@ const ServiceCategory = () => {
             ) }
           </tbody>
         </table>
+        <div className="w-full flex justify-center my-6">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onChange={setPage}
+          />
+        </div>
+
       </div>
 
       <DeleteModal
@@ -224,3 +244,4 @@ const ServiceCategory = () => {
 };
 
 export default ServiceCategory
+
