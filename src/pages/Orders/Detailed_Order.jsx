@@ -2,17 +2,50 @@ import React, { use, useEffect, useState } from "react";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getOrderById } from "../../api/order";
+import { getCustomersById } from "../../api/customer";
+import { getEmployeeById } from "../../api/employee";
 
 function DetailedOrderPage() {
   const navigate = useNavigate();
   const { state } = useLocation();
 
   const [orderDetails, setOrderDetails] = useState(null);
+  const [customerDetails, setCustomerDetails] = useState(null);
+  const [driverDetails, setDriverDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchOrdersData = async () => {
     if (state.orderId) {
-      const order = await getOrderById(state.orderId);
-      setOrderDetails(order.data.data);
+      try {
+        setLoading(true);
+        const order = await getOrderById(state.orderId);
+        const orderData = order.data.data;
+        setOrderDetails(orderData);
+
+        // Fetch customer details
+        if (orderData.customer_id) {
+          try {
+            const customerRes = await getCustomersById(orderData.customer_id);
+            setCustomerDetails(customerRes.data.data);
+          } catch (err) {
+            console.error("Failed to fetch customer details:", err);
+          }
+        }
+
+        // Fetch driver details
+        if (orderData.driver_id) {
+          try {
+            const driverRes = await getEmployeeById(orderData.driver_id);
+            setDriverDetails(driverRes.data.data);
+          } catch (err) {
+            console.error("Failed to fetch driver details:", err);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch order:", err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -20,7 +53,7 @@ function DetailedOrderPage() {
     fetchOrdersData();
   }, []);
 
-  // console.log(orderDetails);
+  console.log(orderDetails);
 
   return (
     <div className="p-4 sm:p-4 bg-[#f4f7fb] min-h-screen ">
@@ -77,16 +110,16 @@ function DetailedOrderPage() {
 
           <div className="grid grid-cols-[90px_auto] gap-y-1 text-sm text-[#1F2937] mb-6">
             <span className="font-medium">Name</span>
-            <span>Test</span>
+            <span>{orderDetails?.customer_name || "N/A"}</span>
 
             <span className="font-medium">Phone</span>
-            <span>9876543210</span>
+            <span>{customerDetails?.mobile_no || "N/A"}</span>
 
             <span className="font-medium">Email</span>
-            <span>test@gmail.com</span>
+            <span>{customerDetails?.email || "N/A"}</span>
 
             <span className="font-medium">Address</span>
-            <span>Dubai</span>
+            <span>{customerDetails?.address || "N/A"}</span>
           </div>
 
           {/* Order Item Header */}
@@ -120,23 +153,29 @@ function DetailedOrderPage() {
               </thead>
               {/* {console.log(orderDetails)} */}
               <tbody>
-                 
                 {orderDetails?.all_items &&
                   JSON.parse(orderDetails.all_items).map((item, index) => (
                     <tr key={index} className="bg-[#EEF2F8]">
                       <td className="px-3 py-2">{index + 1}</td>
                       <td className="px-3 py-2">{item.itemName}</td>
 
-                       <td className="px-3 py-2 flex gap-1 ">
+                      <td className="px-3 py-2 flex gap-1 ">
                         {item.serviceType.length > 0
-                          ? item.serviceType.map((s) => <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs " key={s.type}>{s.type}</div>)
+                          ? item.serviceType.map((s) => (
+                              <div
+                                className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs "
+                                key={s.type}
+                              >
+                                {s.type}
+                              </div>
+                            ))
                           : "--"}
                       </td>
 
-                       <td className="px-3 py-2">
-                        <div
-                          className="w-5 h-5 text-black rounded"
-                         >{item.color}</div>
+                      <td className="px-3 py-2">
+                        <div className="w-5 h-5 text-black rounded">
+                          {item.color}
+                        </div>
                       </td>
 
                       <td className="px-3 py-2">{item.rate}</td>
@@ -210,17 +249,21 @@ function DetailedOrderPage() {
             <div className="text-sm space-y-2">
               <div className="flex gap-2">
                 <span className="font-medium">Name</span>
-                <span>Aswin D</span>
+                <span>
+                  {driverDetails
+                    ? `${driverDetails.first_name} ${driverDetails.last_name}`
+                    : orderDetails?.driver_name || "N/A"}
+                </span>
               </div>
 
               <div className="flex gap-2">
                 <span className="font-medium">Phone</span>
-                <span>9123456780</span>
+                <span>{driverDetails?.mobile_no || "N/A"}</span>
               </div>
 
               <div className="flex gap-2">
                 <span className="font-medium">Email</span>
-                <span>aswin@gmail.com</span>
+                <span>{driverDetails?.email || "N/A"}</span>
               </div>
             </div>
 
@@ -233,7 +276,9 @@ function DetailedOrderPage() {
           <div className="flex flex-col items-center gap-2">
             <h3 className="font-semibold text-base">Order QR Code</h3>
             <img
-              src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=TMS-ORD-01"
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${
+                orderDetails?.order_code || "N/A"
+              }`}
               alt="QR Code"
               className="w-28 h-28"
             />

@@ -15,10 +15,13 @@ import axios from "axios";
 import { FiCalendar, FiUser } from "react-icons/fi";
 import { getEmployeeSearch } from "../api/employee";
 import { getCustomersSearch } from "../api/customer";
+import { createOrder } from "../api/order";
 import { MdOutlinePersonAddAlt } from "react-icons/md";
 import AddCustomerModal from "./services/AddCustomerModal";
+import { useNavigate } from "react-router-dom";
 
 const POS = () => {
+  const navigate = useNavigate();
   // --- State Management ---
   const [services, setServices] = useState([]);
   const [cart, setCart] = useState([]);
@@ -88,6 +91,11 @@ const POS = () => {
     paymentMethod: "",
     paidAmount: "",
   });
+
+  // Discount State
+  const [discount, setDiscount] = useState(0);
+  const [editingDiscount, setEditingDiscount] = useState(false);
+  const [discountInput, setDiscountInput] = useState(0);
 
   // --- Fetch Data ---
   useEffect(() => {
@@ -274,9 +282,10 @@ const POS = () => {
           }
         : null,
       tax,
-      discount: 0,
+      discount,
       grossTotal: grandTotal,
       paidAmount: paidAmount ? Number(paidAmount) : 0,
+      pendingAmount: grandTotal - (paidAmount ? Number(paidAmount) : 0),
       paymentMethod,
       status: "Pending",
       itemList: cart.map((item) => {
@@ -300,8 +309,12 @@ const POS = () => {
     };
 
     console.log("Saving order:", orderObject);
-    //   await createOrder(orderObject);
-    //   navigate("/orders");
+    try {
+      await createOrder(orderObject);
+      navigate("/orders");
+    } catch (error) {
+      console.error("Order create error:", error);
+    }
   };
   // --- Actions ---
   const handleServiceClick = (service) => {
@@ -324,6 +337,9 @@ const POS = () => {
     setSelectedDriver(null);
     setSelectedCustomer(null);
     setDeliveryDate("");
+    setDiscount(0);
+    setDiscountInput(0);
+    setEditingDiscount(false);
     setErrors({
       deliveryDate: "",
       driverName: "",
@@ -379,8 +395,10 @@ const POS = () => {
   const addonPrice = selectedAddon ? Number(selectedAddon.price) : 0;
 
   const grandTotal = useMemo(() => {
-    return subTotal + tax + addonPrice;
-  }, [subTotal, tax, addonPrice]);
+    const total = subTotal + tax + addonPrice;
+    const discountAmount = (total * discount) / 100;
+    return total - discountAmount;
+  }, [subTotal, tax, addonPrice, discount]);
 
   const isSqfEnabled = selectedService?.sqf_status === 1;
   const sqft = isSqfEnabled ? length * width : 1;
@@ -787,8 +805,51 @@ const POS = () => {
                   <div className="flex justify-between w-full md:w-40">
                     <span>Tax (5%):</span> <b>AED {tax.toFixed(2)}</b>
                   </div>
-                  <div className="flex justify-between w-full md:w-40">
-                    <span>Discount %:</span> <b>0 %</b>
+                  <div className="flex justify-between w-full md:w-40 relative">
+                    <span>Discount %:</span>
+                    {editingDiscount ? (
+                      <div className="flex items-center box-border  gap-1 absolute right-0">
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={discountInput}
+                          onChange={(e) => {
+                            let val = Number(e.target.value);
+                            if (val > 100) val = 100;
+                            if (val < 0) val = 0;
+                            setDiscountInput(val);
+                          }}
+                          className="no-spinner border  outline-none focus:ring-0 w-8 px-1   bg-indigo-200"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => {
+                            setDiscount(discountInput);
+                            setEditingDiscount(false);
+                          }}
+                          className="p-0.5 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={() => setEditingDiscount(false)}
+                          className=" p-0.5 bg-gray-400 text-white rounded text-xs font-bold hover:bg-gray-500"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <b
+                        onClick={() => {
+                          setDiscountInput(discount);
+                          setEditingDiscount(true);
+                        }}
+                        className="cursor-pointer hover:text-indigo-600 transition"
+                      >
+                        {discount} %
+                      </b>
+                    )}
                   </div>
                   <div className="flex justify-between w-full md:w-40 text-sm md:text-base mt-1 text-slate-800">
                     <span>Gross Total:</span> <b>AED {grandTotal.toFixed(2)}</b>

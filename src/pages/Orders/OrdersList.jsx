@@ -24,6 +24,18 @@ const formatDisplayDate = (value) => {
 export default function Order_List() {
   const navigate = useNavigate();
 
+  const createdByEmail = (() => {
+    try {
+      const stored = localStorage.getItem("userData");
+      if (!stored) return "";
+      const parsed = JSON.parse(stored);
+      return parsed?.email || "";
+    } catch (error) {
+      console.error("Failed to parse userData from localStorage", error);
+      return "";
+    }
+  })();
+
   const [paymentDropdown, setPaymentDropdown] = useState(false);
   const [driversDropdown, setDriversDropdown] = useState(false);
   const [ordersDropdown, setOrdersDropdown] = useState(false);
@@ -291,11 +303,11 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
                 const deliveryDate = formatDisplayDate(item.delivery_date);
                 const customerName = item.customer_name || "--";
                 const driverName = item.driver_name || "--";
-                const amount = item.total_amount || "--";
+                const amount = item.gross_total || "--";
                 const status = item.status || "--";
-                const totalAmount = item.total_amount || "--";
+                const totalAmount = item.gross_total || "--";
                 const paidAmount = item.paid_amount || "--";
-                const createdBy = "Admin";
+                const createdBy = createdByEmail || "Admin";
 
                 return (
                   <tr key={orderId} className="bg-[#f1f5fb] text-[#3A3D51]">
