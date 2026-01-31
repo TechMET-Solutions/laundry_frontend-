@@ -6,7 +6,7 @@ import { IoIosClose } from "react-icons/io";
 import { RiArrowDropDownLine, RiArrowDropUpLine } from "react-icons/ri";
 import { CiClock2 } from "react-icons/ci";
 import Pagination from "../../components/Pagination";
-import { getAllOrders, hardDeleteOrder, softDeleteOrder } from "../../api/order";
+import { getAllOrders, hardDeleteOrder, revokeOrder, softDeleteOrder } from "../../api/order";
 import { FiTrash2 } from "react-icons/fi";
 import DeleteModal from "../../components/models/DeleteModal";
 
@@ -24,7 +24,6 @@ function Delete_Order() {
   const [totalPages, setTotalPages] = useState(1);
 
   const [openHardDeleteModal, setOpenHardDeleteModal] = useState(false);
-  const [hardDeleteId, setHardDeleteId] = useState(null);
 
   const [openRevokedModal, setOpenRevokedModal] = useState(false);
   const [revokedId, setRevokedId] = useState(null);
@@ -33,51 +32,67 @@ function Delete_Order() {
     try {
       const res = await getAllOrders(p, 10);
 
-      setOrders(res.data.data || []);
+      const cancelledOrders = (res.data.data || []).filter(
+        order => order.order_status === "Cancelled"
+      );
+
+      setOrders(cancelledOrders);
       setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
       console.error("Failed to load orders", err);
     }
   };
 
+  const createdByEmail = (() => {
+    try {
+      const stored = localStorage.getItem("userData");
+      if (!stored) return "";
+      const parsed = JSON.parse(stored);
+      return parsed?.email || "";
+    } catch (error) {
+      console.error("Failed to parse userData from localStorage", error);
+      return "";
+    }
+  })();
+
   useEffect(() => {
     fetchOrders(page);
   }, [page]);
 
   const handleSearchFiltration = () => {
-    const deletedOrders = orders.filter((order) => order.status === "DELETED");
+    if (!search) return orders;
 
-    if (search) {
-      return deletedOrders.filter(
-        (order) =>
-          order.order_code.toLowerCase().includes(search.toLowerCase()) ||
-          order.customer_name.toLowerCase().includes(search.toLowerCase()) ||
-          order.driver_name.toLowerCase().includes(search.toLowerCase()),
-      );
-    }
-    return deletedOrders;
+    return orders.filter(
+      (order) =>
+        order.order_code.toLowerCase().includes(search.toLowerCase()) ||
+        order.customer_name.toLowerCase().includes(search.toLowerCase()) ||
+        order.driver_name.toLowerCase().includes(search.toLowerCase())
+    );
   };
 
-  const handleDelete = async () => {
-    if (!hardDeleteId) return;
 
-    try {
-      await hardDeleteOrder(hardDeleteId);
-      setHardDeleteId(null);
-      fetchOrders();
-    } catch (error) {
-      console.error("Delete failed:", error);
-    }
-  };
+
+  // const handleRevoke = async () => {
+  //   if (!revokedId) return;
+
+  //   try {
+  //     await softDeleteOrder(  revokedId, {status:"PENDING"});
+  //     setRevokedId(null);
+  //     fetchOrders();
+  //   } catch (error) {
+  //     console.error("Revoked failed:", error);
+  //   }
+  // };
+
   const handleRevoke = async () => {
     if (!revokedId) return;
 
     try {
-      await softDeleteOrder(  revokedId, {status:"PENDING"});
+      await revokeOrder(revokedId);
       setRevokedId(null);
       fetchOrders();
     } catch (error) {
-      console.error("Revoked failed:", error);
+      console.error("Revoke failed:", error);
     }
   };
 
@@ -202,23 +217,24 @@ function Delete_Order() {
                     {item.driver_name}
                   </td>
                   <td className="font-semibold px-3 py-3 border-b border-gray-400">
-                    {item.total_amount}
+                    {/* {item.total_amount} */}
+                    AED {Number(item.gross_total).toFixed(2)}
                   </td>
 
                   <td className="text-red-500 font-semibold leading-5 px-3 py-3 border-b border-gray-400">
-                    <p>{item.status}</p>
+                    <p>{item.order_status}</p>
                   </td>
 
                   <td className="text-[12px] leading-5 px-3 py-3 border-b border-gray-400">
                     <p>
-                      Total: <b>{item.total_amount}</b>
+                      Total: <b>AED {Number(item.gross_total).toFixed(2)}</b>
                     </p>
                     <p>
-                      Paid: <b>{item.paid_amount}</b>
+                      Paid: <b>AED {Number(item.paid_amount).toFixed(2)}</b>
                     </p>
                   </td>
 
-                  <td className="px-3 py-3  border-b border-gray-400">Admin</td>
+                  <td className="px-3 py-3  border-b border-gray-400">{createdByEmail}</td>
 
                   <td className="px-3 py-3 border-b border-gray-400">
                     <div className="flex justify-center gap-2">
@@ -228,15 +244,7 @@ function Delete_Order() {
                       }} className=" p-2 bg-sky-300 rounded-md flex items-center justify-center cursor-pointer">
                         <CiClock2 size={18} />
                       </button>
-                      <button
-                        onClick={() => {
-                          setHardDeleteId(item.id);
-                          setOpenHardDeleteModal(true);
-                        }}
-                        className="p-2 bg-[#FFD0C6] text-[#C32300] cursor-pointer rounded"
-                      >
-                        <FiTrash2 size={18} />
-                      </button>
+                      
                     </div>
                   </td>
                 </tr>
@@ -256,7 +264,6 @@ function Delete_Order() {
           isOpen={openHardDeleteModal}
           onCancel={() => {
             setOpenHardDeleteModal(false);
-            setHardDeleteId(null);
           }}
           onConfirm={handleDelete}
         />

@@ -13,4 +13,6 @@ export const getOrderById = (id) => API.get(`/list/${id}`);
 
 export const softDeleteOrder = (id, data) => API.put(`/update/${id}`, data,);
 
+export const revokeOrder = (id) => {return API.put(`/revoke/${id}`);};
+
 export const hardDeleteOrder = (id) => API.delete(`/delete/${id}`);

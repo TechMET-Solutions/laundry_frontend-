@@ -63,7 +63,12 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
       setLoading(true);
       const res = await getAllOrders(p, 10);
       console.log(res.data.data);
-      setOrders(res.data.data || []);
+      // setOrders(res.data.data || []);
+      setOrders(
+        (res.data.data || []).filter(
+          order => order.order_status !== "Cancelled"
+        )
+      );
       setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
       console.error("Failed to load orders", err);
@@ -79,7 +84,7 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
   const handleDelete = async () => { 
     try {
       await softDeleteOrder(deleteId, {
-        status:"DELETED" 
+        status:"Cancelled" 
       });
        fetchOrders(page);
        
@@ -296,7 +301,7 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
 
             {!loading &&
               orders.map((item) => {
-                if(item.status==="DELETED") return null;
+                if (item.status ==="Cancelled") return null;
 
                 const orderId = item.order_code || "N/A";
                 const orderDate = formatDisplayDate(item.order_date);
@@ -304,7 +309,7 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
                 const customerName = item.customer_name || "--";
                 const driverName = item.driver_name || "--";
                 const amount = item.gross_total || "--";
-                const status = item.status || "--";
+                const status = item.order_status || "--";
                 const totalAmount = item.gross_total || "--";
                 const paidAmount = item.paid_amount || "--";
                 const createdBy = createdByEmail || "Admin";
