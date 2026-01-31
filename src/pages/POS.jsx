@@ -218,7 +218,7 @@ const POS = () => {
   // --- Handlers ---
 
   const handleCustomerData = (customerData) => {
-    console.log("New customer added:", customerData);
+    // console.log("New customer added:", customerData);
   };
 
   // Order Validation and Save
@@ -308,7 +308,7 @@ const POS = () => {
       width: null,
     };
 
-    console.log("Saving order:", orderObject);
+    // console.log("Saving order:", orderObject);
     try {
       await createOrder(orderObject);
       navigate("/orders");

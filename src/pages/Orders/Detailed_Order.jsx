@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { getOrderById } from "../../api/order";
 import { getCustomersById } from "../../api/customer";
 import { getEmployeeById } from "../../api/employee";
+import { QRCodeCanvas } from "qrcode.react";
+import AddPaymentModal from "../../components/models/PaymentModel";
 
 function DetailedOrderPage() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ function DetailedOrderPage() {
   const [customerDetails, setCustomerDetails] = useState(null);
   const [driverDetails, setDriverDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const fetchOrdersData = async () => {
     if (state.orderId) {
@@ -53,7 +56,7 @@ function DetailedOrderPage() {
     fetchOrdersData();
   }, []);
 
-  console.log(orderDetails);
+  // console.log(orderDetails);
 
   return (
     <div className="p-4 sm:p-4 bg-[#f4f7fb] min-h-screen ">
@@ -194,7 +197,7 @@ function DetailedOrderPage() {
           {/* Notes */}
           <div className="mt-6 flex items-center gap-2 text-sm">
             <span className="text-red-600 font-semibold">Notes:</span>
-            <span className="text-[#1F2937]">Please use soft detergent.</span>
+            <span className="text-[#1F2937]">{orderDetails?.remark}</span>
           </div>
         </div>
 
@@ -211,22 +214,22 @@ function DetailedOrderPage() {
 
               <div className="flex justify-between">
                 <span className="text-gray-600">Sub Total:</span>
-                <span className="font-medium">AED 3.50</span>
+                <span className="font-medium">AED  {orderDetails?.sub_total}</span>
               </div>
 
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax (5%):</span>
-                <span className="font-medium">AED 1.43</span>
+                <span className="font-medium">AED  {orderDetails?.tax}</span>
               </div>
 
               <div className="flex justify-between">
                 <span className="text-gray-600">Discount %:</span>
-                <span className="font-medium">0 %</span>
+                <span className="font-medium"> {orderDetails?.discount} %</span>
               </div>
 
               <div className="flex justify-between font-semibold  border-t">
                 <span>Gross Total:</span>
-                <span>AED 29.93</span>
+                <span>AED  {orderDetails?.gross_total}</span>
               </div>
             </div>
 
@@ -240,7 +243,10 @@ function DetailedOrderPage() {
               <button className="flex-1 bg-[#F2994A] text-white py-2 rounded-lg font-medium text-sm">
                 Print Invoice
               </button>
-              <button className="flex-1 bg-[#27AE60] text-white py-2 rounded-lg font-medium text-sm">
+              <button
+                className="flex-1 bg-[#27AE60] text-white py-2 rounded-lg font-medium text-sm"
+                onClick={() => setIsPaymentModalOpen(true)}
+              >
                 Add Payment
               </button>
             </div>
@@ -279,16 +285,24 @@ function DetailedOrderPage() {
           {/* QR Code */}
           <div className="flex flex-col items-center gap-2">
             <h3 className="font-semibold text-base">Order QR Code</h3>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${
-                orderDetails?.order_code || "N/A"
-              }`}
-              alt="QR Code"
-              className="w-28 h-28"
+            <QRCodeCanvas
+              value={orderDetails?.order_code || "N/A"}
+              size={120}
+              bgColor="#ffffff"
+              fgColor="#000000"
+              level="M"
+              includeMargin={true}
             />
           </div>
         </div>
       </div>
+
+      {isPaymentModalOpen && (
+        <AddPaymentModal
+          onClose={() => setIsPaymentModalOpen(false)}
+          orderData={orderDetails}
+        />
+      )}
     </div>
   );
 }
