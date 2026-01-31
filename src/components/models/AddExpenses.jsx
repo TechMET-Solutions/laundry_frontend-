@@ -175,7 +175,7 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
                 <option value="Bank Transfer">Bank Transfer</option>
               </select>
             </div>
-            <div className="md:col-span-2 flex items-center gap-6">
+            <div className="w-full md:col-span-2 flex items-center gap-6">
               <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                 Tax Include<span className="text-red-500">*</span>
               </label>
