@@ -182,7 +182,7 @@ const AddPaymentModal = ({ onClose, orderData, onSuccess }) => {
 
   const totalAmount = Number(orderData?.gross_total || 0);
   const paidAmount = Number(orderData?.paid_amount || 0);
-  const pendingAmount = totalAmount - paidAmount;
+  const pendingAmount = Number(orderData?.pending_amount || (totalAmount - paidAmount));
 
   const [amount, setAmount] = useState(pendingAmount);
   const [paymentMethod, setPaymentMethod] = useState("");

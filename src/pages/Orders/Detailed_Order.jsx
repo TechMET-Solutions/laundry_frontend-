@@ -243,12 +243,21 @@ function DetailedOrderPage() {
               <button className="flex-1 bg-[#F2994A] text-white py-2 rounded-lg font-medium text-sm">
                 Print Invoice
               </button>
-              <button
-                className="flex-1 bg-[#27AE60] text-white py-2 rounded-lg font-medium text-sm"
-                onClick={() => setIsPaymentModalOpen(true)}
-              >
-                Add Payment
-              </button>
+                {orderDetails?.pending_amount > 0 ? (
+                        <button
+                          onClick={() => {
+                            setSelectedOrderForPayment(item);
+                            setShowPaymentModal(true);
+                          }}
+                          className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 cursor-pointer rounded-lg text-white font-bold whitespace-nowrap hover:bg-[#219653]"
+                        >
+                          Add Payment
+                        </button>
+                      ) : (
+                        <button className="bg-[gray] px-3 py-1 sm:px-2 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap ">
+                          Fully Paid
+                        </button>
+                      )}
             </div>
           </div>
 

@@ -15,6 +15,7 @@ import { FiCalendar, FiUser } from "react-icons/fi";
 import { getEmployeeSearch } from "../api/employee";
 import { getCustomersSearch } from "../api/customer";
 import { createOrder } from "../api/order";
+import { getAllServicesCategory } from "../api/servicesapi";
 import { MdOutlinePersonAddAlt } from "react-icons/md";
 import AddCustomerModal from "./services/AddCustomerModal";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ const POS = () => {
   const navigate = useNavigate();
   // --- State Management ---
   const [services, setServices] = useState([]);
+  const [serviceCategories, setServiceCategories] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [length, setLength] = useState(1);
@@ -115,6 +117,17 @@ const POS = () => {
       }
     };
     fetchData();
+
+    const fetchServiceCategories = async () => {
+      try {
+        const response = await getAllServicesCategory();
+        setServiceCategories(response.data.data || []);
+      } catch (error) {
+        console.error("Service categories fetch error:", error);
+      }
+    };
+
+    fetchServiceCategories();
   }, []);
 
   // Logic: Update pricing grid when a service type is selected
@@ -465,10 +478,11 @@ const POS = () => {
                 Sort by Category
               </option>
               <option value="All">All</option>
-              <option value="Gends">Gends</option>
-              <option value="Ladis">Ladis</option>
-              <option value="Kids">Kids</option>
-              <option value="Other">Other</option>
+              {serviceCategories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </div>
 

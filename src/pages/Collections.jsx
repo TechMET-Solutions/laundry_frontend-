@@ -109,6 +109,7 @@ function Collections() {
   search: "",
   type: "",
   driver: "",
+  customer:"",
   status: ""
 });
 
@@ -134,13 +135,23 @@ const handleDelete = async () => {
   useEffect(() => {
   let data = [...allCollections];
 
-  // Search by collection code
+  // Search by collection code, customer name, or driver name
   if (filters.search) {
-    data = data.filter(item =>
-      item.collection_code
-        .toLowerCase()
-        .includes(filters.search.toLowerCase())
-    );
+    data = data.filter(item => {
+      const searchLower = filters.search.toLowerCase();
+      const collectionCodeMatch = item.collection_code?.toLowerCase().includes(searchLower);
+      
+      // Get customer name from customers object
+      const customerName = customers[item.customer_id]?.name || "";
+      const customerMatch = customerName.toLowerCase().includes(searchLower);
+      
+      // Get driver name from employees object
+      const driver = employees[item.driver_id];
+      const driverName = driver ? `${driver.first_name || ""} ${driver.last_name || ""}`.trim() : "";
+      const driverMatch = driverName.toLowerCase().includes(searchLower);
+      
+      return collectionCodeMatch || customerMatch || driverMatch;
+    });
   }
   if (filters.type) {
     data = data.filter(item => String(item.collection_type).toLowerCase() === String(filters.type).toLowerCase());
@@ -152,8 +163,8 @@ const handleDelete = async () => {
     data = data.filter(item => String(item.status).toLowerCase() === String(filters.status).toLowerCase());
   }
   
-  console.log("Filters applied:", filters);
-  console.log("Filtered collections count:", data.length);
+  // console.log("Filters applied:", filters);
+  // console.log("Filtered collections count:", data.length);
   
   setFilteredCollections(data);
   setPage(1);

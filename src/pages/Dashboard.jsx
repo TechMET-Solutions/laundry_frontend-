@@ -165,7 +165,7 @@ function Dashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2      flex-1 ">
+            <div className="grid grid-cols-2 gap-4 items-start auto-rows-min flex-1">
               {todayOrders.length > 0 ? (
                 todayOrders.map((item, index) => {
                   const itemCount = item.item_list?.length || 0;
@@ -183,7 +183,7 @@ function Dashboard() {
                   return (
                     <div
                       key={index}
-                      className={`bg-white text-[#1E293B] flex flex-col gap-4 rounded-xl border-2 ${statusStyles.border} shadow-lg hover:shadow-xl transition-shadow duration-300 p-5 self-start`}
+                      className={`bg-white  flex flex-col gap-4 rounded-xl border-2  ${statusStyles.border} shadow-lg hover:shadow-xl transition-shadow duration-300 p-5 self-start`}
                     >
                       <div className="flex justify-between items-start ">
                         <h3 className="text-lg font-bold text-slate-800">

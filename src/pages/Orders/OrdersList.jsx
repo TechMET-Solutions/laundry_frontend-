@@ -8,7 +8,7 @@ import Status_Screen from "../../assets/Status_Screen.svg";
 import { GrView } from "react-icons/gr";
 import { getAllOrders, getOrderById, softDeleteOrder } from "../../api/order";
 import Pagination from "../../components/Pagination";
-import AddPaymentModal from "../../components/models/PaymentModel"; 
+import AddPaymentModal from "../../components/models/PaymentModel";
 
 const formatDisplayDate = (value) => {
   if (!value) return "--";
@@ -19,7 +19,6 @@ const formatDisplayDate = (value) => {
   const year = date.getFullYear();
   return `${day}/${month}/${year}`;
 };
-
 
 export default function Order_List() {
   const navigate = useNavigate();
@@ -51,23 +50,22 @@ export default function Order_List() {
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
-  //for payment module 
 
-const [showPaymentModal, setShowPaymentModal] = useState(false);
-const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
+  //for payment module
 
-   
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
+
   const fetchOrders = async (p = page) => {
     try {
       setLoading(true);
       const res = await getAllOrders(p, 10);
-      console.log(res.data.data);
+      // console.log(res.data.data);
       // setOrders(res.data.data || []);
       setOrders(
         (res.data.data || []).filter(
-          order => order.order_status !== "Deleted orders"
-        )
+          (order) => order.order_status !== "Deleted orders",
+        ),
       );
       setTotalPages(res.data.pagination.totalPages);
     } catch (err) {
@@ -81,13 +79,12 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
     fetchOrders(page);
   }, [page]);
 
-  const handleDelete = async () => { 
+  const handleDelete = async () => {
     try {
       await softDeleteOrder(deleteId, {
-        status:"Cancelled" 
+        status: "Cancelled",
       });
-       fetchOrders(page);
-       
+      fetchOrders(page);
     } catch (error) {
       console.error("Delete failed:", error);
     }
@@ -131,8 +128,8 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
             <IoAddCircleOutline />
             Add New Order
           </button>
-          
-        {/* <button
+
+          {/* <button
           onClick={() => {
             setSelectedOrderForPayment({
               id: "DEMO-123",
@@ -147,7 +144,6 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
         >
           Test Payment Popup
         </button> */}
-         
         </div>
       </div>
 
@@ -301,7 +297,7 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
 
             {!loading &&
               orders.map((item) => {
-                if (item.status ==="Cancelled") return null;
+                if (item.status === "Cancelled") return null;
 
                 const orderId = item.order_code || "N/A";
                 const orderDate = formatDisplayDate(item.order_date);
@@ -368,29 +364,30 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
                     <td className="  md:table-cell whitespace-nowrap text-[#3A3D51]  font-medium  text-[12px] px-2 py-2 sm:px-4 border-b border-gray-400">
                       {createdBy}
                     </td>
-
-                    <td className="px-2 py-2 border-b whitespace-nowrap  text-[12px] border-gray-400">
-                      <button 
+                    {/* {console.log(item)} */}
+                    <td className="px-2 py-2 border-b whitespace-nowrap text-center  text-[12px] border-gray-400">
+                      {item.pending_amount > 0 ? (
+                        <button
                           onClick={() => {
-                            setSelectedOrderForPayment({
-                              id: item.order_code || item.id,
-                              details: `Order for ${item.customer_name}`,
-                              totalAmount: item.total_amount || 0,
-                              deliveryDate: item.delivery_date || "",
-                              paidAmount: item.paid_amount || 0
-                            });
+                            setSelectedOrderForPayment(item);
                             setShowPaymentModal(true);
                           }}
-                          className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap hover:bg-[#219653]"
+                          className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 cursor-pointer rounded-lg text-white font-bold whitespace-nowrap hover:bg-[#219653]"
                         >
                           Add Payment
-                      </button>
+                        </button>
+                      ) : (
+                        <button className="bg-[gray] px-3 py-1 sm:px-2 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap ">
+                          Fully Paid
+                        </button>
+                      )}
                     </td>
 
                     <td className="px-2 py-6 sm:px-2 border-b whitespace-nowrap  text-[12px] border-gray-400 flex gap-2">
-                      <Link to="/orders/detailed_order" 
+                      <Link
+                        to="/orders/detailed_order"
                         className="p-2 bg-[#56CCF291] rounded"
-                        state={{orderId: item.id }}
+                        state={{ orderId: item.id }}
                       >
                         <GrView />
                       </Link>
@@ -437,38 +434,34 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
               </button>
 
               <button
-                onClick={()=>{
+                onClick={() => {
                   handleDelete();
                   setShowDeleteModal(false);
-                } }
+                }}
                 className="bg-red-600 rounded-t-lg text-white px-4 py-2"
               >
                 Confirm
               </button>
             </div>
           </div>
-          
-        </div>)}
-        
+        </div>
+      )}
 
-        
-    
-    {showPaymentModal && (
-      <AddPaymentModal
-        onClose={() => {
-          setShowPaymentModal(false);
-          setSelectedOrderForPayment(null);
-        }}
-        onSave={() => {
-          fetchOrders(page);
-          setShowPaymentModal(false);
-          setSelectedOrderForPayment(null);
-        }}
-        orderData={selectedOrderForPayment}
-      />
-    )}
-  
+      {showPaymentModal && (
+        <AddPaymentModal
+          onClose={() => {
+            setShowPaymentModal(false);
+            setSelectedOrderForPayment(null);
+          }}
+          onSave={() => {
+            fetchOrders(page);
+            setShowPaymentModal(false);
+            setSelectedOrderForPayment(null);
+          }}
+          orderData={selectedOrderForPayment}
+        />
+      )}
+      {/* {console.log(selectedOrderForPayment)} */}
     </div>
-    
   );
 }
