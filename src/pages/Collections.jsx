@@ -9,6 +9,7 @@ import { getAllEmployees } from "../api/employee";
 import { getAllCustomers } from "../api/customer";
 import DeleteModal from "../components/models/DeleteModal";
 import Pagination from "../components/Pagination";
+import { formatDateForInput } from "../utils/formatDateForInput";
 
 
 function Collections() {
@@ -27,6 +28,19 @@ function Collections() {
   const [allCollections, setAllCollections] = useState([]); // master data
   const [filteredCollections, setFilteredCollections] = useState([]); // shown data
   const [allEmployeesList, setAllEmployeesList] = useState([]);
+
+
+  const createdByEmail = (() => {
+    try {
+      const stored = localStorage.getItem("userData");
+      if (!stored) return "";
+      const parsed = JSON.parse(stored);
+      return parsed?.email || "";
+    } catch (error) {
+      console.error("Failed to parse userData from localStorage", error);
+      return "";
+    }
+  })();
 
 
   // Fetch all collections and employees for client-side filtering
@@ -176,29 +190,40 @@ useEffect(() => {
           + Add New Collection
         </button>
       </div>
-      <div className="flex justify-end gap-4 mb-4">
+      <div className="flex flex-wrap justify-end items-center gap-3 mb-4">
+        {/* Search */}
         <input
           type="text"
-          className="border border-gray-300 rounded-md px-4 py-2 w-full"
+          className="border border-gray-300 rounded-md px-4 py-2 w-64"
           placeholder="Search collections..."
           value={filters.search}
-          onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+          onChange={(e) =>
+            setFilters((prev) => ({ ...prev, search: e.target.value }))
+          }
         />
 
+        {/* Type */}
         <select
           name="type"
           value={filters.type}
-          onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
+          onChange={(e) =>
+            setFilters((prev) => ({ ...prev, type: e.target.value }))
+          }
+          className="border border-gray-300 rounded-md px-3 py-2 w-40"
         >
           <option value="">All Types</option>
           <option value="CLOTH">Cloth</option>
           <option value="PAYMENT">Payment</option>
         </select>
 
+        {/* Driver */}
         <select
           name="driver"
           value={filters.driver}
-          onChange={(e) => setFilters((prev) => ({ ...prev, driver: e.target.value }))}
+          onChange={(e) =>
+            setFilters((prev) => ({ ...prev, driver: e.target.value }))
+          }
+          className="border border-gray-300 rounded-md px-3 py-2 w-44"
         >
           <option value="">All Drivers</option>
           {allEmployeesList.map((emp) => (
@@ -208,10 +233,14 @@ useEffect(() => {
           ))}
         </select>
 
+        {/* Status */}
         <select
           name="status"
           value={filters.status}
-          onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+          onChange={(e) =>
+            setFilters((prev) => ({ ...prev, status: e.target.value }))
+          }
+          className="border border-gray-300 rounded-md px-3 py-2 w-44"
         >
           <option value="">All Collection</option>
           <option value="Cancelled">Cancelled</option>
@@ -221,19 +250,20 @@ useEffect(() => {
         </select>
       </div>
 
+
       {/* Table */}
       <div className="bg-white rounded-lg">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-sky-300 text-left">
-              <th className="p-3">Collection ID</th>
-              <th className="p-3">Info</th>
-              <th className="p-3">Customer</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Driver</th>
-              <th className="p-3">Type</th>
-              <th className="p-3">Created By</th>
-              <th className="p-3">Action</th>
+              <th className="p-3 border-r-2 border-gray-100 ">Collection ID</th>
+              <th className="p-3 border-r-2 border-gray-100 ">Info</th>
+              <th className="p-3 border-r-2 border-gray-100 ">Customer</th>
+              <th className="p-3 border-r-2 border-gray-100 ">Status</th>
+              <th className="p-3 border-r-2 border-gray-100 ">Driver</th>
+              <th className="p-3 border-r-2 border-gray-100 ">Type</th>
+              <th className="p-3 border-r-2 border-gray-100 ">Created By</th>
+              <th className="p-3 border-r-2 border-gray-100 ">Action</th>
             </tr>
           </thead>
 
@@ -242,15 +272,24 @@ useEffect(() => {
               <tr key={item.id} className="border-b">
                 <td className="p-3">{item.collection_code}</td>
                 <td className="p-3 text-xs">
-                  {item.pickup_date}
+                  <span className="font-bold">
+                    Pickup Date:
+                  </span>
+                  <span className="ml-1">
+                  {formatDateForInput(item.pickup_date)}
+                  </span>
+                 
                   <br />
-                  {item.time_slot}
+                  <span className="font-bold">
+                    Time Slot:
+                  </span>
+                  <span className="ml-1">{item.time_slot}  </span>
                 </td>
                 <td className="p-3">{customers[item.customer_id]?.name || "N/A"}</td>
                 <td className="p-3">{item.status}</td>
                 <td className="p-3">{`${employees[item.driver_id]?.first_name || ""} ${employees[item.driver_id]?.last_name || ""}`.trim() || "N/A"}</td>
                 <td className="p-3">{item.collection_type}</td>
-                <td className="p-3">{item.created_by}</td>
+                <td className="p-3">{createdByEmail}</td>
                 <td className="p-3 flex gap-2">
                   {/* VIEW */}
                   <button

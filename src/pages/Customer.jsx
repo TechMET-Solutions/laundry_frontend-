@@ -178,12 +178,12 @@ function Customer() {
         <table className="w-full text-sm border-separate border-spacing-y-2">
           <thead>
             <tr className="bg-[#56CCFF] text-center">
-              <th className="px-4 py-3">Sr No</th>
-              <th className="px-4 py-3">Customer Name</th>
-              <th className="px-4 py-3">Customer Type</th>
-              <th className="px-4 py-3">Contact</th>
-              <th className="px-4 py-3">Address</th>
-              <th className="px-4 py-3">Action</th>
+              <th className="px-4 py-3 border-r-2 border-gray-100">Sr No</th>
+              <th className="px-4 py-3 border-r-2 border-gray-100">Customer Name</th>
+              <th className="px-4 py-3 border-r-2 border-gray-100">Customer Type</th>
+              <th className="px-4 py-3 border-r-2 border-gray-100">Contact</th>
+              <th className="px-4 py-3 border-r-2 border-gray-100">Address</th>
+              <th className="px-4 py-3 border-r-2 border-gray-100">Action</th>
             </tr>
           </thead>
 

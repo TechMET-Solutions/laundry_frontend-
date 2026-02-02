@@ -156,7 +156,7 @@ function Expenses() {
                     {item.date?.split("T")[0]}
                   </td>
                   <td className="px-4 py-3 font-semibold">
-                    ₹{item.amount}
+                    {item.amount}
                   </td>
                   <td className="px-4 py-3">{item.category}</td>
                   <td className="px-4 py-3">{item.tax}</td>

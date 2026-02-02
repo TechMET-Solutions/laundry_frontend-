@@ -70,20 +70,6 @@ function Delete_Order() {
     );
   };
 
-
-
-  // const handleRevoke = async () => {
-  //   if (!revokedId) return;
-
-  //   try {
-  //     await softDeleteOrder(  revokedId, {status:"PENDING"});
-  //     setRevokedId(null);
-  //     fetchOrders();
-  //   } catch (error) {
-  //     console.error("Revoked failed:", error);
-  //   }
-  // };
-
   const handleRevoke = async () => {
     if (!revokedId) return;
 
