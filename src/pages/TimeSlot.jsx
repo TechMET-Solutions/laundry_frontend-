@@ -17,6 +17,7 @@ function TimeSlot(){
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [timeSlots, setTimeSlots] = useState([]);
+  const [search, setSearch] = useState("");
 
 
   const fetchTimeSlot = async (p = page) => {
@@ -127,123 +128,93 @@ function TimeSlot(){
                 type="text"
                 placeholder="Search..."
                 className="bg-transparent outline-none w-full"
+               onChange={(e)=>setSearch(e.target.value)}
               />
-            </div>
+              {/* {timeSlots.filter((timeSlots)=>)} */}
+         {/* {users.filter((user)=>user.firstName.toLowerCase().includes(search)).map((user)=>( 
+        // <li key={user.id}>{user.firstName}</li>
+         */}
+          </div>
           </div>
     
           {/* Table */}
-          <div className="w-full text-sm border-separate">
-            <table className="w-full text-sm border-separate">
-    
-              <thead className="text-center align-middle">
-                <tr className="text-center align-middle justify-center">
-                  {[
-                    "Sr No",
-                    "Time",
-                    "Status",
-                    "Action",
-                  ].map((head) => (
-                    <th
-                      key={head}
-                      className="bg-[#56CCFF]  px-4 py-3 text-left font-medium text-gray-800 "
-                    >
-                      {head}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-    
-              <tbody>
+         {/* Table */}
+<div className="w-full text-sm border-separate">
+  <table className="w-full text-sm border-separate">
+    <thead className="text-center align-middle">
+      <tr className="text-center align-middle justify-center">
+        {["Sr No", "Time", "Status", "Action"].map((head) => (
+          <th
+            key={head}
+            className="bg-[#56CCFF] px-4 py-3 text-left font-medium text-gray-800"
+          >
+            {head}
+          </th>
+        ))}
+      </tr>
+    </thead>
 
-                  {timeSlots.length === 0 && (
-                    <tr>
-                      <td colSpan="4" className="text-center py-4 text-gray-500">
-                        No time slots found
-                      </td>
-                    </tr>
-                  )}
+    <tbody>
+      {timeSlots.length === 0 && (
+        <tr>
+          <td colSpan="4" className="text-center py-4 text-gray-500">
+            No time slots found
+          </td>
+        </tr>
+      )}
 
-
-                {timeSlots.map((item, index) => (
-                  <tr key={item.id}
-                    className="hover:bg-slate-50 transition ">
-                  
-                    <td className="px-4 py-3 w-20 items-center text-center align-middle">
-                      {index+1}
-                    </td>
-                    <td className="px-4 py-3  w-100">
-                      {item.time_slot}
-                    </td>
-
-                  {/* // add AM - PM */}
-                      {/* <td className="px-4 py-3 w-100">
-                        {(() => {
-                          if (!item.time_slot) return "";
-                          const [from, to] = item.time_slot.split(" - ");
-                          return `${formatTime(from)} - ${formatTime(to)}`;
-                        })()} 
-                      </td> */}
-
- 
-
-                    {/* <td className="px-4 py-3 text-green-600 list-circle pl-6 text-center align-middle">
-                      <li className="text-center align-middle list-disc list-inside">
-                        {item.status}
-                      </li>
-                    </td> */}
-
-                    <td className="px-4 py-3 text-center">
-                      {item.status ? (
-                        <span className="text-green-600">Active</span>
-                      ) : (
-                        <span className="text-red-600">Inactive</span>
-                      )}
-                    </td>
-
-                    {/* <td className="px-4 py-3 text-center align-middle">
-                        <button className="bg-indigo-100 text-indigo-700 p-2 rounded-md"
-                        onClick={()=>setaddTimeModal(true)}>
-                          <FiEdit />
-                        </button>
-                        {addTimeModal && (
-                        <AddTime onClose={() => setaddTimeModal(false)} />
-                        )}
-                        
-                    </td> */}
-
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        className="bg-indigo-100 text-indigo-700 p-2 rounded-md mr-2 cursor-pointer"
-                        //onClick={() => setaddTimeModal(true)
-                           onClick={() => {
-                            setaddTimeModal({ open: true, slot: item})//pass slot
-                             //setEditingSlot(item) //store the slot we want to edit 
-                             //setaddTimeModal(true)   // open modal
-                        }}
-                      >
-                        <FiEdit />
-                      </button>
-                      <button
-                        className="bg-red-100 text-red-700 p-2 rounded-md cursor-pointer"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <MdDeleteOutline />
-                      </button>
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="w-full flex justify-center my-6">
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onChange={setPage}
-              />
-              </div>
-            
-          </div>
+      {timeSlots
+        .filter((item) => {
+          if (!search) return true;
+          return (
+            item.time_slot.toLowerCase().includes(search.toLowerCase()) ||
+            (item.status
+              ? "active".includes(search.toLowerCase())
+              : "inactive".includes(search.toLowerCase()))
+          );
+        })
+        .map((item, index) => (
+          <tr
+            key={item.id}
+            className="hover:bg-slate-50 transition"
+          >
+            <td className="px-4 py-3 w-20 text-center">{index + 1}</td>
+            <td className="px-4 py-3">{item.time_slot}</td>
+            <td className="px-4 py-3 text-center">
+              {item.status ? (
+                <span className="text-green-600">Active</span>
+              ) : (
+                <span className="text-red-600">Inactive</span>
+              )}
+            </td>
+            <td className="px-4 py-3 text-center">
+              <button
+                className="bg-indigo-100 text-indigo-700 p-2 rounded-md mr-2 cursor-pointer"
+                onClick={() =>
+                  setaddTimeModal({ open: true, slot: item })
+                }
+              >
+                <FiEdit />
+              </button>
+              <button
+                className="bg-red-100 text-red-700 p-2 rounded-md cursor-pointer"
+                onClick={() => handleDelete(item.id)}
+              >
+                <MdDeleteOutline />
+              </button>
+            </td>
+          </tr>
+        ))}
+    </tbody>
+  </table>
+  <div className="w-full flex justify-center my-6">
+    <Pagination
+      currentPage={page}
+      totalPages={totalPages}
+      onChange={setPage}
+    />
+  </div>
+</div>
         </div>
       );
     }

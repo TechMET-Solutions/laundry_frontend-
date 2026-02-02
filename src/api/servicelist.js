@@ -5,7 +5,19 @@ const API = axios.create({
 
 export const createNewServiceList = (data) => API.post("/create", data);
 
-export const getAllServicesList = () => API.get("/list");
+export const getAllServicesList = (page = 1, limit = 10, search = "", category = "", status = "", sortField = "", sortDirection = "asc") => {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+
+  if (search) params.append("search", search);
+  if (category) params.append("category", category);
+  if (status) params.append("status", status);
+  if (sortField) params.append("sortField", sortField);
+
+  return API.get(`/list?${params.toString()}`);
+};
 
 export const getServiceByIdList = (id) => API.get(`/list/${id}`);
 

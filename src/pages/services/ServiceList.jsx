@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FiEdit, FiSearch, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
-import { RiArrowDropDownLine } from "react-icons/ri";
+import { RiArrowDropDownLine, RiArrowUpDownLine, RiArrowUpLine, RiArrowDownLine } from "react-icons/ri";
 import { ImageURL } from "../../api";
 import { deleteServiceList, getAllServicesList } from "../../api/servicelist";
 import { getAllServicesCategory } from "../../api/servicesapi";
@@ -15,51 +15,50 @@ const ServiceList = () => {
   const [selectedService, setSelectedService] = useState(null);
   const [openDropdown, setOpenDropdown] = useState(false);
   const [selectedValue, setSelectedValue] = useState("");
-
+  const [statusFilter, setStatusFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+       
   const [servicesData, setServicesData] = useState([]);
-  const [categories, setCategories] = useState([]); // Store fetched categories
+  const [categories, setCategories] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [deleteService, setDeleteService] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(10);
+
+  // Sorting state
+  const [sortField, setSortField] = useState("");
 
   const handleCloseModal = () => {
     setOpen(false);
     setSelectedService(null);
   };
 
-  // 1. Fetch Services and Active Categories
-  // const fetchData = async () => {
-  //   try {
-  //     const [serviceRes, catRes] = await Promise.all([
-  //       getAllServicesList(),
-  //       getAllServicesCategory()
-  //     ]);
+  // Handle sorting
+  const handleSort = (field) => {
+    const direction = sortField === field ;
+    setSortField(field);
+    setPage(1); 
+  };
 
-  //     setServicesData(serviceRes.data.data || []);
+  // Handle search with debounce
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setPage(1); 
+  };
 
-  //     // Filter categories to show only status !== 0 (assuming 1 is active)
-  //     const activeCats = (catRes.data.data || []).filter(cat => cat.status !== 0);
-  //     setCategories(activeCats);
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   }
-  // };
-
-  
-
-const fetchData = async (
+  const fetchData = async (
     p = page,
     s = searchQuery,
-    c = selectedValue
+    c = selectedValue,
+    status = statusFilter,
+    sort = sortField,
   ) => {
     try {
       const [serviceRes, catRes] = await Promise.all([
-        getAllServicesList(p, limit, s, c),
+        getAllServicesList(p, limit, s, c, status, sort),
         getAllServicesCategory()
       ]);
 
@@ -73,52 +72,21 @@ const fetchData = async (
     }
   };
 
-
-  const handleSearch = (value) => {
-    setSearchQuery(value);
-    setPage(1); // 🔥 VERY IMPORTANT
-  };
-
-
-
-  // useEffect(() => {
-  //   fetchData();
-  // }, [refresh]);
-
   useEffect(() => {
-    fetchData(page, searchQuery, selectedValue);
-  }, [page, searchQuery, selectedValue, refresh]);
+    fetchData(page, searchQuery, selectedValue, statusFilter);
+  }, [page, searchQuery, selectedValue, statusFilter, sortField, refresh]);
 
 
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
       await deleteServiceList(deleteId);
-      // setDeleteId(null);
-      // setDeleteService(false);
+    
       setRefresh(prev => !prev);
     } catch (error) {
       console.error("Delete failed:", error);
     }
   };
-
-  // 2. Corrected Filtering Logic
-  // const filteredServices = servicesData.filter((item) => {
-  //   const searchLower = searchQuery.toLowerCase();
-
-  //   const matchesSearch =
-  //     searchQuery === "" ||
-  //     item.name.toLowerCase().includes(searchLower) ||
-  //     item.category.toLowerCase().includes(searchLower);
-
-  //   const matchesDropdown =
-  //     selectedValue === "" ||
-  //     selectedValue === "All Categories" ||
-  //     item.category === selectedValue;
-
-  //   return matchesSearch && matchesDropdown;
-  // });
-
 
   return (
     <div className="p-6 min-h-screen">
@@ -159,11 +127,11 @@ const fetchData = async (
         <div className="relative w-64 ">
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
           <input
+            value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            
             type="text"
-            placeholder="Search..."
-            className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
+            placeholder="Search services..."
+            className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
@@ -171,9 +139,9 @@ const fetchData = async (
           <button
             type="button"
             onClick={() => setOpenDropdown((prev) => !prev)}
-            className="flex h-9 w-full items-center justify-between rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700"
+            className="flex h-9 w-full items-center justify-between rounded-lg bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 transition-colors"
           >
-            <span>{selectedValue ? selectedValue : "Sort By Category"}</span>
+            <span>{selectedValue ? selectedValue : "All Categories"}</span>
             <RiArrowDropDownLine className="h-6 w-6 text-gray-600" />
           </button>
 
@@ -197,20 +165,55 @@ const fetchData = async (
             </ul>
           )}
         </div>
+
       </div>
 
       <div className="bg-[#f4f7fb]  rounded-lg ">
         <table className="w-full text-sm border-separate border-spacing-0">
           <thead>
             <tr>
-              {["Sr No", "Service", "Service Type", "Service Category", "Status", "Action"].map((head) => (
-                <th
-                  key={head}
-                  className="bg-[#56CCFF]  px-4 py-3 text-left font-semibold text-gray-800 border-r-2 border-gray-100"
-                >
-                  {head}
-                </th>
-              ))}
+              <th className="bg-[#56CCFF] px-4 py-3 text-left font-semibold text-gray-800 border-r-2 border-gray-100">
+                Sr No
+              </th>
+              <th 
+                className="bg-[#56CCFF] px-4 py-3 text-left font-semibold text-gray-800 border-r-2 border-gray-100 cursor-pointer hover:bg-[#4AB8E6] transition-colors"
+                onClick={() => handleSort("name")}
+              >
+                <div className="flex items-center gap-1">
+                  Service
+                  {sortField === "name" &&(
+                    <RiArrowUpDownLine className="w-4 h-4 opacity-50" />
+                  )}
+                </div>
+              </th>
+              <th className="bg-[#56CCFF] px-4 py-3 text-left font-semibold text-gray-800 border-r-2 border-gray-100">
+                Service Type
+              </th>
+              <th 
+                className="bg-[#56CCFF] px-4 py-3 text-left font-semibold text-gray-800 border-r-2 border-gray-100 cursor-pointer hover:bg-[#4AB8E6] transition-colors"
+                onClick={() => handleSort("category")}
+              >
+                <div className="flex items-center gap-1">
+                  Service Category
+                  {sortField === "category"&& (
+                    <RiArrowUpDownLine className="w-4 h-4 opacity-50" />
+                  )}
+                </div>
+              </th>
+              <th 
+                className="bg-[#56CCFF] px-4 py-3 text-left font-semibold text-gray-800 border-r-2 border-gray-100 cursor-pointer hover:bg-[#4AB8E6] transition-colors"
+                onClick={() => handleSort("status")}
+              >
+                <div className="flex items-center gap-1">
+                  Status
+                  {sortField === "status"&& (
+                    <RiArrowUpDownLine className="w-4 h-4 opacity-50" />
+                  )}
+                </div>
+              </th>
+              <th className="bg-[#56CCFF] px-4 py-3 text-left font-semibold text-gray-800">
+                Action
+              </th>
             </tr>
           </thead>
 

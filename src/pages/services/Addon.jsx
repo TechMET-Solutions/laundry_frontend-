@@ -14,6 +14,8 @@ const Addon = () => {
   const [serviceAddons, setServiceAddons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editData, setEditData] = useState();
+  const [search, setSearch] = useState("");
+
 
   //pagination
   const [page, setPage] = useState(1);
@@ -58,6 +60,18 @@ const Addon = () => {
           alert("Failed to delete addon");
         }
       };
+
+      const filteredAddons = serviceAddons.filter((item) => {
+        const q = search.toLowerCase();
+
+        const nameMatch = item.name?.toLowerCase().includes(q);
+        const priceMatch = String(item.price)?.toLowerCase().includes(q);
+        const statusMatch =
+          (item.status === 1 ? "active" : "inactive").includes(q);
+
+        return nameMatch || priceMatch || statusMatch;
+      });
+
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -117,11 +131,14 @@ const Addon = () => {
         {/* Search */}
         <div className="relative w-64 ">
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
-          <input
+         <input
             type="text"
-            placeholder="Search..."
-            className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none "
+            placeholder="Search by addon, price, status..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none"
           />
+
         </div>
       </div>
 
@@ -142,7 +159,8 @@ const Addon = () => {
           </thead>
 
           <tbody>
-            {serviceAddons.length === 0 ? (
+           {filteredAddons.length === 0 ? (
+
               <tr>
                 <td colSpan="6" className="px-4 py-20 text-center bg-white border-b border-gray-300">
                   <div className="flex flex-col items-center justify-center gap-2">
@@ -157,7 +175,8 @@ const Addon = () => {
                 </td>
               </tr>
             ) : (
-              serviceAddons.map((item, index) => (
+             filteredAddons.map((item, index) => (
+
                 <tr key={item.id} className="bg-[#f1f5fb] text-center">
                   <td className="px-4 py-3 font-medium text-gray-700 border-b text-center border-gray-300">
                     {(page - 1) * 10 + index + 1}
