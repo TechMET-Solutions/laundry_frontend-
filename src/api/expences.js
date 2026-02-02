@@ -14,20 +14,16 @@ export const updateExpense = (id, data) => API.put(`/update/${id}`, data);
 
 export const deleteExpense = (id) => API.delete(`/delete/${id}`);
 
-//EXPENSE CATEGORIES
-const API2 = axios.create({
-    baseURL: "http://localhost:5000/api/expenses/category",
-});
-
-export const createExpenseCategory = (data) => API2.post("/create", data);
+export const createExpenseCategory = (data) => API.post("/category/create", data);
 
 export const getAllExpensesCategories = (page = 1, limit = 10) =>
-    API2.get(`/list?page=${page}&limit=${limit}`);
+    API.get(`/category/list?page=${page}&limit=${limit}`);
 
-export const getExpenseCategoryById = (id) => API2.get(`/list/${id}`);
+export const getExpenseCategoryById = (id) => API.get(`/category/list/${id}`);
 
-export const updateExpenseCategory = (id, data) => API2.put(`/update/${id}`, data);  
+export const updateExpenseCategory = (id, data) => API.put(`/category/update/${id}`, data);  
 
-export const deleteExpenseCategory = (id) => API2.delete(`/delete/${id}`);
+export const deleteExpenseCategory = (id) => API.delete(`/category/delete/${id}`);
   
-  
+export const getExpensesReport = (startDate, endDate) =>
+    API.get(`/report?start_date=${startDate}&end_date=${endDate}`);

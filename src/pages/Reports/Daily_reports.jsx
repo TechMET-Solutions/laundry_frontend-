@@ -1,26 +1,19 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
+import { reportitems } from "../../constants/reportitems";
 
 
-const reportitems = [
-  { name: "Daily Reports", path: "/reports/daily_reports" },
-  { name: "Order Reports", path: "/reports/order_reports" },
-  { name: "Sales Reports", path: "/reports/sales_reports" },
-  { name: "Cloth Wise Reports", path: "/reports/cloth_wise_reports" },
-  { name: "Ledger Reports", path: "/reports/ledger_reports" },
-  { name: "Outstanding Reports", path: "/reports/outstanding_reports" },
-  { name: "Customer Outstanding Reports", path: "/reports/customer_outstanding_reports" },
-  { name: "Expenses Reports", path: "/reports/expenses_reports" },
-  { name: "Tax Reports", path: "/reports/tax_reports" },
-];
 
-function Daily_reports() {  
+
+function Daily_reports() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [startDate, setStartDate] = useState("2025-12-01");
-const [endDate, setEndDate] = useState("2025-12-01");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [reportData, setReportData] = useState([]);
 
 
   // find active report from URL
@@ -30,10 +23,87 @@ const [endDate, setEndDate] = useState("2025-12-01");
 
   const [selectedReport, setSelectedReport] = useState(activeReport);
 
+  // 1. Fetch Table Data
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await axios.get(`http://localhost:5000/api/reports/daily`, {
+  //       params: { startDate, endDate }
+  //     });
+  //     // Assuming your API returns an array of { Particulars, Value }
+  //     setReportData(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching data", error);
+  //   }
+  // };
+
+  const fetchData = async () => {
+    try {
+      if (!startDate || !endDate) {
+        setReportData([]);
+        return;
+      }
+
+      const response = await axios.get(
+        `http://localhost:5000/api/reports/daily`,
+        { params: { startDate, endDate } }
+      );
+
+      setReportData(
+        Array.isArray(response.data?.data)
+          ? response.data.data
+          : []
+      );
+    } catch (error) {
+      console.error("Error fetching data", error);
+      setReportData([]);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchData();
+  }, [startDate, endDate]); // Re-run when dates change
+
+  // 2. Download Excel
+  const downloadExcel = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/reports/download`, {
+        params: { startDate, endDate },
+        responseType: 'blob', // Important for files
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Daily_Report_${startDate}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      alert("Failed to download Excel");
+    }
+  };
+
+  // 3. Download/Print PDF
+  const downloadPDF = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/reports/print`, {
+        params: { startDate, endDate },
+        responseType: 'blob', // REQUIRED: Tells axios to handle binary data
+      });
+
+      // Create a Blob from the PDF Stream
+      const file = new Blob([response.data], { type: 'application/pdf' });
+
+      // Create a URL for the blob and open it
+      const fileURL = URL.createObjectURL(file);
+      window.open(fileURL, "_blank");
+
+    } catch (error) {
+      console.error("PDF Display Error:", error);
+    }
+  };
+
   const handleReportChange = (e) => {
-    const report = reportitems.find(
-      (item) => item.path === e.target.value
-    );
+    const report = reportitems.find((item) => item.path === e.target.value);
     setSelectedReport(report);
     navigate(report.path);
   };
@@ -72,107 +142,130 @@ const [endDate, setEndDate] = useState("2025-12-01");
             ))}
           </select>
 
-          <button className="bg-green-600 text-white px-4 py-2 rounded-full text-sm">
+          <button
+            onClick={downloadExcel}
+            className="bg-green-600 text-white px-4 py-2 rounded-full text-sm">
             Download Report
           </button>
 
-          <button className="bg-orange-600 text-white px-4 py-2 rounded-full text-sm">
+          <button onClick={downloadPDF} className="bg-orange-600 text-white px-4 py-2 rounded-full text-sm">
             Print Report
           </button>
         </div>
       </div>
       {/* DATE FILTERS */}
-<div className="flex justify-end gap-6 mb-6">
-  <div className="flex items-center gap-2">
-    <label className="text-sm font-medium text-gray-600">
-      Start Date
-    </label>
-    <input
-      type="date"
-      value={startDate}
-      onChange={(e) => setStartDate(e.target.value)}
-      className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
-    />
-  </div>
+      <div className="flex justify-end gap-6 mb-6">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-600">
+            Start Date
+          </label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
+          />
+        </div>
 
-  <div className="flex items-center gap-2">
-    <label className="text-sm font-medium text-gray-600">
-      End Date
-    </label>
-    <input
-      type="date"
-      value={endDate}
-      onChange={(e) => setEndDate(e.target.value)}
-      className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
-    />
-  </div>
-</div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-600">
+            End Date
+          </label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
+          />
+        </div>
+      </div>
 
 
       {/* TABLE */}
-       <div className="bg-[#f4f7fb]  ">
-              <table className="w-full text-sm border-separate  ">
-               <thead>
-          <tr>
+      <div className="bg-[#f4f7fb]  ">
+        <table className="w-full text-sm border-separate  ">
+          <thead>
+            <tr>
+              {[
+                "Particulars",
+                "Value"
+              ].map((head) => (
+                <th
+                  key={head}
+                  className="bg-[#56CCFF]  px-4 py-3 text-left font-medium text-gray-800 "
+                >
+                  {head}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          {/* <tbody>
             {[
-              "Particulars",
-              "Value"
-            ].map((head) => (
-              <th
-                key={head}
-                className="bg-[#56CCFF]  px-4 py-3 text-left font-medium text-gray-800 "
+              {
+                Particulars: "Orders",
+                Value: "9",
+              },
+              {
+                Particulars: "No. of Orders Delivered",
+                Value: "0",
+              },
+              {
+                Particulars: "Total Sales",
+                Value: "AED 418.25",
+              },
+              {
+                Particulars: "Total Payment",
+                Value: "AED 121.43",
+              },
+              {
+                Particulars: "Total Expense",
+                Value: "AED 0.00",
+              },
+              {
+                Particulars: "Total Outstanding",
+                Value: "AED 296.82",
+              },
+            ].map((item, index) => (
+              <tr
+                key={index}
+                className="bg-[#f1f5fb] border-b"
               >
-                {head}
-              </th>
+                <td className="px-4 py-3 text-left">
+                  {item.Particulars}
+                </td>
+                <td className="px-4 py-3 text-left font-medium">
+                  {item.Value}
+                </td>
+              </tr>
             ))}
-          </tr>
-        </thead>
+          </tbody> */}
           <tbody>
-      {[
-        {
-          Particulars: "Orders",
-          Value: "9",
-        },
-        {
-          Particulars: "No. of Orders Delivered",
-          Value: "0",
-        },
-        {
-          Particulars: "Total Sales",
-          Value: "AED 418.25",
-        },
-        {
-          Particulars: "Total Payment",
-          Value: "AED 121.43",
-        },
-        {
-          Particulars: "Total Expense",
-          Value: "AED 0.00",
-        },
-        {
-          Particulars: "Total Outstanding",
-          Value: "AED 296.82",
-        },
-      ].map((item, index) => (
-        <tr
-          key={index}
-          className="bg-[#f1f5fb] border-b"
-        >
-          <td className="px-4 py-3 text-left">
-            {item.Particulars}
-          </td>
-          <td className="px-4 py-3 text-left font-medium">
-            {item.Value}
-          </td>
-        </tr>
-      ))}
-    </tbody>
+            {reportData.length > 0 ? (
+              reportData.map((item, index) => (
+                <tr key={index} className="bg-[#f1f5fb] border-b">
+                  <td className="px-4 py-3 text-left">
+                    {item?.Particulars || "-"}
+                  </td>
+                  <td className="px-4 py-3 text-left font-medium">
+                    {item?.Value || "0"}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="2" className="px-4 py-3 text-center text-gray-500">
+                  No data found
+                </td>
+              </tr>
+            )}
+          </tbody>
 
-              </table>
-            </div>
-          </div>
-        
-  );  
+
+
+        </table>
+      </div>
+    </div>
+  );
 }
 
 export default Daily_reports;

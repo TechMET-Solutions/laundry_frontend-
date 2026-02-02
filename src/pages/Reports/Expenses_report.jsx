@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getAllExpenses } from "../../api/expences";
+import { reportitems } from "../../constants/reportitems";
+import { getExpensesReport } from "../../api/expences";
 
-const reportitems = [
-  { name: "Daily Reports", path: "/reports/daily_reports" },
-  { name: "Order Reports", path: "/reports/order_reports" },
-  { name: "Sales Reports", path: "/reports/sales_reports" },
-  { name: "Cloth Wise Reports", path: "/reports/cloth_wise_reports" },
-  { name: "Ledger Reports", path: "/reports/ledger_reports" },
-  { name: "Outstanding Reports", path: "/reports/outstanding_reports" },
-  { name: "Customer Outstanding Reports", path: "/reports/customer_outstanding_reports" },
-  { name: "Expenses Reports", path: "/reports/expenses_reports" },
-  { name: "Tax Reports", path: "/reports/tax_reports" },
-];
+
 
 function Expenses_report() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [startDate, setStartDate] = useState("2025-12-01");
-  const [endDate, setEndDate] = useState("2025-12-01");
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
+
   
   // State for expenses data
   const [expenses, setExpenses] = useState([]);
@@ -34,28 +30,29 @@ function Expenses_report() {
 
   const [selectedReport, setSelectedReport] = useState(activeReport);
 
-
   const fetchExpenses = async () => {
+    if (!startDate || !endDate) return;
+
     try {
       setLoading(true);
       setError(null);
-      const res = await getAllExpenses();
-      if (res.data.success) {
-        setExpenses(res.data.data || []);
-      } else {
-        setError("Failed to fetch expenses data");
-      }
-    } catch (error) {
-      console.error("API ERROR:", error);
-      setError("Failed to fetch expenses data");
+
+      const res = await getExpensesReport(startDate, endDate);
+      setExpenses(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load expenses report");
+      setExpenses([]);
     } finally {
       setLoading(false);
     }
   };
 
+
   useEffect(() => {
     fetchExpenses();
-  }, []);
+  }, [startDate, endDate]);
+
 
   const handleReportChange = (e) => {
     const report = reportitems.find(
@@ -64,6 +61,69 @@ function Expenses_report() {
     setSelectedReport(report);
     navigate(report.path);
   };
+
+  // Download Report PDF
+  const handleDownloadPDF = () => {
+    if (!expenses.length) {
+      alert("No data to export");
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(14);
+    doc.text("Expenses Report", 14, 15);
+
+    doc.setFontSize(10);
+    doc.text(`From: ${startDate}  To: ${endDate}`, 14, 22);
+
+    const tableColumn = [
+      "Sr No",
+      "Date",
+      "Category",
+      "Amount (AED)",
+      "Tax %",
+      "Tax Amount",
+      "Payment Mode",
+    ];
+
+    const tableRows = expenses.map((expense, index) => [
+      index + 1,
+      new Date(expense.date).toLocaleDateString("en-GB"),
+      expense.category,
+      Number(expense.amount).toFixed(2),
+      expense.tax ? `${expense.tax}%` : "-",
+      expense.tax
+        ? (expense.amount * expense.tax / 100).toFixed(2)
+        : "0.00",
+      expense.payment_mode,
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 28,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [86, 204, 255] },
+    });
+
+    const totalAmount = expenses.reduce(
+      (sum, e) => sum + Number(e.amount || 0),
+      0
+    );
+
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.text(`Total Expenses: ${expenses.length}`, 14, finalY);
+    doc.text(
+      `Total Amount: AED ${totalAmount.toFixed(2)}`,
+      14,
+      finalY + 6
+    );
+
+    doc.save(`Expenses_Report_${startDate}_to_${endDate}.pdf`);
+  };
+
+
 
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
@@ -99,9 +159,13 @@ function Expenses_report() {
                 ))}
               </select>
     
-              <button className="bg-green-600 text-white px-4 py-2 rounded-full text-sm">
-                Download Report
-              </button>
+          <button
+            onClick={handleDownloadPDF}
+            className="bg-green-600 text-white px-4 py-2 rounded-full text-sm"
+          >
+            Download Report
+          </button>
+
     
               <button className="bg-orange-600 text-white px-4 py-2 rounded-full text-sm">
                 Print Report
