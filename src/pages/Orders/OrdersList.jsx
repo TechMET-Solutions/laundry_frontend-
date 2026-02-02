@@ -66,7 +66,7 @@ const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
       // setOrders(res.data.data || []);
       setOrders(
         (res.data.data || []).filter(
-          order => order.order_status !== "Cancelled"
+          order => order.order_status !== "Deleted orders"
         )
       );
       setTotalPages(res.data.pagination.totalPages);

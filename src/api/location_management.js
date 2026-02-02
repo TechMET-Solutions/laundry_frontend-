@@ -9,8 +9,9 @@ const API = axios.create({
 export const createEmirate = (data) => API.post("/emirates/create", data);
 
 export const getAllEmirates = (page = 1, limit = 10) =>
-     API.get(`/emirates/list?page=${page}&limit=${limit}`);
+    API.get(`/emirates/list?page=${page}&limit=${limit}`);
 
+export const getAllEmiratesFetch = () => API.get("/emirates/list");
 
 
 export const getEmirateById = (id) => API.get(`/emirates/${id}`);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { IoIosClose } from "react-icons/io";
 import { createEmirate, updateEmirate } from "../../api/location_management";
+import { COUNTRIES } from "../../constants/countries";
 
 function AddEmirates({ onClose, onSuccess, mode = "add", emirateData }) {
   const isView = mode === "view";
@@ -117,8 +118,11 @@ function AddEmirates({ onClose, onSuccess, mode = "add", emirateData }) {
             className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-gray-100"
           >
             <option value="">Choose Country</option>
-            <option value="United Arab Emirates">United Arab Emirates</option>
-            <option value="India">India</option>
+            {COUNTRIES.map((country) => (
+              <option key={country.code} value={country.name}>
+                {country.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -130,14 +134,12 @@ function AddEmirates({ onClose, onSuccess, mode = "add", emirateData }) {
               setIsActive(!isActive);
               setForm({ ...form, status: !form.status });
             }}
-            className={`w-10 h-5 rounded-full relative cursor-pointer transition ${
-              isActive ? "bg-green-500" : "bg-gray-300"
-            } ${isView ? "cursor-not-allowed" : ""}`}
+            className={`w-10 h-5 rounded-full relative cursor-pointer transition ${isActive ? "bg-green-500" : "bg-gray-300"
+              } ${isView ? "cursor-not-allowed" : ""}`}
           >
             <div
-              className={`w-4 h-4 bg-white rounded-full shadow transform transition ${
-                isActive ? "translate-x-5" : "translate-x-1"
-              }`}
+              className={`w-4 h-4 bg-white rounded-full shadow transform transition ${isActive ? "translate-x-5" : "translate-x-1"
+                }`}
             />
           </div>
           <span className="text-sm font-medium">{isActive ? "Active" : "Inactive"}</span>

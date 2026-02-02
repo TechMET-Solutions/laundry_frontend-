@@ -1,28 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { IoIosClose } from "react-icons/io";
 import { createArea, updateArea } from "../../api/area";
+import { COUNTRIES } from "../../constants/countries";
+import { getAllEmiratesFetch } from "../../api/location_management";
 
 function AddArea({ onClose, onSuccess, mode = "add", areaData }) {
   const isView = mode === "view";
   const isEdit = mode === "edit";
 
   const [isActive, setIsActive] = useState(true);
+  const [isEmirates, setIsEmirates] = useState([]);
   const [form, setForm] = useState({
     area: "",
     emirates: "",
-    radius: "",
     country: "",
     status: true,
   });
+
 
   // 🔥 Pre-fill for edit/view
   useEffect(() => {
     if (areaData && (isEdit || isView)) {
       setForm({
-        area: areaData.area,
-        emirates: areaData.emirates,
-        radius: areaData.radius,
-        country: areaData.country,
+        area: areaData.area || "",
+        emirates: areaData.emirates || "",
+        country: areaData.country || "",
         status: areaData.status === 1,
       });
       setIsActive(areaData.status === 1);
@@ -37,7 +39,7 @@ function AddArea({ onClose, onSuccess, mode = "add", areaData }) {
   const handleSubmit = async () => {
     if (isView) return;
 
-    if (!form.area || !form.emirates || !form.radius || !form.country) {
+    if (!form.area || !form.emirates || !form.country) {
       alert("Fill all required fields");
       return;
     }
@@ -60,6 +62,24 @@ function AddArea({ onClose, onSuccess, mode = "add", areaData }) {
       console.error("Error:", error);
     }
   };
+
+  // emirates fetch
+  useEffect(() => {
+    const fetchEmirates = async () => {
+      try {
+        const res = await getAllEmiratesFetch();
+        const activeEmirates = (res.data.data || []).filter(
+          (item) => Number(item.status) !== 0
+        );
+        setIsEmirates(activeEmirates);
+      } catch (error) {
+        console.error("Failed to fetch emirates", error);
+      }
+    };
+
+    fetchEmirates();
+  }, []);
+
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -94,28 +114,19 @@ function AddArea({ onClose, onSuccess, mode = "add", areaData }) {
             <label className="text-sm font-medium">
               Emirate<span className="text-red-500">*</span>
             </label>
-            <input
+            <select
               name="emirates"
               value={form.emirates}
               onChange={handleChange}
-              disabled={isView}
-              placeholder="Emirate"
-              className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-gray-100"
-            />
-          </div>
-
-          <div className="flex-1">
-            <label className="text-sm font-medium">
-              Radius<span className="text-red-500">*</span>
-            </label>
-            <input
-              name="radius"
-              value={form.radius}
-              onChange={handleChange}
-              disabled={isView}
-              placeholder="radius"
-              className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-gray-100"
-            />
+              className="w-full px-3 py-2 border rounded-lg text-sm border border-[#BEC3E4]"
+            >
+              <option value="">Emirates</option>
+              {isEmirates.map((item) => (
+                <option key={item.id} value={item.emirate}>
+                  {item.emirate}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -132,30 +143,37 @@ function AddArea({ onClose, onSuccess, mode = "add", areaData }) {
             className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px] outline-none focus:ring-2 focus:ring-indigo-300 disabled:bg-gray-100"
           >
             <option value="">Choose Country</option>
-            <option value="United Arab Emirates">United Arab Emirates</option>
-            <option value="India">India</option>
-            <option value="Antarctica">Antarctica</option>
-            <option value="Antigua And Barbuda">Antigua And Barbuda</option>
+
+            {COUNTRIES.map((country) => (
+              <option key={country.code} value={country.name}>
+                {country.name}
+              </option>
+            ))}
           </select>
         </div>
+
 
         <div className="flex items-center gap-3 mb-6">
           <div
             onClick={() => {
               if (isView) return;
-              setIsActive(!isActive);
-              setForm({ ...form, status: !form.status });
+
+              const newStatus = !isActive;
+              setIsActive(newStatus);
+              setForm({ ...form, status: newStatus });
             }}
-            className="w-10 h-5 bg-gray-300 rounded-full relative cursor-pointer"
+            className={`w-10 h-5 rounded-full relative cursor-pointer transition 
+      ${isActive ? "bg-green-500" : "bg-gray-300"}`}
           >
-            <div
-              className={`w-4 h-4 bg-white rounded-full shadow transform transition ${
-                isActive ? "translate-x-5" : "translate-x-1"
-              }`}
+            <span
+              className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all
+        ${isActive ? "right-0.5" : "left-0.5"}`}
             />
           </div>
+
           <span className="text-sm">Is Active?</span>
         </div>
+
 
         {/* Buttons */}
         <div className="flex justify-end gap-3">

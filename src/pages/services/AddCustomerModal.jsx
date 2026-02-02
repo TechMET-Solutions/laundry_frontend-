@@ -1,7 +1,7 @@
 import { useState, useEffect,} from "react";
 import { FiX } from "react-icons/fi";
 import { createCustomers, updateCustomers } from "../../api/customer";
-import { getAllEmirates } from "../../api/location_management"; 
+import { getAllEmiratesFetch } from "../../api/location_management"; 
 //import { getAllAreas } from "../../api/location_management";
 import { getAllAreas } from "../../api/area";
 import { useAsyncError } from "react-router-dom";
@@ -37,15 +37,24 @@ const AddCustomerModal = ({ onClose, onSave, editData }) => {
   useEffect(() => {
     const fetchEmirates = async () => {
       try {
-        const res = await getAllEmirates(1, 100); // get all
-        console.log("ALL EMIRATES:", res.data.data);
-        setEmirates(res.data.data || []);
+        const res = await getAllEmiratesFetch(); // get all
+        const allEmirates = res.data.data || [];
+
+        // status == 0 ko remove karo
+        const activeEmirates = allEmirates.filter(
+          (item) => item.status !== 0
+        );
+
+        console.log("ACTIVE EMIRATES:", activeEmirates);
+        setEmirates(activeEmirates);
       } catch (error) {
         console.error("Failed to fetch emirates", error);
       }
-    }; 
+    };
+
     fetchEmirates();
   }, []);
+
 
   // areas fetch
   useEffect(() => {

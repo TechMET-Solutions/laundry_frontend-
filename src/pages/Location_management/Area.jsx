@@ -10,7 +10,6 @@ import { getAllAreas, deleteArea } from "../../api/area";
 import Pagination from "../../components/Pagination";
 import AddArea from "../../components/models/AddArea";
 import { IoEyeOutline } from "react-icons/io5";
-//import { getAllAreas } from "../../api/location_management";
 
 function Area() {
   const [areas, setAreas] = useState([]);
@@ -98,27 +97,24 @@ function Area() {
       <div className="  overflow-hidden ">
         <div className="overflow-x-auto">
           <table  className="w-full">
-            <thead className="w-full text-sm border-separate  border-spacing-y-0 border-spacing-x-1">
-              <tr>
-                <th className="bg-[#56CCF2] px-3 md:px-4 py-3 text-left font-semibold">
+            <thead className="w-full text-sm ">
+              <tr className="bg-[#56CCF2]">
+                <th className="border-r-2 border-gray-100 px-3 md:px-4 py-3 text-left font-semibold">
                   Sr No
                 </th>
-                <th className="bg-[#56CCF2] px-3 md:px-4 py-3 text-left font-semibold">
+                <th className=" border-r-2 border-gray-100 px-3 md:px-4 py-3 text-left font-semibold">
                   Area Name
                 </th>
-                <th className="bg-[#56CCF2] px-3 md:px-4 py-3 text-left font-semibold hidden sm:table-cell">
+                <th className="border-r-2 border-gray-100 px-3 md:px-4 py-3 text-left font-semibold hidden sm:table-cell">
                   Emirate
                 </th>
-                <th className="bg-[#56CCF2] px-3 md:px-4 py-3 text-left font-semibold hidden md:table-cell">
+                <th className="border-r-2 border-gray-100 px-3 md:px-4 py-3 text-left font-semibold hidden md:table-cell">
                   Country
                 </th>
-                <th className="bg-[#56CCF2] px-3 md:px-4 py-3 text-left font-semibold hidden lg:table-cell">
-                  Radius
-                </th>
-                <th className="bg-[#56CCF2] px-3 md:px-4 py-3 text-left font-semibold">
+                <th className="border-r-2 border-gray-100 px-3 md:px-4 py-3 text-left font-semibold">
                   Status
                 </th>
-                <th className="bg-[#56CCF2] px-3 md:px-4 py-3 text-center font-semibold">
+                <th className="border-r-2 border-gray-100 px-3 md:px-4 py-3 text-center font-semibold">
                   Action
                 </th>
               </tr>
@@ -144,9 +140,6 @@ function Area() {
                   </td>
                   <td className="px-3 md:px-4 py-3 hidden md:table-cell border-b border-gray-300 text-gray-700">
                     {item.country}
-                  </td>
-                  <td className="px-3 md:px-4 py-3 hidden lg:table-cell border-b border-gray-300 text-gray-700">
-                    {item.radius}
                   </td>
                   <td className="px-3 md:px-4 py-3 border-b border-gray-300">
                     <span

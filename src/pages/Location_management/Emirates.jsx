@@ -12,9 +12,22 @@ import Pagination from "../../components/Pagination";
 // import EditEmirates from "./EditEmirates";
 import { getAllEmirates, deleteEmirate } from "../../api/location_management";
 import { useNavigate } from "react-router-dom";
+import { formatDateTimeForInput } from "../../utils/formatDateForInput";
 
 function Emirates() {
   const navigate = useNavigate();
+
+  const createdByEmail = (() => {
+    try {
+      const stored = localStorage.getItem("userData");
+      if (!stored) return "";
+      const parsed = JSON.parse(stored);
+      return parsed?.email || "";
+    } catch (error) {
+      console.error("Failed to parse userData from localStorage", error);
+      return "";
+    }
+  })();
 
   const [search, setSearch] = useState("");
   const [modalMode, setModalMode] = useState(null);
@@ -104,7 +117,7 @@ function Emirates() {
 
       <div className="bg-white rounded-lg overflow-hidden ">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border-separate  border-spacing-y-0 border-spacing-x-1 ">
+          <table className="w-full text-sm border-separate">
             <thead>
               <tr>
                 <th className="bg-[#56CCF2] px-3 md:px-4 py-3 text-left font-semibold">
@@ -161,11 +174,7 @@ function Emirates() {
                     </span>
                   </td>
                   <td className="px-3 md:px-4 py-3 text-gray-700 hidden md:table-cell border-b border-gray-300  ">
-                    {item.createdAt
-                      .split("T")[0]
-                      .split("-")
-                      .reverse()
-                      .join("-")}
+                    {formatDateTimeForInput(item.createdAt)}
                   </td>
                   <td className="px-3 md:px-4  border-b border-gray-300">
                     <div className="flex justify-center gap-2">
