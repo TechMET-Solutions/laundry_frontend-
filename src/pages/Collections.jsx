@@ -10,6 +10,7 @@ import { getAllCustomers } from "../api/customer";
 import DeleteModal from "../components/models/DeleteModal";
 import Pagination from "../components/Pagination";
 import { formatDateForInput } from "../utils/formatDateForInput";
+import { CiSearch } from "react-icons/ci";
 
 
 function Collections() {
@@ -191,11 +192,12 @@ useEffect(() => {
         </button>
       </div>
       <div className="flex flex-wrap justify-end items-center gap-3 mb-4">
-        {/* Search */}
+        {/* Search
+        <CiSearch className="text-gray-500" /> */}
         <input
           type="text"
-          className="border border-gray-300 rounded-md px-4 py-2 w-64"
-          placeholder="Search collections..."
+          className=" bg-gray-200 focus:outline-none rounded-md px-4 py-2 w-64"
+          placeholder="Search collections id..."
           value={filters.search}
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, search: e.target.value }))
@@ -209,7 +211,7 @@ useEffect(() => {
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, type: e.target.value }))
           }
-          className="border border-gray-300 rounded-md px-3 py-2 w-40"
+          className="bg-gray-200 focus:outline-none rounded-md px-3 py-2 w-40"
         >
           <option value="">All Types</option>
           <option value="CLOTH">Cloth</option>
@@ -223,7 +225,7 @@ useEffect(() => {
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, driver: e.target.value }))
           }
-          className="border border-gray-300 rounded-md px-3 py-2 w-44"
+          className="bg-gray-200 focus:outline-none rounded-md px-3 py-2 w-44"
         >
           <option value="">All Drivers</option>
           {allEmployeesList.map((emp) => (
@@ -240,7 +242,7 @@ useEffect(() => {
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, status: e.target.value }))
           }
-          className="border border-gray-300 rounded-md px-3 py-2 w-44"
+          className="bg-gray-200 focus:outline-none rounded-md px-3 py-2 w-44"
         >
           <option value="">All Collection</option>
           <option value="Cancelled">Cancelled</option>
@@ -269,23 +271,23 @@ useEffect(() => {
 
           <tbody>
             {collections.map((item) => (
-              <tr key={item.id} className="border-b">
-                <td className="p-3">{item.collection_code}</td>
+              <tr key={item.id} className="border-b text-[#3A3D51] font-semibold border-gray-400">
+                <td className="p-3  ">{item.collection_code}</td>
                 <td className="p-3 text-xs">
-                  <span className="font-bold">
+                  <span className="   ">
                     Pickup Date:
                   </span>
-                  <span className="ml-1">
+                  <span className="ml-1 font-bold">
                   {formatDateForInput(item.pickup_date)}
                   </span>
                  
                   <br />
-                  <span className="font-bold">
+                  <span className="   ">
                     Time Slot:
                   </span>
-                  <span className="ml-1">{item.time_slot}  </span>
+                  <span className="ml-1 font-bold">{item.time_slot}  </span>
                 </td>
-                <td className="p-3">{customers[item.customer_id]?.name || "N/A"}</td>
+                <td className="p-3 text-[12px]">{customers[item.customer_id]?.name || "N/A"}</td>
                 <td className="p-3">{item.status}</td>
                 <td className="p-3">{`${employees[item.driver_id]?.first_name || ""} ${employees[item.driver_id]?.last_name || ""}`.trim() || "N/A"}</td>
                 <td className="p-3">{item.collection_type}</td>

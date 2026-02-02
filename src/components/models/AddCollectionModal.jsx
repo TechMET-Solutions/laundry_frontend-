@@ -27,19 +27,25 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
   const [filteredCustomerList, setFilteredCustomerList] = useState([]);
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
   const [isLoadingCustomers, setIsLoadingCustomers] = useState(false);
+  const [manuallyClosedCustomerDropdown, setManuallyClosedCustomerDropdown] =
+    useState(false);
 
   //employee driver search state
   const [allEmployees, setAllEmployees] = useState([]);
   const [employeeSearchTerm, setEmployeeSearchTerm] = useState("");
   const [filteredEmployeeList, setFilteredEmployeeList] = useState([]);
-  const [isEmployeeSearchDropdownOpen, setIsEmployeeSearchDropdownOpen] = useState(false);
+  const [isEmployeeSearchDropdownOpen, setIsEmployeeSearchDropdownOpen] =
+    useState(false);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
+  const [manuallyClosedEmployeeDropdown, setManuallyClosedEmployeeDropdown] =
+    useState(false);
 
   const [allTimeSlots, setAllTimeSlots] = useState([]);
   const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false);
   const [timeSlotSearchTerm, setTimeSlotSearchTerm] = useState("");
   const [filteredTimeSlotList, setFilteredTimeSlotList] = useState([]);
-  const [isTimeSlotSearchDropdownOpen, setIsTimeSlotSearchDropdownOpen] = useState(false);
+  const [isTimeSlotSearchDropdownOpen, setIsTimeSlotSearchDropdownOpen] =
+    useState(false);
 
   // Fetch timeslots on mount
   useEffect(() => {
@@ -63,7 +69,10 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
     const timer = setTimeout(() => {
       console.log("All timeslots:", allTimeSlots);
       const timeSlots = allTimeSlots.filter(
-        (slot) => slot.type && typeof slot.type === "string" && slot.type.toLowerCase() === "time"
+        (slot) =>
+          slot.type &&
+          typeof slot.type === "string" &&
+          slot.type.toLowerCase() === "time",
       );
       console.log("Filtered timeslots (type=time):", timeSlots);
 
@@ -76,7 +85,9 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
 
       const filtered = timeSlots.filter((slot) => {
         const slotName = slot.time_slot || slot.name || "";
-        return slotName.toLowerCase().includes(timeSlotSearchTerm.toLowerCase().trim());
+        return slotName
+          .toLowerCase()
+          .includes(timeSlotSearchTerm.toLowerCase().trim());
       });
       console.log("Filtered timeslots (search):", filtered);
 
@@ -107,30 +118,37 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       const drivers = allEmployees.filter(
-        (emp) => emp.role && typeof emp.role === "string" && emp.role.toLowerCase() === "driver"
+        (emp) =>
+          emp.role &&
+          typeof emp.role === "string" &&
+          emp.role.toLowerCase() === "driver",
       );
 
-      // if search empty: show all drivers
+      // if search empty: don't show dropdown
       if (!employeeSearchTerm.trim()) {
         setFilteredEmployeeList(drivers);
-        setIsEmployeeSearchDropdownOpen(drivers.length > 0);
+        setIsEmployeeSearchDropdownOpen(false);
+        setManuallyClosedEmployeeDropdown(false);
         return;
       }
 
       const filtered = drivers.filter((employee) => {
-        const fullName = `${employee.first_name || ""} ${employee.last_name || ""}`.trim();
-        return (
-          fullName.toLowerCase().includes(employeeSearchTerm.toLowerCase().trim())
-        );
+        const fullName =
+          `${employee.first_name || ""} ${employee.last_name || ""}`.trim();
+        return fullName
+          .toLowerCase()
+          .includes(employeeSearchTerm.toLowerCase().trim());
       });
 
       setFilteredEmployeeList(filtered);
-      setIsEmployeeSearchDropdownOpen(filtered.length > 0);
+      // Only reopen if not manually closed
+      if (!manuallyClosedEmployeeDropdown) {
+        setIsEmployeeSearchDropdownOpen(filtered.length > 0);
+      }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [employeeSearchTerm, allEmployees]);
-
+  }, [employeeSearchTerm, allEmployees, manuallyClosedEmployeeDropdown]);
 
   // Fetch customers on mount
   useEffect(() => {
@@ -154,6 +172,7 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
     if (!customerSearchTerm.trim()) {
       setFilteredCustomerList([]);
       setIsSearchDropdownOpen(false);
+      setManuallyClosedCustomerDropdown(false);
       return;
     }
 
@@ -163,15 +182,18 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
           ? customer.name
               .toLowerCase()
               .includes(customerSearchTerm.toLowerCase().trim())
-          : false
+          : false,
       );
 
       setFilteredCustomerList(filtered);
-      setIsSearchDropdownOpen(filtered.length > 0);
+      // Only reopen if not manually closed
+      if (!manuallyClosedCustomerDropdown) {
+        setIsSearchDropdownOpen(filtered.length > 0);
+      }
     }, 700);
 
     return () => clearTimeout(timer);
-  }, [customerSearchTerm, allCustomers]);
+  }, [customerSearchTerm, allCustomers, manuallyClosedCustomerDropdown]);
 
   useEffect(() => {
     if (collection) {
@@ -188,9 +210,12 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
 
       // Set driver name in search term if driver_id exists
       if (collection.driver_id && allEmployees.length > 0) {
-        const driver = allEmployees.find((emp) => emp.id === collection.driver_id);
+        const driver = allEmployees.find(
+          (emp) => emp.id === collection.driver_id,
+        );
         if (driver) {
-          const fullName = `${driver.first_name || ""} ${driver.last_name || ""}`.trim();
+          const fullName =
+            `${driver.first_name || ""} ${driver.last_name || ""}`.trim();
           setEmployeeSearchTerm(fullName);
         }
       }
@@ -200,10 +225,14 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Trim string inputs for text fields
-    const trimmedValue = 
-      ["customer_type", "phone_number", "driver_id", "comments"].includes(name) 
-        ? value.trim() 
-        : value;
+    const trimmedValue = [
+      "customer_type",
+      "phone_number",
+      "driver_id",
+      "comments",
+    ].includes(name)
+      ? value.trim()
+      : value;
     setForm((prev) => ({ ...prev, [name]: trimmedValue }));
   };
 
@@ -215,15 +244,14 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
     }));
   };
   useEffect(() => {
-  const handleClickOutside = (e) => {
-    if (!e.target.closest(".relative")) {
-      setIsEmployeeSearchDropdownOpen(false);
-    }
-  };
-  document.addEventListener("click", handleClickOutside);
-  return () => document.removeEventListener("click", handleClickOutside);
-}, []);
-
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".relative")) {
+        setIsEmployeeSearchDropdownOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -239,7 +267,7 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validation
     if (!form.customer_name || !form.customer_name.trim()) {
       alert("Please select a customer");
@@ -275,7 +303,12 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
       onClose();
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Error: " + (error.response?.data?.message || error.message || "Failed to save collection"));
+      alert(
+        "Error: " +
+          (error.response?.data?.message ||
+            error.message ||
+            "Failed to save collection"),
+      );
     }
   };
 
@@ -289,7 +322,11 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
           className="bg-white w-[520px] rounded-2xl shadow-xl p-6"
         >
           <h2 className="text-lg font-semibold mb-4">
-            {isView ? "View Collection" : isEdit ? "Edit Collection" : "Add Collection"}
+            {isView
+              ? "View Collection"
+              : isEdit
+                ? "Edit Collection"
+                : "Add Collection"}
           </h2>
 
           {/* Collection Type */}
@@ -366,31 +403,30 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
                     <li className="p-2 text-sm text-gray-400">Searching...</li>
                   )}
 
-                  {!isLoadingCustomers && filteredCustomerList.length > 0 ? (
-                    filteredCustomerList.map((customer) => (
-                      <li
-                        key={customer.id}
-                        className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
-                        onClick={() => {
-                          setIsSearchDropdownOpen(false);
-                          setCustomerSearchTerm(customer.name);
-                          setForm((prev) => ({
-                            ...prev,
-                            customer_name: customer.name,
-                            customer_id: customer.id,
-                          }));
-                        }}
-                      >
-                        {customer.name}
-                      </li>
-                    ))
-                  ) : (
-                    !isLoadingCustomers && (
-                      <li className="p-2 text-sm text-gray-400">
-                        No customers found
-                      </li>
-                    )
-                  )}
+                  {!isLoadingCustomers && filteredCustomerList.length > 0
+                    ? filteredCustomerList.map((customer) => (
+                        <li
+                          key={customer.id}
+                          className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            setCustomerSearchTerm(customer.name);
+                            setForm((prev) => ({
+                              ...prev,
+                              customer_name: customer.name,
+                              customer_id: customer.id,
+                            }));
+                            setIsSearchDropdownOpen(false);
+                            setManuallyClosedCustomerDropdown(true);
+                          }}
+                        >
+                          {customer.name}
+                        </li>
+                      ))
+                    : !isLoadingCustomers && (
+                        <li className="p-2 text-sm text-gray-400">
+                          No customers found
+                        </li>
+                      )}
                 </ul>
               )}
             </div>
@@ -417,16 +453,21 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
                 onClick={() => setIsTimeSlotSearchDropdownOpen(true)}
                 className="flex items-center gap-2 bg-gray-100 rounded-lg p-2 cursor-pointer border"
               >
-              
-                <select className="w-full bg-gray-100 rounded-lg text-sm outline-none font-medium" name="time_slot" id="time_slot" value={form.time_slot} onChange={handleChange} disabled={isView}>
+                <select
+                  className="w-full bg-gray-100 rounded-lg text-sm outline-none font-medium"
+                  name="time_slot"
+                  id="time_slot"
+                  value={form.time_slot}
+                  onChange={handleChange}
+                  disabled={isView}
+                >
                   <option value="">Select Time Slot</option>
                   {allTimeSlots.map((slot) => (
-                    <option key={slot.id} value={slot.id}>
+                    <option key={slot.id} value={slot.time_slot || slot.name}>
                       {slot.time_slot || slot.name}
                     </option>
                   ))}
                 </select>
-               
               </div>
             </div>
 
@@ -471,7 +512,9 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
                 {isEmployeeSearchDropdownOpen && (
                   <ul className="absolute left-0 right-0 top-full mt-1 bg-white rounded-lg shadow-lg z-50 max-h-48 overflow-auto border">
                     {isLoadingEmployees ? (
-                      <li className="p-2 text-sm text-gray-400">Searching...</li>
+                      <li className="p-2 text-sm text-gray-400">
+                        Searching...
+                      </li>
                     ) : filteredEmployeeList.length > 0 ? (
                       filteredEmployeeList.map((employee) => (
                         <li
@@ -485,23 +528,27 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
                               driver_id: employee.id,
                             }));
                             setIsEmployeeSearchDropdownOpen(false);
+                            setManuallyClosedEmployeeDropdown(true);
                           }}
                         >
                           {`${employee.first_name || ""} ${employee.last_name || ""}`.trim()}
                         </li>
                       ))
                     ) : (
-                      <li className="p-2 text-sm text-gray-400">No drivers found</li>
+                      <li className="p-2 text-sm text-gray-400">
+                        No drivers found
+                      </li>
                     )}
                   </ul>
                 )}
               </div>
             </div>
-
           </div>
 
           <div className="mt-4">
-            <label className="block text-gray-600 font-medium mb-1">Comments</label>
+            <label className="block text-gray-600 font-medium mb-1">
+              Comments
+            </label>
             <textarea
               name="comments"
               value={form.comments}
@@ -534,7 +581,6 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
         </form>
       </div>
     </>
-
   );
 };
 

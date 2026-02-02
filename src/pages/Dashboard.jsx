@@ -10,6 +10,7 @@ import piechart from "../assets/piechart.png";
 import { useNavigate } from "react-router-dom";
 import { getTodaysOrdesrs } from "../api/order";
 import { useEffect, useState } from "react";
+import { CiSearch } from "react-icons/ci";
 
 const STATUS_LIST = [
   { label: "Ready to deliver", color: "bg-green-500" },
@@ -47,8 +48,20 @@ function Dashboard() {
   const fetchTodayOrders = async () => {
     try {
       const response = await getTodaysOrdesrs();
-      console.log(response.data.data);
-      setTodayOrders(response.data.data || []);
+      const allOrders = response.data.data || [];
+      // console.log(allOrders);
+
+      // Filter orders for today based on createdAt date
+
+      const today = new Date().toLocaleDateString("en-CA");
+      const filteredOrders = allOrders.filter((order) => {
+        if (!order?.created_at) return false;
+        const orderDate = new Date(order.created_at).toLocaleDateString(
+          "en-CA",
+        );
+        return orderDate === today;
+      });
+      setTodayOrders(filteredOrders);
     } catch (error) {
       console.error("Error fetching today's orders:", error);
       setTodayOrders([]);
@@ -91,114 +104,145 @@ function Dashboard() {
         <CgProfile className="h-6 w-6" />
       </div>
 
-      {/* TOP CARDS */}
-      <div className="flex gap-6 mb-8">
-        <StatCard
-          title="Pending Orders"
-          count="03"
-          border="border-yellow-400"
-          icon={<TbReport />}
-        />
-        <StatCard
-          title="Delivered Orders"
-          count="88"
-          border="border-black"
-          icon={<FiTruck />}
-        />
-        <StatCard
-          title="Ready To Deliver"
-          count="23"
-          border="border-green-400"
-          icon={<PiCubeTransparentFill />}
-        />
-        <StatCard
-          title="Delete Order"
-          count="20"
-          border="border-red-400"
-          icon={<RiDeleteBin5Line />}
-        />
-        <div className="bg-white rounded-lg shadow-sm w-56 px-4 py-3 border-b border-green-400">
-          <div>Payment Outstanding</div>
-          <div className="text-2xl font-semibold">AED 240.00</div>
-        </div>
-      </div>
-
-      {/* CUSTOMER + PIE SECTION */}
       <div className="flex gap-6">
-        {/* LEFT — CUSTOMER CARDS */}
-        <div className="flex-1 bg-white rounded-lg shadow-sm p-4">
-          <h3 className="text-lg font-semibold mb-4">Customer Orders</h3>
+        <div className="flex-1">
+          <div className="flex gap-6 mb-6">
+            <div className="flex-1">
+              <StatCard
+                title="Pending Orders"
+                count="03"
+                border="border-yellow-400"
+                icon={<TbReport />}
+              />
+            </div>
+            <div className="flex-1">
+              <StatCard
+                title="Delivered Orders"
+                count="88"
+                border="border-black"
+                icon={<FiTruck />}
+              />
+            </div>
+            <div className="flex-1">
+              <StatCard
+                title="Ready To Deliver"
+                count="23"
+                border="border-green-400"
+                icon={<PiCubeTransparentFill />}
+              />
+            </div>
+            <div className="flex-1">
+              <StatCard
+                title="Delete Order"
+                count="20"
+                border="border-red-400"
+                icon={<RiDeleteBin5Line />}
+              />
+            </div>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {todayOrders.length > 0 ? (
-              todayOrders.map((item, index) => {
-                const styles = getStatusStyles(item.order_status);
-                
-                // Get item count and unique service types
-                const itemCount = item.item_list?.length || 0;
-                const serviceTypes = item.item_list?.map(listItem => listItem.type) || [];
-                const uniqueTypes = [...new Set(serviceTypes)];
-                const displayTypes = uniqueTypes.slice(0, 3).join(" ");
-                const hasMore = uniqueTypes.length > 3;
+          <div className="p-6 bg-[#F5F8FF] rounded-lg h-[600px] flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-slate-800">
+                Today’s Delivery
+              </h2>
 
-                return (
-                  <div
-                    key={index}
-                    className={`w-full h-[153px] border ${styles.border} rounded-md p-4 shadow-sm`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-base">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center border border-[#BEC3E4] gap-2 rounded-xl px-4 py-2 w-[280px] bg-white shadow-sm">
+                  <CiSearch className="text-gray-600  " />
+                  <input
+                    type="text"
+                    placeholder="Search Here..."
+                    className="w-full outline-none text-sm text-gray-600"
+                  />
+                </div>
+
+                <select className="border border-[#BEC3E4] rounded-xl px-4 py-2 bg-white shadow-sm text-sm font-medium">
+                  <option>All Orders</option>
+                  <option>Delivered</option>
+                  <option>Processing</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2      flex-1 ">
+              {todayOrders.length > 0 ? (
+                todayOrders.map((item, index) => {
+                  const itemCount = item.item_list?.length || 0;
+
+                  // Service Types
+                  const serviceTypes =
+                    item.item_list?.map((listItem) => listItem.type) || [];
+
+                  const uniqueTypes = [...new Set(serviceTypes)];
+                  const displayTypes = uniqueTypes.slice(0, 2).join(" + ");
+                  const hasMore = uniqueTypes.length > 2;
+
+                  const statusStyles = getStatusStyles(item.order_status);
+
+                  return (
+                    <div
+                      key={index}
+                      className={`bg-white text-[#1E293B] flex flex-col gap-4 rounded-xl border-2 ${statusStyles.border} shadow-lg hover:shadow-xl transition-shadow duration-300 p-5 self-start`}
+                    >
+                      <div className="flex justify-between items-start ">
+                        <h3 className="text-lg font-bold text-slate-800">
                           {item.customer_name}
                         </h3>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {itemCount} {itemCount === 1 ? 'item' : 'items'} - {displayTypes}{hasMore ? '...' : ''}
+                        <span
+                          className={`px-4 py-1 rounded-full text-xs font-semibold ${statusStyles.badge}`}
+                        >
+                          {item.order_status}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center ">
+                        <p className="text-sm text-gray-500">
+                          {itemCount} Items {displayTypes}
+                          {hasMore ? "..." : ""}
+                        </p>
+                        <p className="font-bold text-slate-800 text-sm">
+                          {item.order_code}
                         </p>
                       </div>
-                      
-                      <span
-                        className={`px-3 py-1 text-xs rounded-full ${styles.badge} inline-block`}
-                      >
-                        {item.order_status}
-                      </span>
                     </div>
-
-                    <div className="mt-3 flex justify-end">
-                      <span className="text-lg font-semibold text-gray-500">
-                        {item.order_code}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="col-span-2 text-center text-gray-500 py-8">
-                No orders found for today
-              </div>
-            )}
+                  );
+                })
+              ) : (
+                <p className="col-span-2 text-center text-gray-500">
+                  No orders found for today
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* RIGHT — PIE + LEGEND */}
-        <div className="w-[380px] bg-white rounded-lg shadow-sm p-4 h-fit justify-between">
-          <h3 className="text-lg font-semibold mb-4">Overview</h3>
+        <div className="w-[380px] flex flex-col gap-6">
+          <div className="bg-white rounded-lg shadow-sm px-4 py-3 border-b border-green-400">
+            <div>Payment Outstanding</div>
+            <div className="text-2xl font-semibold">AED 240.00</div>
+          </div>
 
-          <img
-            src={piechart}
-            alt="Pie Chart"
-            className="w-75 mb-6 justify-between"
-          />
+          <div className="bg-white rounded-lg shadow-sm p-4 flex-1 overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">Overview</h3>
 
-          <div className="border-2 border-white p-4 rounded-lg shadow-sm">
-            <div className="grid grid-cols-2 gap-x-10 gap-y-5">
-              {STATUS_LIST.map((item, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className={`w-5 h-5 ${item.color}`} />
-                  <span className="text-sm font-semibold text-gray-700">
-                    {item.label}
-                  </span>
-                </div>
-              ))}
+            <img
+              src={piechart}
+              alt="Pie Chart"
+              className="w-75 mb-6 justify-between"
+            />
+
+            <div className="border-2 border-white p-4 rounded-lg shadow-sm">
+              <div className="grid grid-cols-2 gap-x-10 gap-y-5">
+                {STATUS_LIST.map((item, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <div className={`w-5 h-5 ${item.color}`} />
+                    <span className="text-sm font-semibold text-gray-700">
+                      {item.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -211,7 +255,7 @@ function Dashboard() {
 function StatCard({ title, count, border, icon }) {
   return (
     <div
-      className={`bg-white rounded-lg shadow-sm w-56 px-4 py-3 border-b ${border}`}
+      className={`bg-white rounded-lg shadow-sm px-4 py-3 border-b ${border}`}
     >
       <div className="flex justify-between items-center">
         <span className="text-2xl font-semibold">{count}</span>

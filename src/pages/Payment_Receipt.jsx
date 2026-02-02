@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import { getAllPaymentReceipts } from "../api/paymentReport";
 import { formatDateForInput } from "../utils/formatDateForInput";
+import { getEmployeeSearch } from "../api/employee";
+import { CiSearch } from "react-icons/ci";
 
 function Payment_Receipt() {
   const navigate = useNavigate();
@@ -12,9 +14,11 @@ function Payment_Receipt() {
   const [paymentReceipts, setPaymentReceipts] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [allDrivers, setAllDrivers] = useState([]);
 
   // States for Filters
   const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState("");
   const [driver, setDriver] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -22,21 +26,70 @@ function Payment_Receipt() {
 
   const fetchPaymentReceipts = async () => {
     try {
-      // Pass all filters to your API function
       const params = {
         page,
         limit: 10,
-        search,
+        search: searchQuery,
         status,
         driver,
         startDate,
-        endDate
+        endDate,
       };
 
       const res = await getAllPaymentReceipts(params);
 
       if (res.data) {
-        setPaymentReceipts(res.data.data);
+        let filtered = res.data.data || [];
+
+        // Apply client-side filtering for Order ID
+        if (searchQuery && searchQuery.trim()) {
+          filtered = filtered.filter((item) =>
+            item.order_id
+              ?.toString()
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()),
+          );
+        }
+
+        // Apply client-side filtering for Payment Type
+        if (status && status.trim()) {
+          filtered = filtered.filter(
+            (item) => item.payment_type?.toLowerCase() === status.toLowerCase(),
+          );
+        }
+
+        // Apply client-side filtering for Driver
+        if (driver && driver.trim()) {
+          filtered = filtered.filter((item) =>
+            item.driver?.toLowerCase().includes(driver.toLowerCase()),
+          );
+        }
+
+        // Apply client-side filtering for Start Date
+        if (startDate) {
+          filtered = filtered.filter((item) => {
+            if (!item.date) return false;
+            // Parse the item date - handle various formats
+            const itemDateStr = item.date.split('T')[0]; // Get just the date part
+            const itemDateObj = new Date(itemDateStr);
+            const startDateObj = new Date(startDate);
+            return itemDateObj >= startDateObj;
+          });
+        }
+
+        // Apply client-side filtering for End Date
+        if (endDate) {
+          filtered = filtered.filter((item) => {
+            if (!item.date) return false;
+            // Parse the item date - handle various formats
+            const itemDateStr = item.date.split('T')[0]; // Get just the date part
+            const itemDateObj = new Date(itemDateStr);
+            const endDateObj = new Date(endDate);
+            return itemDateObj <= endDateObj;
+          });
+        }
+
+        setPaymentReceipts(filtered);
         setTotalPages(res.data.pagination.totalPages);
       }
     } catch (error) {
@@ -44,15 +97,52 @@ function Payment_Receipt() {
     }
   };
 
+  // Debounce search - wait 500ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(search);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
   // Trigger fetch when page or any filter changes
   useEffect(() => {
     fetchPaymentReceipts();
-  }, [page, status, driver, startDate, endDate]);
+  }, [page, status, driver, startDate, endDate, searchQuery]);
 
-  // Handle Search on "Enter" or clear
+  // Fetch drivers from employee API
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const response = await getEmployeeSearch();
+        const drivers = response.data.data.filter(
+          (employee) => employee.role === "Driver",
+        );
+        setAllDrivers(drivers);
+      } catch (error) {
+        console.error("Failed to fetch drivers:", error);
+      }
+    };
+    fetchDrivers();
+  }, []);
+
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
-    setPage(1); // Reset to first page on new search
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === "Enter") {
+      setSearchQuery(search);
+      setPage(1);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearch("");
+    setSearchQuery("");
+    setPage(1);
   };
 
   return (
@@ -74,18 +164,22 @@ function Payment_Receipt() {
       <div className="flex flex-wrap justify-end gap-4 mb-6">
         {/* Search Box */}
         <div className="flex items-center bg-gray-200 rounded-lg px-3 py-2 w-64">
+          <CiSearch className="text-gray-500 mr-2" />
           <input
             type="text"
-            placeholder="🔍 Search Customer..."
+            placeholder="Search Order ID..."
             value={search}
             onChange={handleSearchChange}
+            onKeyPress={handleSearchKeyPress}
             className="bg-transparent outline-none text-sm w-full"
           />
           {search && (
             <span
               className="text-gray-500 cursor-pointer"
-              onClick={() => setSearch("")}
-            >✕</span>
+              onClick={handleClearSearch}
+            >
+              ✕
+            </span>
           )}
         </div>
 
@@ -93,11 +187,12 @@ function Payment_Receipt() {
         <select
           className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none"
           value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
         >
-          <option value={""} disabled>
-            Payment Method
-          </option>
+          <option value="">All Payment Methods</option>
           <option value="Settlement">Settlement</option>
           <option value="Advance">Advance</option>
           <option value="Cash">Cash</option>
@@ -110,20 +205,34 @@ function Payment_Receipt() {
         <select
           className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none"
           value={driver}
-          onChange={(e) => { setDriver(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setDriver(e.target.value);
+            setPage(1);
+          }}
         >
           <option value="">All Drivers</option>
-          <option value="Nilesh Pathak">Nilesh Pathak</option>
-          <option value="Pk Nawaz">Pk Nawaz</option>
+          {allDrivers.map((driverItem) => (
+            <option
+              key={driverItem.id}
+              value={`${driverItem.first_name} ${driverItem.last_name}`}
+            >
+              {driverItem.first_name} {driverItem.last_name}
+            </option>
+          ))}
         </select>
 
         {/* Date Filters */}
         <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-600">Start Date</label>
+          <label className="text-sm font-medium text-gray-600">
+            Start Date
+          </label>
           <input
             type="date"
             value={startDate}
-            onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setPage(1);
+            }}
             className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
           />
         </div>
@@ -133,7 +242,10 @@ function Payment_Receipt() {
           <input
             type="date"
             value={endDate}
-            onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setPage(1);
+            }}
             className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
           />
         </div>
@@ -144,8 +256,20 @@ function Payment_Receipt() {
         <table className="w-full text-sm border-separate">
           <thead>
             <tr>
-              {["Sr No", "Date", "Order ID", "Customer", "Driver", "Amount", "Payment Type", "Note"].map((head) => (
-                <th key={head} className="bg-[#56CCFF] px-4 py-3 text-left font-medium text-gray-800">
+              {[
+                "Sr No",
+                "Date",
+                "Order ID",
+                "Customer",
+                "Driver",
+                "Amount",
+                "Payment Type",
+                "Note",
+              ].map((head) => (
+                <th
+                  key={head}
+                  className="bg-[#56CCFF] px-4 py-3 text-left font-medium text-gray-800"
+                >
                   {head}
                 </th>
               ))}
@@ -154,24 +278,35 @@ function Payment_Receipt() {
           <tbody>
             {paymentReceipts.length > 0 ? (
               paymentReceipts.map((item, index) => (
-                <tr key={item.id || index} className="bg-white border-b hover:bg-gray-50">
+                <tr
+                  key={item.id || index}
+                  className="bg-white border-b hover:bg-gray-50"
+                >
                   <td className="px-4 py-3">{(page - 1) * 10 + (index + 1)}</td>
                   <td className="px-4 py-3">{formatDateForInput(item.date)}</td>
-                  <td className="px-4 py-3 font-medium text-blue-600">{item.order_id}</td>
+                  <td className="px-4 py-3 font-medium text-blue-600">
+                    {item.order_id}
+                  </td>
                   <td className="px-4 py-3">{item.customer}</td>
                   <td className="px-4 py-3">{item.driver}</td>
                   <td className="px-4 py-3 font-semibold">AED {item.amount}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs ${item.payment_type === 'Cash' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${item.payment_type === "Cash" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}
+                    >
                       {item.payment_type}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{item.note || "-"}</td>
+                  <td className="px-4 py-3 text-gray-500">
+                    {item.note || "-"}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="text-center py-10 text-gray-500">No records found.</td>
+                <td colSpan="8" className="text-center py-10 text-gray-500">
+                  No records found.
+                </td>
               </tr>
             )}
           </tbody>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   Search,
-  ChevronDown,
   Calendar,
   User,
   UserPlus,
@@ -29,6 +28,8 @@ const POS = () => {
   const [length, setLength] = useState(1);
   const [width, setWidth] = useState(1);
   const [openPickerIndex, setOpenPickerIndex] = useState(null);
+  const [serviceSearchTerm, setServiceSearchTerm] = useState("");
+  const [serviceCategoryFilter, setServiceCategoryFilter] = useState("");
 
   // Selection State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -405,6 +406,27 @@ const POS = () => {
 
   const modalTotal = prices[deliveryType] * qty * (isSqfEnabled ? sqft : 1);
 
+
+  // --- Filtered Services ---
+  
+  const filteredServices = useMemo(() => {
+    const term = serviceSearchTerm.trim().toLowerCase();
+    const filterValue = serviceCategoryFilter.trim().toLowerCase();
+
+    return services.filter((service) => {
+      const nameMatch = term
+        ? service?.name?.toLowerCase().includes(term)
+        : true;
+      if (!filterValue || filterValue === "all") return nameMatch;
+      const categoryValue = service?.category
+        ? service.category.toLowerCase()
+        : "";
+      const categoryMatch = categoryValue.includes(filterValue);
+      return nameMatch && categoryMatch;
+    });
+  }, [serviceSearchTerm, serviceCategoryFilter, services]);
+
+
   return (
     <div className="min-h-screen bg-[#f0f4f9] p-3 md:p-6 font-sans text-slate-700">
       {/* Header */}
@@ -429,19 +451,32 @@ const POS = () => {
               <input
                 type="text"
                 placeholder="Search services..."
+                value={serviceSearchTerm}
+                onChange={(e) => setServiceSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 rounded-lg bg-white shadow-sm outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
-            <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm font-medium hover:bg-slate-50 whitespace-nowrap">
-              Sort By Category <ChevronDown size={16} />
-            </button>
+            <select
+              value={serviceCategoryFilter}
+              onChange={(e) => setServiceCategoryFilter(e.target.value)}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm font-medium hover:bg-slate-50 whitespace-nowrap"
+            >
+              <option value="" disabled>
+                Sort by Category
+              </option>
+              <option value="All">All</option>
+              <option value="Gends">Gends</option>
+              <option value="Ladis">Ladis</option>
+              <option value="Kids">Kids</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
 
           {loading ? (
             <div className="text-center py-20">Loading services...</div>
           ) : (
             <ServiceGrid
-              services={services}
+              services={filteredServices}
               onServiceClick={handleServiceClick}
             />
           )}
