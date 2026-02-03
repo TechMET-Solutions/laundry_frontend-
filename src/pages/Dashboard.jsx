@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { getTodaysOrdesrs } from "../api/order";
 import { useEffect, useState } from "react";
 import { CiSearch } from "react-icons/ci";
+import NavButton from "../components/ui/NavButton";
 
 const STATUS_LIST = [
   { label: "Ready to deliver", color: "bg-green-500" },
@@ -76,29 +77,20 @@ function Dashboard() {
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* HEADER */}
       <div className="flex justify-end mb-6 gap-3 items-center">
-        <button
-          onClick={() => navigate("/pos")}
-          className="bg-white px-4 py-2 rounded-full ring-2 ring-blue-400 text-sm"
-        >
+        <NavButton onClick={() => navigate("/pos")}>
           <IoIosAddCircleOutline className="inline mr-1" />
           Add New Order
-        </button>
+        </NavButton>
 
-        <button
-          onClick={() => navigate("/customers")}
-          className="bg-white px-4 py-2 rounded-full ring-2 ring-blue-400 text-sm"
-        >
+        <NavButton onClick={() => navigate("/customers")}>
           <IoPersonOutline className="inline mr-1" />
           Manage Customer
-        </button>
+        </NavButton>
 
-        <button
-          onClick={() => navigate("/services/list")}
-          className="bg-white px-4 py-2 rounded-full ring-2 ring-blue-400 text-sm"
-        >
+        <NavButton onClick={() => navigate("/services/list")}>
           <TbSettingsBolt className="inline mr-1" />
           Add New Services
-        </button>
+        </NavButton>
 
         <VscBell className="h-6 w-6" />
         <CgProfile className="h-6 w-6" />

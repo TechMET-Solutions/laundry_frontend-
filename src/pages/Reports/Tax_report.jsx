@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { FiEye, FiEdit, FiTrash2 } from "react-icons/fi";
-import { IoReturnUpBackOutline } from "react-icons/io5";
-import { useNavigate, useLocation } from "react-router-dom";
 import { reportitems } from "../../constants/reportitems";
+import NavButton from "../../components/ui/NavButton";
+import ReportHeader from "../../components/ReportHeader";
 import { getTaxReport } from "../../api/report";
 import { formatDateForInput } from "../../utils/formatDateForInput";
+import SummaryCard from "../../components/SummaryCard";
+import DateFilter from "../../components/DateFilter";
+import ReportTable from "../../components/ReportTable";
 
 
 function Tax_report() {
-  const navigate = useNavigate();
-  const location = useLocation();
+
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -23,22 +24,6 @@ function Tax_report() {
   const [totalDebit, setTotalDebit] = useState(0);
   const [totalCredit, setTotalCredit] = useState(0);
 
-
-
-  // find active report from URL
-  const activeReport =
-    reportitems.find((item) => item.path === location.pathname) ||
-    reportitems[0];
-
-  const [selectedReport, setSelectedReport] = useState(activeReport);
-
-  const handleReportChange = (e) => {
-    const report = reportitems.find(
-      (item) => item.path === e.target.value
-    );
-    setSelectedReport(report);
-    navigate(report.path);
-  };
 
   const fetchTaxReport = async () => {
     try {
@@ -169,161 +154,83 @@ function Tax_report() {
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
+      <ReportHeader
+        reportItems={reportitems}
+        actions={
+          <>
+            <NavButton
+              onClick={handleDownloadPDF}
+              variant="download">
+              Download Report
+            </NavButton>
 
-        {/* Left side */}
-        <div className="flex items-center gap-3">
-          <div
-            className="h-8 w-8 flex items-center justify-center bg-blue-600 text-white rounded cursor-pointer"
-            onClick={() => navigate(-1)}
-          >
-            <IoReturnUpBackOutline />
-          </div>
-
-          <h2 className="font-semibold text-lg">
-            {selectedReport.name}
-          </h2>
-        </div>
-
-        {/* Right side */}
-        <div className="flex items-center gap-3">
-          <select
-            value={selectedReport.path}
-            onChange={handleReportChange}
-            className="px-4 py-2 rounded-lg text-sm bg-indigo-400 text-white cursor-pointer"
-          >
-            {reportitems.map((item, index) => (
-              <option key={index} value={item.path} className="text-black bg-white">
-                {item.name}
-              </option>
-            ))}
-          </select>
-
-          <button
-            onClick={handleDownloadPDF}
-            className="bg-green-600 text-white px-4 py-2 rounded-full text-sm"
-          >
-            Download Report
-          </button>
-
-          <button
-            onClick={handlePrintPDF}
-            className="bg-orange-600 text-white px-4 py-2 rounded-full text-sm"
-          >
-            Print Report
-          </button>
-
-        </div>
-      </div>
+            <NavButton
+              onClick={handlePrintPDF}
+              variant="print">
+              Print Report
+            </NavButton>
+          </>
+        }
+      />
       <div className="flex gap-6 mt-6">
-        {/* Total Debit */}
-        <div className="bg-white rounded-lg shadow-sm w-56">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-green-400">
-            <p className="text-sm text-gray-600">Total Debit</p>
-            <span className="text-lg font-semibold text-gray-800">
-              AED {totalDebit}
-            </span>
-          </div>
-        </div>
-
-        {/* Total Credit */}
-        <div className="bg-white rounded-lg shadow-sm w-56">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-yellow-400">
-            <p className="text-sm text-gray-600">Total Credit</p>
-            <span className="text-lg font-semibold text-gray-800">
-              AED {totalCredit}
-            </span>
-          </div>
-        </div>
+        <SummaryCard
+          label="Total Debit"
+          currency="AED"
+          value={totalDebit}
+          borderColor="border-green-400"
+        />
+        <SummaryCard
+          label="Total Credit"
+          currency="AED"
+          value={totalCredit}
+          borderColor="border-yellow-400"
+        />
       </div>
-
 
       {/* DATE FILTERS */}
-      <div className="flex justify-end gap-6 mb-6">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-600">
-            Start Date
-          </label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-600">
-            End Date
-          </label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-gray-200 text-sm outline-none"
-          />
-        </div>
-        <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
+      <div className="flex justify-end gap-6 mb-2">
+        <DateFilter
+          startDate={startDate}
+          endDate={endDate}
+          onStartChange={setStartDate}
+          onEndChange={setEndDate}
+        />
+        {/* <select className="bg-gray-200 rounded-lg px-4 py-2 text-sm outline-none">
           <option>Sales</option>
           <option>Sales</option>
           <option>Expenses</option>
 
-        </select>
+        </select> */}
       </div>
 
-      <div className="bg-[#f4f7fb]  ">
-        <table className="w-full text-sm border-separate  ">
-          <thead>
-            <tr>
-              {[
-                "Sr No",
-                "Date",
-                "Order ID",
-                "Before Tax",
-                "Tax Amount",
-                "Total Amount",
-
-              ].map((head) => (
-                <th
-                  key={head}
-                  className="bg-[#56CCFF]  px-4 py-3 text-left font-medium text-gray-800 "
-                >
-                  {head}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="6" className="text-center py-6">
-                  Loading...
-                </td>
-              </tr>
-            ) : reportData.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="text-center py-6">
-                  No records found
-                </td>
-              </tr>
-            ) : (
-              reportData.map((item, index) => (
-                <tr key={index} className="bg-[#f1f5fb] border-b">
-                  <td className="px-4 py-3">{index + 1}</td>
-                  <td className="px-4 py-3">{formatDateForInput(item.order_date)}</td>
-                  <td className="px-4 py-3">{item.order_code}</td>
-                  <td className="px-4 py-3">AED {item.sub_total}</td>
-                  <td className="px-4 py-3">AED {item.tax}</td>
-                  <td className="px-4 py-3">AED {item.gross_total}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ReportTable
+        headers={[
+          "Sr No",
+          "Date",
+          "Order ID",
+          "Before Tax",
+          "Tax Amount",
+          "Total Amount",
+        ]}
+        data={reportData}
+        loading={loading}
+        renderRow={(item, index) => (
+          <tr key={index} className="bg-[#f1f5fb] border-b">
+            <td className="px-4 py-3">{index + 1}</td>
+            <td className="px-4 py-3">
+              {formatDateForInput(item.order_date)}
+            </td>
+            <td className="px-4 py-3">{item.order_code}</td>
+            <td className="px-4 py-3">AED {item.sub_total}</td>
+            <td className="px-4 py-3">AED {item.tax}</td>
+            <td className="px-4 py-3">AED {item.gross_total}</td>
+          </tr>
+        )}
+      />
     </div>
 
   );
 }
 
 export default Tax_report;
+
