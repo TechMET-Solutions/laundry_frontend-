@@ -294,7 +294,7 @@ const POS = () => {
             addonName: selectedAddon.name,
             addonPrice: Number(selectedAddon.price),
           }
-        : null,
+        : 0,
       tax,
       discount,
       grossTotal: grandTotal,

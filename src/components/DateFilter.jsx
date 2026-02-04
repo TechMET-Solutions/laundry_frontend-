@@ -5,7 +5,7 @@ const DateFilter = ({
     onEndChange,
 }) => {
     return (
-        <div className="flex justify-end gap-6 mb-6">
+        <div className="flex justify-end gap-6">
             <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-gray-600">
                     Start Date

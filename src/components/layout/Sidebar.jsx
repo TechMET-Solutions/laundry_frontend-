@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import logo from '../../assets/logo.png'
 import {
   LuLayoutDashboard,
@@ -36,7 +36,7 @@ const menu = [
   },
   { name: 'Employees', icon: LuUserCog, path: '/employees' },
   { name: 'Payment Receipt', icon: LuReceipt, path: '/payments' },
-  { name: 'Reports', icon: LuBriefcase, path: '/reports' },
+  { name: 'Reports', icon: LuBriefcase, path: '/reports/daily' },
   { name: 'Time Slots', icon: LuClock, path: '/time-slots' },
   {
     name: 'Location Management',
