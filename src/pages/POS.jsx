@@ -653,7 +653,7 @@ const POS = () => {
                   <span className="text-indigo-600 block text-sm">
                     {deliveryDate
                       ? deliveryDate.split("-").reverse().join("-")
-                      : "--"}
+                      : " "}
                   </span>
                 </div>
 

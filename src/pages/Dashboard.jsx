@@ -6,12 +6,34 @@ import { IoPersonOutline } from "react-icons/io5";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { FiTruck } from "react-icons/fi";
 import { PiCubeTransparentFill } from "react-icons/pi";
-import piechart from "../assets/piechart.png";
 import { useNavigate } from "react-router-dom";
 import { getTodaysOrdesrs } from "../api/order";
 import { useEffect, useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import NavButton from "../components/ui/NavButton";
+
+//------------Pie Chart Data and Settings----------------
+
+import { PieChart } from "@mui/x-charts/PieChart";
+
+const data = [
+  { label: "Ready to deliver", value: 4, color: "#10b981" },
+  { label: "Returned", value: 3, color: "#dc2626" },
+  { label: "Delivered", value: 10, color: "#1e40af" },
+  { label: "Partial delivery", value: 2, color: "#b45309" },
+  { label: "Processing", value: 33, color: "#f97316" },
+  { label: "Out for delivery", value: 7, color: "#3b82f6" },
+  { label: "Pending delivery", value: 5, color: "#fbbf24" },
+];
+
+const settings = {
+  margin: { right: 5 },
+  width: 200,
+  height: 200,
+  hideLegend: true,
+};
+
+//---------------------------------------------
 
 const STATUS_LIST = [
   { label: "Ready to deliver", color: "bg-green-500" },
@@ -45,6 +67,8 @@ const getStatusStyles = (status) => {
 function Dashboard() {
   const navigate = useNavigate();
   const [todayOrders, setTodayOrders] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("all");
 
   const fetchTodayOrders = async () => {
     try {
@@ -73,6 +97,23 @@ function Dashboard() {
     fetchTodayOrders();
   }, []);
 
+  // Filter and sort orders
+  const filteredAndSortedOrders = todayOrders
+    .filter((order) => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        order.customer_name.toLowerCase().includes(searchLower) ||
+        order.order_code.toLowerCase().includes(searchLower)
+      );
+    })
+    .filter((order) => {
+      if (sortBy === "all") return true;
+      const status = (order.order_status || "").toLowerCase();
+      if (sortBy === "pending") return status.includes("pending");
+      return status === sortBy;
+    });
+
+  console.log(filteredAndSortedOrders);
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* HEADER */}
@@ -145,21 +186,32 @@ function Dashboard() {
                   <input
                     type="text"
                     placeholder="Search Here..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full outline-none text-sm text-gray-600"
                   />
                 </div>
 
-                <select className="border border-[#BEC3E4] rounded-xl px-4 py-2 bg-white shadow-sm text-sm font-medium">
-                  <option>All Orders</option>
-                  <option>Delivered</option>
-                  <option>Processing</option>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="border border-[#BEC3E4] rounded-xl px-4 py-2 bg-white shadow-sm text-sm font-medium"
+                >
+                  <option value="all">All Orders</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="processing">Processing</option>
+                  <option value="ready to deliver">Ready to Deliver</option>
+                  <option value="pending">Pending</option>
+                  <option value="out for delivery">Out for Delivery</option>
+                  <option value="partial delivery">Partial Delivery</option>
+                  <option value="returned">Returned</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 items-start auto-rows-min flex-1">
-              {todayOrders.length > 0 ? (
-                todayOrders.map((item, index) => {
+              {filteredAndSortedOrders.length > 0 ? (
+                filteredAndSortedOrders.map((item, index) => {
                   const itemCount = item.item_list?.length || 0;
 
                   // Service Types
@@ -218,11 +270,22 @@ function Dashboard() {
           <div className="bg-white rounded-lg shadow-sm p-4 flex-1 overflow-y-auto">
             <h3 className="text-lg font-semibold mb-4">Overview</h3>
 
-            <img
-              src={piechart}
-              alt="Pie Chart"
-              className="w-75 mb-6 justify-between"
-            />
+            <div className="flex justify-center mb-6">
+              <PieChart
+                series={[
+                  {
+                    innerRadius: 50,
+                    outerRadius: 100,
+                    data,
+                    arcLabel: "value",
+                  },
+                ]}
+                sx={{
+                  ".MuiPieArc-root": { stroke: "none", strokeWidth: 0 },
+                }}
+                {...settings}
+              />
+            </div>
 
             <div className="border-2 border-white p-4 rounded-lg shadow-sm">
               <div className="grid grid-cols-2 gap-x-10 gap-y-5">
