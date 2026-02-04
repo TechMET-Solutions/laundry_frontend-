@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/layout/Layout";
-// import PosPage from "./pages/Pos/PosPage.jsx"
 import ServiceList from "./pages/services/ServiceList";
 import ServiceType from "./pages/services/ServiceType";
 import ServiceCategory from "./pages/services/ServiceCategory";
@@ -32,11 +31,9 @@ import Delete_Order from "./pages/Orders/Delete_Order.jsx";
 import DetailedOrderPage from "./pages/Orders/Detailed_Order.jsx";
 import Payment from "./pages/Payment_Receipt.jsx";
 
-// Add this import with other imports
 import CustomerD from "./pages/CustomerD.jsx";
 import Login from "./pages/Login.jsx";
 
-//expenses
 import ExpenseCategories from "./pages/Expense_categories.jsx";
 import POS from "./pages/POS.jsx";
 
@@ -55,10 +52,9 @@ function App() {
         <Route path="location_management/emirates" element={<Emirates />} />
         <Route path="location_management/areas" element={<Area />} />
         <Route path="collection" element={<Collections />} />
-<<<<<<< HEAD
 
-
-        {/* <Route path="reports" element={<Daily_reports />} /> */}
+        {/* Reports */}
+        <Route path="reports" element={<Daily_reports />} />
         <Route path="reports/daily" element={<Daily_reports />} />
         <Route path="reports/outstanding" element={<Outstanding_reports />} />
         <Route path="reports/sales" element={<SalesReport />} />
@@ -66,51 +62,26 @@ function App() {
         <Route path="reports/ledger" element={<Ledger_report />} />
         <Route path="reports/customer-outstanding" element={<Customer_outstanding_report />} />
         <Route path="reports/cloth-wise" element={<Cloth_wise_reports />} />
-
         <Route path="reports/expenses" element={<Expenses_report />} />
         <Route path="reports/tax" element={<Tax_report />} />
-=======
-        <Route path="reports" element={<Daily_reports />} />
-        <Route path="reports/daily_reports" element={<Daily_reports />} />
-        <Route
-          path="reports/outstanding_reports"
-          element={<Outstanding_reports />}
-        />
-        <Route path="reports/sales_reports" element={<Sales_report />} />
-        <Route path="reports/order_reports" element={<Order_reports />} />
-        <Route path="reports/ledger_reports" element={<Ledger_report />} />
-        <Route
-          path="reports/customer_outstanding_reports"
-          element={<Customer_outstanding_report />}
-        />
-        <Route
-          path="reports/cloth_wise_reports"
-          element={<Cloth_wise_reports />}
-        />
-        <Route path="reports/expenses_reports" element={<Expenses_report />} />
-        <Route path="reports/tax_reports" element={<Tax_report />} />
->>>>>>> Yash
+
+        {/* Other */}
         <Route path="expenses" element={<Expenses />} />
+        <Route path="expense_categories" element={<ExpenseCategories />} />
         <Route path="time-slots" element={<TimeSlot />} />
         <Route path="customers" element={<Customer />} />
-        <Route path="/employees" element={<Employee></Employee>}></Route>
-        <Route path="/orders" element={<Order_List />} />
-        <Route path="/orders/status_screen" element={<Order_Status_Screen />} />
-        <Route path="/orders/deleted_orders" element={<Delete_Order />} />
-        <Route path="/orders/detailed_order" element={<DetailedOrderPage />} />
-        <Route path="/orders/:id" element={<DetailedOrderPage />} />
-        <Route path="/payments" element={<Payment />} />
-        {/* ... other routes ... */}
-        <Route path="reports/tax_reports" element={<Tax_report />} />
-        <Route path="expenses" element={<Expenses />} />
-        <Route path="time-slots" element={<TimeSlot />} />
-        <Route path="customers/:id/details" element={<CustomerD />} />{" "}
-        {/* ADDED ROUTE */}
-        <Route path="/employees" element={<Employee />} />
-        <Route path="/orders" element={<Order_List />} />
-        {/* ... rest of routes ... */}
-        // In your router configuration
-        <Route path="/expense_categories" element={<ExpenseCategories />} />
+        <Route path="customers/:id/details" element={<CustomerD />} />
+        <Route path="employees" element={<Employee />} />
+
+        {/* Orders */}
+        <Route path="orders" element={<Order_List />} />
+        <Route path="orders/status_screen" element={<Order_Status_Screen />} />
+        <Route path="orders/deleted_orders" element={<Delete_Order />} />
+        <Route path="orders/detailed_order" element={<DetailedOrderPage />} />
+        <Route path="orders/:id" element={<DetailedOrderPage />} />
+
+        {/* Payments */}
+        <Route path="payments" element={<Payment />} />
       </Route>
     </Routes>
   );
