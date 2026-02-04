@@ -117,6 +117,7 @@ function Customer() {
     } catch (error) {
       console.error("Export error:", error);
       alert("Failed to download Excel file");
+      
     }
   };
 

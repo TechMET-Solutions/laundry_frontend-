@@ -1,9 +1,9 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getOrderById } from "../../api/order";
+import { getOrderById, updateDriver } from "../../api/order";
 import { getCustomersById } from "../../api/customer";
-import { getEmployeeById } from "../../api/employee";
+import { getAllEmployees, getEmployeeById } from "../../api/employee";
 import { QRCodeCanvas } from "qrcode.react";
 import AddPaymentModal from "../../components/models/PaymentModel";
 
@@ -16,6 +16,18 @@ function DetailedOrderPage() {
   const [driverDetails, setDriverDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isChangeDriverOpen, setIsChangeDriverOpen] = useState(false);
+  const [driverSearchTerm, setDriverSearchTerm] = useState("");
+  const [filteredDriverList, setFilteredDriverList] = useState([]);
+  const [isDriverSearchDropdownOpen, setIsDriverSearchDropdownOpen] =
+    useState(false);
+  const [isLoadingDrivers, setIsLoadingDrivers] = useState(false);
+  const [allDrivers, setAllDrivers] = useState([]);
+  const [isUpdatingDriver, setIsUpdatingDriver] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [driverSelectionError, setDriverSelectionError] = useState("");
+  const [driverUpdateError, setDriverUpdateError] = useState("");
+  const isSelectingDriverRef = useRef(false);
 
   const fetchOrdersData = async () => {
     if (state.orderId) {
@@ -55,6 +67,94 @@ function DetailedOrderPage() {
   useEffect(() => {
     fetchOrdersData();
   }, []);
+
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        setIsLoadingDrivers(true);
+        const response = await getAllEmployees();
+        const drivers = (response.data.data || []).filter(
+          (employee) => employee.role === "Driver",
+        );
+        setAllDrivers(drivers);
+      } catch (error) {
+        console.error("Driver fetch error:", error);
+      } finally {
+        setIsLoadingDrivers(false);
+      }
+    };
+
+    fetchDrivers();
+  }, []);
+
+  useEffect(() => {
+    if (!driverSearchTerm.trim()) {
+      setFilteredDriverList([]);
+      setIsDriverSearchDropdownOpen(false);
+      return;
+    }
+
+    if (isSelectingDriverRef.current) {
+      isSelectingDriverRef.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const filtered = allDrivers.filter((driver) => {
+        const fullName =
+          `${driver.first_name} ${driver.last_name}`.toLowerCase();
+        return fullName.includes(driverSearchTerm.toLowerCase());
+      });
+      setFilteredDriverList(filtered);
+      setIsDriverSearchDropdownOpen(filtered.length > 0);
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [driverSearchTerm, allDrivers]);
+
+  const handleDriverUpdate = async () => {
+    if (!selectedDriver) {
+      setDriverSelectionError("Please select a driver");
+      return;
+    }
+    const orderId =
+      orderDetails?.id ||
+      orderDetails?._id ||
+      orderDetails?.order_id ||
+      orderDetails?.orderId ||
+      state?.orderId;
+    if (!orderId) {
+      setDriverUpdateError("Order id not found");
+      return;
+    }
+
+    try {
+      setIsUpdatingDriver(true);
+      setDriverUpdateError("");
+      const fullName = `${selectedDriver.first_name} ${selectedDriver.last_name}`;
+      const driverId = selectedDriver.id || selectedDriver._id;
+      if (!driverId) {
+        setDriverUpdateError("Driver id not found");
+        return;
+      }
+      await updateDriver(orderId, {
+        driverId,
+        driverName: fullName,
+      });
+      await fetchOrdersData();
+      setIsChangeDriverOpen(false);
+      setDriverSearchTerm("");
+      setFilteredDriverList([]);
+      setIsDriverSearchDropdownOpen(false);
+      setSelectedDriver(null);
+      setDriverSelectionError("");
+    } catch (error) {
+      console.error("Failed to update driver:", error);
+      setDriverUpdateError("Failed to update driver");
+    } finally {
+      setIsUpdatingDriver(false);
+    }
+  };
 
   // console.log(orderDetails);
 
@@ -129,7 +229,17 @@ function DetailedOrderPage() {
           <div className="flex justify-between items-center mb-3">
             <h3 className="font-semibold text-base">Order item</h3>
 
-            <button className="bg-[#4F46E5] text-white px-5 py-2 rounded-full text-sm font-medium">
+            <button
+              onClick={() =>
+                navigate("/pos", {
+                  state: {
+                    orderDetails: orderDetails,
+                    itemList: orderDetails?.item_list || [],
+                  },
+                })
+              }
+              className="bg-[#4F46E5] text-white px-5 py-2 rounded-full text-sm font-medium"
+            >
               Add New Service
             </button>
           </div>
@@ -173,10 +283,9 @@ function DetailedOrderPage() {
                               </div>
                             ))
                           : "--"} */}
-                          <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
-                            {item.type}
-                          </div>
-                          
+                        <div className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
+                          {item.type}
+                        </div>
                       </td>
 
                       <td className="px-3 py-2">
@@ -209,17 +318,21 @@ function DetailedOrderPage() {
             <div className=" text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Addon:</span>
-                <span className="font-medium">AED {orderDetails?.addon?.addonPrice}</span>
+                <span className="font-medium">
+                  AED {orderDetails?.addon?.addonPrice}
+                </span>
               </div>
 
               <div className="flex justify-between">
                 <span className="text-gray-600">Sub Total:</span>
-                <span className="font-medium">AED  {orderDetails?.sub_total}</span>
+                <span className="font-medium">
+                  AED {orderDetails?.sub_total}
+                </span>
               </div>
 
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax (5%):</span>
-                <span className="font-medium">AED  {orderDetails?.tax}</span>
+                <span className="font-medium">AED {orderDetails?.tax}</span>
               </div>
 
               <div className="flex justify-between">
@@ -229,7 +342,7 @@ function DetailedOrderPage() {
 
               <div className="flex justify-between font-semibold  border-t">
                 <span>Gross Total:</span>
-                <span>AED  {orderDetails?.gross_total}</span>
+                <span>AED {orderDetails?.gross_total}</span>
               </div>
             </div>
 
@@ -243,21 +356,21 @@ function DetailedOrderPage() {
               <button className="flex-1 bg-[#F2994A] text-white py-2 rounded-lg font-medium text-sm">
                 Print Invoice
               </button>
-                {orderDetails?.pending_amount > 0 ? (
-                        <button
-                          onClick={() => {
-                            setSelectedOrderForPayment(item);
-                            setShowPaymentModal(true);
-                          }}
-                          className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 cursor-pointer rounded-lg text-white font-bold whitespace-nowrap hover:bg-[#219653]"
-                        >
-                          Add Payment
-                        </button>
-                      ) : (
-                        <button className="bg-[gray] px-3 py-1 sm:px-2 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap ">
-                          Fully Paid
-                        </button>
-                      )}
+              {orderDetails?.pending_amount > 0 ? (
+                <button
+                  onClick={() => {
+                    setSelectedOrderForPayment(item);
+                    setShowPaymentModal(true);
+                  }}
+                  className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 cursor-pointer rounded-lg text-white font-bold whitespace-nowrap hover:bg-[#219653]"
+                >
+                  Add Payment
+                </button>
+              ) : (
+                <button className="bg-[gray] px-3 py-1 sm:px-2 sm:py-2 rounded-lg text-white font-bold whitespace-nowrap ">
+                  Fully Paid
+                </button>
+              )}
             </div>
           </div>
 
@@ -286,9 +399,92 @@ function DetailedOrderPage() {
               </div>
             </div>
 
-            <button className="mt-4 w-full bg-[#4F46E5] text-white py-2 rounded-lg font-medium text-sm">
-              Change Driver
-            </button>
+            <div className="mt-4 flex items-center  justify-center gap-2">
+              {isChangeDriverOpen && (
+                <div className="relative flex-1">
+                  <div
+                    onClick={() => setIsDriverSearchDropdownOpen(true)}
+                    className="flex items-center gap-2 bg-[#E1E3F3] rounded-lg px-2 py-2 cursor-pointer"
+                  >
+                    <input
+                      type="text"
+                      value={driverSearchTerm}
+                      placeholder="Search driver"
+                      onClick={() => setIsDriverSearchDropdownOpen(true)}
+                      onChange={(e) => setDriverSearchTerm(e.target.value)}
+                      className="w-full bg-[#E1E3F3] rounded-lg text-[12px] outline-none font-medium"
+                    />
+                  </div>
+
+                  {isDriverSearchDropdownOpen && (
+                    <ul className="absolute left-0 top-full mt-2 w-full bg-white rounded-lg shadow-lg z-50 max-h-48 overflow-auto">
+                      {isLoadingDrivers && (
+                        <li className="p-2 text-sm text-gray-400">
+                          Loading drivers...
+                        </li>
+                      )}
+
+                      {!isLoadingDrivers &&
+                        filteredDriverList.length === 0 &&
+                        driverSearchTerm && (
+                          <li className="p-2 text-sm text-gray-400">
+                            No drivers found
+                          </li>
+                        )}
+
+                      {!isLoadingDrivers &&
+                        filteredDriverList.map((driver) => (
+                          <li
+                            key={driver.id || driver._id}
+                            className="p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              const fullName = `${driver.first_name} ${driver.last_name}`;
+                              isSelectingDriverRef.current = true;
+                              setIsDriverSearchDropdownOpen(false);
+                              setDriverSearchTerm(fullName);
+                              setSelectedDriver(driver);
+                              setDriverSelectionError("");
+                            }}
+                          >
+                            {driver.first_name} {driver.last_name}
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                  {driverSelectionError && (
+                    <span className="absolute left-0 top-full mt-2 text-red-500 text-xs">
+                      {driverSelectionError}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <button
+                className="flex-none bg-[#4F46E5]  text-white py-2 px-4 rounded-lg font-medium text-sm whitespace-nowrap"
+                onClick={() => {
+                  if (!isChangeDriverOpen) {
+                    setIsChangeDriverOpen(true);
+                    setDriverSelectionError("");
+                    setDriverUpdateError("");
+                    setSelectedDriver(null);
+                    return;
+                  }
+                  handleDriverUpdate();
+                }}
+                disabled={isUpdatingDriver}
+              >
+                {isUpdatingDriver
+                  ? "Updating..."
+                  : isChangeDriverOpen
+                    ? "Save"
+                    : "Change Driver"}
+              </button>
+            </div>
+            {driverUpdateError && (
+              <div className="mt-2 text-xs text-red-500">
+                {driverUpdateError}
+              </div>
+            )}
           </div>
 
           {/* QR Code */}
