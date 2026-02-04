@@ -9,12 +9,24 @@ import Pagination from "../../components/Pagination";
 import { getAllOrders, hardDeleteOrder, revokeOrder, softDeleteOrder } from "../../api/order";
 import { FiTrash2 } from "react-icons/fi";
 import DeleteModal from "../../components/models/DeleteModal";
+import { getAllEmployees } from "../../api/employee";
 
 function Delete_Order() {
   const [search, setSearch] = useState("");
   const [showRoles, setShowRoles] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
-
+  const [driversDropdown, setDriversDropdown] = useState(false);
+    const [driverSelected, setDriverSelected] = useState("All Drivers");
+      const [driversList, setDriversList] = useState([]);
+      const [filteredOrders, setFilteredOrders] = useState([]);
+    
+      const [filters, setFilters] = useState({
+          search: "",
+          driver: "",
+          orderStatus: "",
+          paymentStatus: "",
+        });
+  
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
@@ -24,24 +36,116 @@ function Delete_Order() {
   const [totalPages, setTotalPages] = useState(1);
 
   const [openHardDeleteModal, setOpenHardDeleteModal] = useState(false);
+  const [allOrders, setAllOrders] = useState([]);
+    const [employees, setEmployees] = useState({});
+  
 
   const [openRevokedModal, setOpenRevokedModal] = useState(false);
   const [revokedId, setRevokedId] = useState(null);
 
   const fetchOrders = async (p = page) => {
-    try {
-      const res = await getAllOrders(p, 10);
+  try {
+    const res = await getAllOrders(p, 10);
 
-      const cancelledOrders = (res.data.data || []).filter(
-        order => order.order_status === "Cancelled"
-      );
+    const cancelledOrders = (res.data.data || []).filter(
+      order => order.order_status === "Cancelled"
+    );
 
-      setOrders(cancelledOrders);
-      setTotalPages(res.data.pagination.totalPages);
-    } catch (err) {
-      console.error("Failed to load orders", err);
-    }
-  };
+    setOrders(cancelledOrders);
+    setAllOrders(cancelledOrders);   // ⭐ THIS WAS MISSING
+    setTotalPages(res.data.pagination.totalPages);
+  } catch (err) {
+    console.error("Failed to load orders", err);
+  }
+};
+
+  
+  
+    const fetchDrivers = async () => {
+      try {
+        let collected = [];
+        let p = 1;
+  
+        while (true) {
+          const res = await getAllEmployees(p, 100);
+          const data = res.data.data || [];
+          const pagination = res.data.pagination;
+  
+          collected = collected.concat(data);
+  
+          if (!pagination || p >= pagination.totalPages) break;
+          p++;
+        }
+  
+        const drivers = collected.filter(
+          (e) => e.role?.toLowerCase() === "driver"
+        );
+  
+        const map = {};
+        drivers.forEach((d) => (map[d.id] = d));
+  
+        setDriversList(drivers);
+        setEmployees(map);
+      } catch (err) {
+        console.error("Fetch drivers failed", err);
+      }
+    };
+  
+    useEffect(() => {
+      fetchDrivers();
+    }, []);
+  
+
+    
+      useEffect(() => {
+        let data = [...allOrders];
+    
+        if (filters.search) {
+          const s = filters.search.toLowerCase();
+          data = data.filter((o) => {
+            const driver = employees[o.driver_id]
+              ? `${employees[o.driver_id].first_name} ${employees[o.driver_id].last_name}`.toLowerCase()
+              : "";
+            return (
+              o.order_code?.toLowerCase().includes(s) ||
+              o.customer_name?.toLowerCase().includes(s) ||
+              driver.includes(s)
+            );
+          });
+        }
+    
+        if (filters.driver) {
+          data = data.filter(
+            (o) => String(o.driver_id) === String(filters.driver),
+          );
+        }
+    
+        if (filters.orderStatus) {
+          data = data.filter(
+            (o) =>
+              o.order_status?.toLowerCase() ===
+              filters.orderStatus.toLowerCase(),
+          );
+        }
+    
+        if (filters.paymentStatus) {
+          data = data.filter((o) => {
+            if (filters.paymentStatus === "Pending") return o.paid_amount === 0;
+            if (filters.paymentStatus === "Partialy Paid")
+              return o.paid_amount > 0 && o.pending_amount > 0;
+            if (filters.paymentStatus === "Fully Paid")
+              return o.pending_amount === 0;
+            return true;
+          });
+        }
+    
+        setFilteredOrders(data);
+      }, [filters, allOrders, employees]);
+
+      useEffect(() => {
+  setFilteredOrders(allOrders);
+}, [allOrders]);
+
 
   const createdByEmail = (() => {
     try {
@@ -58,17 +162,6 @@ function Delete_Order() {
   useEffect(() => {
     fetchOrders(page);
   }, [page]);
-
-  const handleSearchFiltration = () => {
-    if (!search) return orders;
-
-    return orders.filter(
-      (order) =>
-        order.order_code.toLowerCase().includes(search.toLowerCase()) ||
-        order.customer_name.toLowerCase().includes(search.toLowerCase()) ||
-        order.driver_name.toLowerCase().includes(search.toLowerCase())
-    );
-  };
 
   const handleRevoke = async () => {
     if (!revokedId) return;
@@ -102,8 +195,8 @@ function Delete_Order() {
         <div className="   rounded-lg bg-[#E2E8F0] flex items-center px-4  gap-2">
           <CiSearch className=" text-slate-600" />
           <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+           value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
             placeholder="Search..."
             className="flex-1   bg-transparent outline-none"
           />
@@ -115,42 +208,43 @@ function Delete_Order() {
           )}
         </div>
 
-        <div className=" relative ">
-          <div className="h-12 bg-[#E2E8F0] rounded-lg px-4 flex items-center justify-between">
-            <span>{selectedRole || "All Drivers"}</span>
-            <span
-              onClick={() => setShowRoles(!showRoles)}
-              className="cursor-pointer"
-            >
-              {showRoles ? (
-                <RiArrowDropUpLine size={24} />
-              ) : (
-                <RiArrowDropDownLine size={24} />
-              )}
-            </span>
-          </div>
-
-          {showRoles && (
-            <div className="relative w-full">
-              <div className="absolute top-full  w-full bg-white rounded-lg shadow-lg  z-50 overflow-hidden">
-                {["All Drivers", "Aswin VD", "Super Man", "Sales Team"].map(
-                  (role, i) => (
-                    <p
-                      key={i}
-                      onClick={() => {
-                        setSelectedRole(role);
-                        setShowRoles(false);
-                      }}
-                      className="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 transition"
-                    >
-                      {role}
-                    </p>
-                  ),
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        <div className="relative w-full sm:w-56">
+                  <button
+                    onClick={() => setDriversDropdown(!driversDropdown)}
+                    className="flex w-full items-center justify-between bg-gray-200 px-4 py-2 rounded-lg"
+                  >
+                    {driverSelected}
+                    <RiArrowDropDownLine className="h-6 w-6" />
+                  </button>
+        
+                  {driversDropdown && (
+                    <ul className="absolute z-20 w-full bg-white border rounded-lg shadow-md max-h-60 overflow-y-auto">
+                      <li
+                        onClick={() => {
+                          setDriverSelected("All Drivers");
+                          setFilters({ ...filters, driver: "" });
+                          setDriversDropdown(false);
+                        }}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        All Drivers
+                      </li>
+                      {driversList.map((d) => (
+                        <li
+                          key={d.id}
+                          onClick={() => {
+                            setDriverSelected(`${d.first_name} ${d.last_name}`);
+                            setFilters({ ...filters, driver: d.id });
+                            setDriversDropdown(false);
+                          }}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        >
+                          {d.first_name} {d.last_name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
       </div>
 
       {/* TABLE */}
@@ -180,7 +274,7 @@ function Delete_Order() {
           </thead>
 
           <tbody>
-            {handleSearchFiltration().map((item) => {
+           {filteredOrders.map((item) => {
               return (
                 <tr key={item.id} className="  text-center">
                   <td className="font-semibold px-3 py-3 border-b border-gray-400">
