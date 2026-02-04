@@ -14,14 +14,21 @@ import axios from "axios";
 import { FiCalendar, FiUser } from "react-icons/fi";
 import { getEmployeeSearch } from "../api/employee";
 import { getCustomersSearch } from "../api/customer";
-import { createOrder } from "../api/order";
+import { createOrder, updateOrder } from "../api/order";
 import { getAllServicesCategory } from "../api/servicesapi";
 import { MdOutlinePersonAddAlt } from "react-icons/md";
 import AddCustomerModal from "./services/AddCustomerModal";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const POS = () => {
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  // Edit mode state - true if coming from OrderDetails
+  const [isEditMode] = useState(!!state?.orderDetails);
+  const [existingOrderData] = useState(state?.orderDetails || null);
+  const [orderId] = useState(state?.orderId || null);
+
   // --- State Management ---
   const [services, setServices] = useState([]);
   const [serviceCategories, setServiceCategories] = useState([]);
@@ -229,6 +236,117 @@ const POS = () => {
     return () => clearTimeout(timer);
   }, [customerSearchTerm, allCustomers]);
 
+  // Pre-fill form data when editing existing order
+  useEffect(() => {
+    if (
+      isEditMode &&
+      existingOrderData &&
+      allDrivers.length > 0 &&
+      allCustomers.length > 0
+    ) {
+      // Set delivery date
+      if (existingOrderData.delivery_date) {
+        const formattedDate = existingOrderData.delivery_date.split("T")[0];
+        setDeliveryDate(formattedDate);
+      }
+
+      // Set customer
+      if (existingOrderData.customer_name) {
+        isSelectingCustomerRef.current = true;
+        setCustomerSearchTerm(existingOrderData.customer_name);
+        const customer = allCustomers.find(
+          (c) =>
+            c.id === existingOrderData.customer_id ||
+            c.name === existingOrderData.customer_name,
+        );
+        if (customer) {
+          setSelectedCustomer(customer);
+        }
+      }
+
+      // Set driver
+      if (existingOrderData.driver_name) {
+        isSelectingDriverRef.current = true;
+        setDriverSearchTerm(existingOrderData.driver_name);
+        const driver = allDrivers.find(
+          (d) =>
+            d.id === existingOrderData.driver_id ||
+            `${d.first_name} ${d.last_name}` === existingOrderData.driver_name,
+        );
+        if (driver) {
+          setSelectedDriver(driver);
+        }
+      }
+
+      // Set addon - Check multiple possible field names
+      if (existingOrderData.addon && addons.length > 0) {
+        const addonId =
+          existingOrderData.addon.addonId || existingOrderData.addon.id;
+        const addon = addons.find((a) => a.id === addonId);
+        if (addon) {
+          setSelectedAddon(addon);
+        }
+      }
+
+      // Set discount
+      if (existingOrderData.discount) {
+        setDiscount(Number(existingOrderData.discount));
+        setDiscountInput(Number(existingOrderData.discount));
+      }
+
+      // Set remarks
+      if (existingOrderData.remark) {
+        setRemarks(existingOrderData.remark);
+      }
+
+      // Set payment method and paid amount
+      if (existingOrderData.payment_method) {
+        setPaymentMethod(existingOrderData.payment_method);
+      }
+      if (existingOrderData.paid_amount) {
+        setPaidAmount(existingOrderData.paid_amount);
+      }
+
+      // Pre-fill cart items
+      if (
+        existingOrderData.item_list &&
+        existingOrderData.item_list.length > 0
+      ) {
+        const prefillCart = existingOrderData.item_list.map((item, idx) => ({
+          id: idx,
+          name: item.name,
+          type: item.type,
+          color: item.color || "#2563eb",
+          price: item.rate,
+          qty: item.qty,
+          deliveryType: "normal",
+          length: item.height || 1,
+          width: item.width || 1,
+          sqft: (item.height || 1) * (item.width || 1),
+        }));
+        setCart(prefillCart);
+      }
+    }
+  }, [isEditMode, existingOrderData, allDrivers, allCustomers]);
+
+  // Re-try addon matching when addons list loads
+  useEffect(() => {
+    if (
+      isEditMode &&
+      existingOrderData &&
+      existingOrderData.addon &&
+      addons.length > 0 &&
+      !selectedAddon
+    ) {
+      const addonId =
+        existingOrderData.addon.addonId || existingOrderData.addon.id;
+      const addon = addons.find((a) => a.id === addonId);
+      if (addon) {
+        setSelectedAddon(addon);
+      }
+    }
+  }, [addons, isEditMode, existingOrderData, selectedAddon]);
+
   // --- Handlers ---
 
   const handleCustomerData = (customerData) => {
@@ -262,7 +380,7 @@ const POS = () => {
       newErrors.paymentMethod = "Please select a payment method";
     }
 
-    if (parseFloat(paidAmount) > grandTotal) {
+    if (paidAmount && parseFloat(paidAmount) > grandTotal) {
       newErrors.paidAmount = "Paid amount cannot exceed total";
     }
 
@@ -324,10 +442,21 @@ const POS = () => {
 
     // console.log("Saving order:", orderObject);
     try {
-      await createOrder(orderObject);
-      navigate("/orders");
+      if (isEditMode && existingOrderData) {
+        // UPDATE existing order
+        const orderId = existingOrderData.id || existingOrderData._id;
+        await updateOrder(orderId, orderObject);
+        navigate(`/orders/detailed_order`, {
+          state: { orderId },
+          replace: true,
+        });
+      } else {
+        // CREATE new order
+        await createOrder(orderObject);
+        navigate("/orders");
+      }
     } catch (error) {
-      console.error("Order create error:", error);
+      console.error("Order create/update error:", error);
     }
   };
   // --- Actions ---
@@ -419,9 +548,8 @@ const POS = () => {
 
   const modalTotal = prices[deliveryType] * qty * (isSqfEnabled ? sqft : 1);
 
-
   // --- Filtered Services ---
-  
+
   const filteredServices = useMemo(() => {
     const term = serviceSearchTerm.trim().toLowerCase();
     const filterValue = serviceCategoryFilter.trim().toLowerCase();
@@ -439,7 +567,6 @@ const POS = () => {
     });
   }, [serviceSearchTerm, serviceCategoryFilter, services]);
 
-
   return (
     <div className="min-h-screen bg-[#f0f4f9] p-3 md:p-6 font-sans text-slate-700">
       {/* Header */}
@@ -448,7 +575,7 @@ const POS = () => {
           <ArrowLeft size={20} />
         </button>
         <h1 className="text-lg md:text-xl font-bold text-slate-800">
-          Create New Order
+          {isEditMode ? "Edit Order" : "Create New Order"}
         </h1>
       </div>
 
@@ -524,7 +651,9 @@ const POS = () => {
                 <div>
                   Delivery Date:{" "}
                   <span className="text-indigo-600 block text-sm">
-                    {deliveryDate.split("-").reverse().join("-")}
+                    {deliveryDate
+                      ? deliveryDate.split("-").reverse().join("-")
+                      : "--"}
                   </span>
                 </div>
 
@@ -814,7 +943,12 @@ const POS = () => {
             {/* Totals Section */}
             <div className="bg-indigo-50/30 p-3 md:p-4 rounded-xl space-y-2 text-xs md:text-sm mb-4 border border-indigo-50">
               <div className="flex justify-between">
-                <span className="text-slate-500">Order ID:</span>
+                <span className="text-slate-500">
+                  Order ID:{" "}
+                  <span className="font-bold text-[#3A3D51]">
+                    {isEditMode ? `TMS/ORD-${orderId}` : "New Order"}
+                  </span>
+                </span>
                 <span className="font-bold">
                   Addon:
                   <span className="ml-4">
@@ -958,7 +1092,7 @@ const POS = () => {
                 onClick={handleSaveOrder}
                 className="flex-1 bg-indigo-600 text-white py-2 md:py-3 rounded-xl font-bold hover:bg-indigo-700 shadow-md text-sm md:text-base"
               >
-                Save
+                {isEditMode ? "Update Order" : "Save"}
               </button>
               <button className="flex-1 bg-emerald-500 text-white py-2 md:py-3 rounded-xl font-bold hover:bg-emerald-600 shadow-md text-sm md:text-base">
                 Print

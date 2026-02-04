@@ -24,13 +24,13 @@ import Customer from "./pages/Customer.jsx";
 import Expenses from "./pages/Expenses.jsx";
 import TimeSlot from "./pages/TimeSlot.jsx";
 
-import Employee from "./pages/Employee.jsx"
+import Employee from "./pages/Employee.jsx";
 
 import Order_List from "./pages/Orders/OrdersList.jsx";
 import Order_Status_Screen from "./pages/Orders/Order_Status_Screen.jsx";
 import Delete_Order from "./pages/Orders/Delete_Order.jsx";
 import DetailedOrderPage from "./pages/Orders/Detailed_Order.jsx";
-import Payment from "./pages/Payment_Receipt.jsx"
+import Payment from "./pages/Payment_Receipt.jsx";
 
 // Add this import with other imports
 import CustomerD from "./pages/CustomerD.jsx";
@@ -40,17 +40,12 @@ import Login from "./pages/Login.jsx";
 import ExpenseCategories from "./pages/Expense_categories.jsx";
 import POS from "./pages/POS.jsx";
 
-
-
 function App() {
   return (
     <Routes>
       <Route index element={<Login />} />
 
-      <Route
-        path="/"
-        element={<Layout />}
-      >
+      <Route path="/" element={<Layout />}>
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="pos" element={<POS />} />
         <Route path="services/list" element={<ServiceList />} />
@@ -60,6 +55,7 @@ function App() {
         <Route path="location_management/emirates" element={<Emirates />} />
         <Route path="location_management/areas" element={<Area />} />
         <Route path="collection" element={<Collections />} />
+<<<<<<< HEAD
 
 
         {/* <Route path="reports" element={<Daily_reports />} /> */}
@@ -73,33 +69,49 @@ function App() {
 
         <Route path="reports/expenses" element={<Expenses_report />} />
         <Route path="reports/tax" element={<Tax_report />} />
+=======
+        <Route path="reports" element={<Daily_reports />} />
+        <Route path="reports/daily_reports" element={<Daily_reports />} />
+        <Route
+          path="reports/outstanding_reports"
+          element={<Outstanding_reports />}
+        />
+        <Route path="reports/sales_reports" element={<Sales_report />} />
+        <Route path="reports/order_reports" element={<Order_reports />} />
+        <Route path="reports/ledger_reports" element={<Ledger_report />} />
+        <Route
+          path="reports/customer_outstanding_reports"
+          element={<Customer_outstanding_report />}
+        />
+        <Route
+          path="reports/cloth_wise_reports"
+          element={<Cloth_wise_reports />}
+        />
+        <Route path="reports/expenses_reports" element={<Expenses_report />} />
+        <Route path="reports/tax_reports" element={<Tax_report />} />
+>>>>>>> Yash
         <Route path="expenses" element={<Expenses />} />
         <Route path="time-slots" element={<TimeSlot />} />
         <Route path="customers" element={<Customer />} />
-
         <Route path="/employees" element={<Employee></Employee>}></Route>
-
         <Route path="/orders" element={<Order_List />} />
         <Route path="/orders/status_screen" element={<Order_Status_Screen />} />
         <Route path="/orders/deleted_orders" element={<Delete_Order />} />
         <Route path="/orders/detailed_order" element={<DetailedOrderPage />} />
+        <Route path="/orders/:id" element={<DetailedOrderPage />} />
         <Route path="/payments" element={<Payment />} />
-
         {/* ... other routes ... */}
         <Route path="reports/tax_reports" element={<Tax_report />} />
         <Route path="expenses" element={<Expenses />} />
         <Route path="time-slots" element={<TimeSlot />} />
-
-        <Route path="customers/:id/details" element={<CustomerD />} /> {/* ADDED ROUTE */}
+        <Route path="customers/:id/details" element={<CustomerD />} />{" "}
+        {/* ADDED ROUTE */}
         <Route path="/employees" element={<Employee />} />
         <Route path="/orders" element={<Order_List />} />
         {/* ... rest of routes ... */}
-
         // In your router configuration
         <Route path="/expense_categories" element={<ExpenseCategories />} />
-
       </Route>
-
     </Routes>
   );
 }

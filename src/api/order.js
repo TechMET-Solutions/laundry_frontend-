@@ -20,3 +20,5 @@ export const revokeOrder = (id) => {return API.put(`/revoke/${id}`);};
 export const hardDeleteOrder = (id) => API.delete(`/delete/${id}`);
 
 export const updateDriver = (id, data) => API.put(`/updatedriver/${id}`, data);
+
+export const updateOrder = (id, data) => API.put(`/updateorder/${id}`, data);
