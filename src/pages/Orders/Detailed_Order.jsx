@@ -29,6 +29,8 @@ function DetailedOrderPage() {
   const [driverUpdateError, setDriverUpdateError] = useState("");
   const isSelectingDriverRef = useRef(false);
 
+  const [selectedOrderForPayment, setSelectedOrderForPayment] = useState(null);
+
   const fetchOrdersData = async () => {
     if (state.orderId) {
       try {
@@ -234,7 +236,7 @@ function DetailedOrderPage() {
                 navigate("/pos", {
                   state: {
                     orderDetails: orderDetails,
-                    itemList: orderDetails?.item_list || [],
+                    orderId: state.orderId,
                   },
                 })
               }
@@ -359,8 +361,8 @@ function DetailedOrderPage() {
               {orderDetails?.pending_amount > 0 ? (
                 <button
                   onClick={() => {
-                    setSelectedOrderForPayment(item);
-                    setShowPaymentModal(true);
+                    setSelectedOrderForPayment(orderDetails);
+                    setIsPaymentModalOpen(true);
                   }}
                   className="bg-[#27AE60] px-3 py-1 sm:px-2 sm:py-2 cursor-pointer rounded-lg text-white font-bold whitespace-nowrap hover:bg-[#219653]"
                 >
@@ -505,7 +507,7 @@ function DetailedOrderPage() {
       {isPaymentModalOpen && (
         <AddPaymentModal
           onClose={() => setIsPaymentModalOpen(false)}
-          orderData={orderDetails}
+          orderData={selectedOrderForPayment}
         />
       )}
     </div>
