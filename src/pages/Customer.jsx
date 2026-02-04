@@ -161,15 +161,15 @@ function Customer() {
       </div>
 
       {/* Search */}
-      <div className="flex items-center mb-6">
-        <div className="relative w-64">
+      <div className="flex justify-end items-center mb-6">
+        <div className="relative  w-114">
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
           <input
             type="text"
             placeholder="Search customers..."
             value={searchTerm}
             onChange={handleSearch}
-            className="w-full pl-10 pr-3 py-2 bg-gray-200 rounded-lg text-sm outline-none focus:bg-white"
+            className="w-full pl-10 pr-3 py-3 bg-gray-200 rounded-lg text-sm outline-none focus:bg-white"
           />
         </div>
       </div>
