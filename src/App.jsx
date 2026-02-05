@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/layout/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 import ServiceList from "./pages/services/ServiceList";
 import ServiceType from "./pages/services/ServiceType";
 import ServiceCategory from "./pages/services/ServiceCategory";
@@ -42,7 +43,14 @@ function App() {
     <Routes>
       <Route index element={<Login />} />
 
-      <Route path="/" element={<Layout />}>
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="pos" element={<POS />} />
         <Route path="services/list" element={<ServiceList />} />
@@ -60,7 +68,10 @@ function App() {
         <Route path="reports/sales" element={<SalesReport />} />
         <Route path="reports/order" element={<OrderReports />} />
         <Route path="reports/ledger" element={<Ledger_report />} />
-        <Route path="reports/customer-outstanding" element={<Customer_outstanding_report />} />
+        <Route
+          path="reports/customer-outstanding"
+          element={<Customer_outstanding_report />}
+        />
         <Route path="reports/cloth-wise" element={<Cloth_wise_reports />} />
         <Route path="reports/expenses" element={<Expenses_report />} />
         <Route path="reports/tax" element={<Tax_report />} />

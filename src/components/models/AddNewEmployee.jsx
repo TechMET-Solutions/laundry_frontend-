@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { IoIosClose } from "react-icons/io";
 import { createEmployee, updateEmployee } from "../../api/employee";
 import { formatDateForInput } from "../../utils/formatDateForInput";
+import { encryptPassword } from "../../utils/encryption";
 
 function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
   const [selectedRole, setSelectedRole] = useState(employee?.role || "");
@@ -74,10 +75,17 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Encrypt password before sending
+    const encryptedForm = {
+      ...form,
+      password: encryptPassword(form.password),
+    };
+
     if (isEdit) {
-      await updateEmployee(employee.id, form);
+      await updateEmployee(employee.id, encryptedForm);
     } else {
-      await createEmployee(form);
+      await createEmployee(encryptedForm);
     }
     onSuccess?.();
     onClose();

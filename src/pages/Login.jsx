@@ -1,24 +1,22 @@
-import React, { useState } from 'react'
-import login_image from '../assets/login_image.png'
-import login2 from '../assets/login2.png'
-import login3 from '../assets/login3.png'
-import logo from '../assets/logo.png'
+import React, { useState, useEffect } from "react";
+import login_image from "../assets/login_image.png";
+import login2 from "../assets/login2.png";
+import login3 from "../assets/login3.png";
+import logo from "../assets/logo.png";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { getEmployeeSearch } from "../api/employee";
+import { comparePassword } from "../utils/encryption";
+import { saveAuth, isAuthenticated } from "../utils/auth";
 
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination, Autoplay, Navigation } from 'swiper/modules'
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay, Navigation } from "swiper/modules";
 
-import 'swiper/css'
-import 'swiper/css/pagination'
-import 'swiper/css/navigation'
-import { useNavigate } from 'react-router-dom'
-
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  
-  const EMAIL = "admin@gmail.com";
-  const PASSWORD = "admin";
-
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,26 +24,57 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
+
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-     if (email === EMAIL && password === PASSWORD) {
-    const userData = {
-      email,
-      password,
-      loginTime: new Date().toISOString(),
-    };
+       const response = await getEmployeeSearch();
+      console.log("API Response:", response);
 
-    localStorage.setItem("userData", JSON.stringify(userData));
+      const employees = response.data.data || response.data;
+      console.log("Parsed employees:", employees);
+      console.log("Number of employees:", employees?.length);
 
-    navigate("/dashboard");
-  } else {
-    setError("Invalid email or password. Please try again.");
-  }
+       const employee = employees.find((emp) => {
+         return emp.email === email && emp.role === "Supervisor";
+      });
 
+       
+
+      if (!employee) {
+        setError("Only Supervisors can login. Invalid email or role.");
+        setLoading(false);
+        return;
+      }
+
+       const isPasswordValid = comparePassword(password, employee.password);
+
+ 
+      // Compare passwords
+      if (isPasswordValid) {
+        const userData = {
+          email: employee.email,
+          first_name: employee.first_name,
+          last_name: employee.last_name,
+          role: employee.role,
+          loginTime: new Date().toISOString(),
+        };
+
+        // Save auth with 7-day expiry
+        saveAuth(userData);
+        navigate("/dashboard");
+      } else {
+        setError("Invalid email or password. Please try again.");
+      }
     } catch (error) {
       setError("Login failed. Please try again.");
       console.error("Login failed:", error);
@@ -54,12 +83,7 @@ const Login = () => {
     }
   };
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem("userEmail");
-  //   localStorage.removeItem("userPassword");
-  //   localStorage.removeItem("loginTime");
-  //   navigate("/login");
-  // };
+   
 
   return (
     <>
@@ -78,15 +102,12 @@ const Login = () => {
       `}</style>
 
       <div className="flex flex-col md:flex-row bg-[#F3F6FA] min-h-screen p-0 md:p-20 gap-4">
-
         <div className="bg-[#56CCF280] p-8 w-full md:w-3/5 flex flex-col items-center justify-center rounded-lg">
-
           <Swiper
             spaceBetween={30}
             centeredSlides
             autoplay={{ delay: 3000, disableOnInteraction: false }}
-             pagination={{ clickable: true }}
-            
+            pagination={{ clickable: true }}
             modules={[Autoplay, Pagination, Navigation]}
             className="mySwiper"
           >
@@ -102,14 +123,14 @@ const Login = () => {
               Manage Your Laundry Effortlessly
             </h3>
             <p className="mt-2 text-gray-700">
-              Create orders, track pickups, and update delivery status — all in one place.
+              Create orders, track pickups, and update delivery status — all in
+              one place.
             </p>
           </div>
         </div>
 
         <div className="bg-white p-8 w-full md:w-2/5 flex items-center justify-center">
           <div className="max-w-md w-full">
-
             <div className="mb-6 flex justify-center pb-8">
               <img src={logo} alt="Logo" className="h-8 w-auto" />
             </div>
@@ -118,8 +139,7 @@ const Login = () => {
               Login to Continue
             </h2>
 
-<form onSubmit={handleLogin}>
-              
+            <form onSubmit={handleLogin}>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                   Email
@@ -156,7 +176,11 @@ const Login = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-2 text-gray-600 cursor-pointer hover:text-gray-800"
                   >
-                    {showPassword ? <MdVisibility size={20} /> : <MdVisibilityOff size={20} />}
+                    {showPassword ? (
+                      <MdVisibility size={20} />
+                    ) : (
+                      <MdVisibilityOff size={20} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -182,7 +206,10 @@ const Login = () => {
               <input type="checkbox" className="mr-2 h-4 w-4" />
               <p className="text-sm text-gray-700">Remember Me</p>
 
-              <a href="#" className="ml-auto text-sm text-blue-600 hover:underline">
+              <a
+                href="#"
+                className="ml-auto text-sm text-blue-600 hover:underline"
+              >
                 Forgot Password?
               </a>
             </div>
@@ -190,13 +217,11 @@ const Login = () => {
             <div className="mt-6 text-center text-sm text-gray-600">
               By continuing, you agree to the Terms of use and Privacy Policy.
             </div>
-
           </div>
         </div>
-
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
