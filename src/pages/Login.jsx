@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import login_image from "../assets/login_image.png";
 import login2 from "../assets/login2.png";
 import login3 from "../assets/login3.png";
 import logo from "../assets/logo.png";
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
-import { getEmployeeSearch } from "../api/employee";
-import { comparePassword } from "../utils/encryption";
-import { saveAuth, isAuthenticated } from "../utils/auth";
+import axios from "axios";
+import { saveAuth } from "../utils/auth";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay, Navigation } from "swiper/modules";
@@ -24,66 +23,46 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (isAuthenticated()) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [navigate]);
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-       const response = await getEmployeeSearch();
-      console.log("API Response:", response);
+      // Call backend login controller
+      const response = await axios.post(
+        "http://localhost:5000/api/employees/login",
+        {
+          email,
+          password,
+        },
+      );
 
-      const employees = response.data.data || response.data;
-      console.log("Parsed employees:", employees);
-      console.log("Number of employees:", employees?.length);
+      if (response.data.success) {
+        const { token, user } = response.data;
 
-       const employee = employees.find((emp) => {
-         return emp.email === email && emp.role === "Supervisor";
-      });
+        // Store JWT token in localStorage
+        localStorage.setItem("token", token);
 
-       
+        // Set axios default header for future requests
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
-      if (!employee) {
-        setError("Only Supervisors can login. Invalid email or role.");
-        setLoading(false);
-        return;
-      }
+        // Store user data with 7-day expiry
+        saveAuth(user, 7);
 
-       const isPasswordValid = comparePassword(password, employee.password);
-
- 
-      // Compare passwords
-      if (isPasswordValid) {
-        const userData = {
-          email: employee.email,
-          first_name: employee.first_name,
-          last_name: employee.last_name,
-          role: employee.role,
-          loginTime: new Date().toISOString(),
-        };
-
-        // Save auth with 7-day expiry
-        saveAuth(userData);
         navigate("/dashboard");
       } else {
-        setError("Invalid email or password. Please try again.");
+        setError(response.data.message || "Login failed");
       }
     } catch (error) {
-      setError("Login failed. Please try again.");
-      console.error("Login failed:", error);
+      setError(
+        error.response?.data?.message || "Login failed. Please try again.",
+      );
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
   };
-
-   
 
   return (
     <>

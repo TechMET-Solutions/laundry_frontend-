@@ -1,6 +1,7 @@
-import { NavLink, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
-import logo from '../../assets/logo.png'
+import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
+import logo from "../../assets/logo.png";
 import {
   LuLayoutDashboard,
   LuShoppingCart,
@@ -15,55 +16,54 @@ import {
 } from "react-icons/lu";
 import { GiTakeMyMoney } from "react-icons/gi";
 import { TbSettingsCode } from "react-icons/tb";
-import { RiArrowDownSLine, RiArrowRightSLine } from 'react-icons/ri';
+import { RiArrowDownSLine, RiArrowRightSLine } from "react-icons/ri";
 
 const menu = [
-  { name: 'Dashboard', icon: LuLayoutDashboard, path: '/Dashboard' },
-  { name: 'POS', icon: LuShoppingCart, path: '/pos' },
-  { name: 'Orders', icon: LuClipboardList, path: '/orders' },
-  { name: 'Collection', icon: LuBriefcase, path: '/collection' },
-  { name: 'Expenses', icon: GiTakeMyMoney, path: '/expenses' },
-  { name: 'Customers', icon: LuUsers, path: '/customers' },
+  { name: "Dashboard", icon: LuLayoutDashboard, path: "/Dashboard" },
+  { name: "POS", icon: LuShoppingCart, path: "/pos" },
+  { name: "Orders", icon: LuClipboardList, path: "/orders" },
+  { name: "Collection", icon: LuBriefcase, path: "/collection" },
+  { name: "Expenses", icon: GiTakeMyMoney, path: "/expenses" },
+  { name: "Customers", icon: LuUsers, path: "/customers" },
   {
-    name: 'Services',
+    name: "Services",
     icon: TbSettingsCode,
     children: [
-      { name: 'Service List', path: '/services/list' },
-      { name: 'Service Type', path: '/services/type' },
-      { name: 'Service Category', path: '/services/category' },
-      { name: 'Addon', path: '/services/addon' },
-    ]
+      { name: "Service List", path: "/services/list" },
+      { name: "Service Type", path: "/services/type" },
+      { name: "Service Category", path: "/services/category" },
+      { name: "Addon", path: "/services/addon" },
+    ],
   },
-  { name: 'Employees', icon: LuUserCog, path: '/employees' },
-  { name: 'Payment Receipt', icon: LuReceipt, path: '/payments' },
-  { name: 'Reports', icon: LuBriefcase, path: '/reports/daily' },
-  { name: 'Time Slots', icon: LuClock, path: '/time-slots' },
+  { name: "Employees", icon: LuUserCog, path: "/employees" },
+  { name: "Payment Receipt", icon: LuReceipt, path: "/payments" },
+  { name: "Reports", icon: LuBriefcase, path: "/reports/daily" },
+  { name: "Time Slots", icon: LuClock, path: "/time-slots" },
   {
-    name: 'Location Management',
+    name: "Location Management",
     icon: LuMapPin,
     children: [
-      { name: 'Emirates', path: '/location_management/emirates' },
-      { name: 'Areas', path: '/location_management/areas' }
-    ]
+      { name: "Emirates", path: "/location_management/emirates" },
+      { name: "Areas", path: "/location_management/areas" },
+    ],
   },
-  { name: 'Logout', icon: LuLogOut, path: '/logout' },
-]
+  { name: "Logout", icon: LuLogOut, path: "/logout" },
+];
 
 function Sidebar() {
-  const [openMenu, setOpenMenu] = useState(null)
-  const [open, setOpen] = useState(false)
+  const [openMenu, setOpenMenu] = useState(null);
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  
-   const handleLogout = () => {
+  const handleLogout = () => {
     localStorage.removeItem("userData");
+    localStorage.removeItem("token");
+    delete axios.defaults.headers.common["Authorization"];
     navigate("/");
   };
 
-
   return (
     <>
-      
       <button
         onClick={() => setOpen(true)}
         className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-[#EAEEF6] shadow"
@@ -86,7 +86,7 @@ function Sidebar() {
           bg-white rounded-xl shadow-xl
           flex flex-col
           transition-transform duration-300
-          ${open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
       >
         {/* Logo */}
@@ -96,10 +96,10 @@ function Sidebar() {
 
         <nav className="flex-1 overflow-y-auto px-3 space-y-1">
           {menu.map((item, i) => {
-            const Icon = item.icon
+            const Icon = item.icon;
 
             if (item.children) {
-              const isOpen = openMenu === item.name
+              const isOpen = openMenu === item.name;
 
               return (
                 <div key={i}>
@@ -110,7 +110,9 @@ function Sidebar() {
                   >
                     <Icon className="text-lg" />
                     <span className="flex-1 text-left">{item.name}</span>
-                    <span>{isOpen ? <RiArrowDownSLine /> : <RiArrowRightSLine />}</span>
+                    <span>
+                      {isOpen ? <RiArrowDownSLine /> : <RiArrowRightSLine />}
+                    </span>
                   </button>
 
                   {isOpen && (
@@ -122,9 +124,10 @@ function Sidebar() {
                           onClick={() => setOpen(false)}
                           className={({ isActive }) =>
                             `block px-3 py-2 rounded-md text-sm transition
-                            ${isActive
-                              ? 'bg-blue-100 text-blue-600'
-                              : 'text-gray-500 hover:bg-blue-50 hover:text-blue-600'
+                            ${
+                              isActive
+                                ? "bg-blue-100 text-blue-600"
+                                : "text-gray-500 hover:bg-blue-50 hover:text-blue-600"
                             }`
                           }
                         >
@@ -134,13 +137,13 @@ function Sidebar() {
                     </div>
                   )}
                 </div>
-              )
+              );
             }
 
-            if (item.name === 'Logout') {
+            if (item.name === "Logout") {
               return (
                 <button
-                  key={i}                                              
+                  key={i}
                   onClick={() => handleLogout()}
                   className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
                              text-red-600 hover:bg-red-50 hover:text-red-700 transition"
@@ -148,8 +151,7 @@ function Sidebar() {
                   <Icon className="text-lg" />
                   {item.name}
                 </button>
-              
-              )
+              );
             }
 
             return (
@@ -159,21 +161,22 @@ function Sidebar() {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition
-                  ${isActive
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+                  ${
+                    isActive
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
                   }`
                 }
               >
                 <Icon className="text-lg" />
                 {item.name}
               </NavLink>
-            )
+            );
           })}
         </nav>
       </aside>
     </>
-  )
+  );
 }
 
-export default Sidebar
+export default Sidebar;

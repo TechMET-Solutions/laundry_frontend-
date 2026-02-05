@@ -4,6 +4,15 @@ const API = axios.create({
     baseURL: "http://localhost:5000/api/employees",
 });
 
+// Add token to every request
+API.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 // CREATE
 export const createEmployee = (data) => API.post("/create", data);
 
@@ -15,7 +24,7 @@ export const getAllEmployees = (page = 1, limit = 10) =>
 // GET BY ID
 export const getEmployeeById = (id) => API.get(`/list/${id}`);
 
-export const getEmployeeSearch = ( ) => API.get(`/list`);
+export const getEmployeeSearch = () => API.get(`/list`);
 
 // UPDATE
 export const updateEmployee = (id, data) => API.put(`/update/${id}`, data);

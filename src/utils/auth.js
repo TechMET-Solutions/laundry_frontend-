@@ -1,9 +1,10 @@
 const AUTH_KEY = "userData";
-const EXPIRY_DAYS = 7;
+const DEFAULT_EXPIRY_DAYS = 7;
 
 // Save auth with 7-day expiry
-export const saveAuth = (userData) => {
-  const expiresAt = new Date().getTime() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+export const saveAuth = (userData, expiryDays = DEFAULT_EXPIRY_DAYS) => {
+  const expiresAt =
+    new Date().getTime() + expiryDays * 24 * 60 * 60 * 1000;
   const authData = {
     ...userData,
     expiresAt,
@@ -37,7 +38,9 @@ export const getAuth = () => {
 // Check if user is authenticated
 export const isAuthenticated = () => {
   const auth = getAuth();
-  return auth && auth.role === "Supervisor";
+  if (!auth || !auth.role) return false;
+  const role = String(auth.role).toLowerCase();
+  return role === "supervisor" || role === "admin";
 };
 
 // Clear auth (logout)

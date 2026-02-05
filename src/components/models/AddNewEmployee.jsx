@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { IoIosClose } from "react-icons/io";
 import { createEmployee, updateEmployee } from "../../api/employee";
 import { formatDateForInput } from "../../utils/formatDateForInput";
-import { encryptPassword } from "../../utils/encryption";
 
 function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
   const [selectedRole, setSelectedRole] = useState(employee?.role || "");
@@ -63,7 +62,6 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
     }));
   };
 
-
   const handleRoleChange = (e) => {
     const value = e.target.value;
     setSelectedRole(value);
@@ -75,29 +73,26 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Encrypt password before sending
-    const encryptedForm = {
-      ...form,
-      password: encryptPassword(form.password),
-    };
 
     if (isEdit) {
-      await updateEmployee(employee.id, encryptedForm);
+      await updateEmployee(employee.id, form);
     } else {
-      await createEmployee(encryptedForm);
+      await createEmployee(form);
     }
     onSuccess?.();
     onClose();
   };
-
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
       <div className="bg-white w-[900px] max-h-[90vh] overflow-y-auto rounded-[10px] p-6 shadow-lg relative">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-semibold text-gray-800">
-            {isView ? "View Employee" : isEdit ? "Edit Employee" : "Add Employee"}
+            {isView
+              ? "View Employee"
+              : isEdit
+                ? "Edit Employee"
+                : "Add Employee"}
           </h2>
           <button onClick={onClose}>
             <IoIosClose className="w-9 h-9 text-gray-500 hover:text-black" />
@@ -152,9 +147,7 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
                 <option value="Supervisor">Supervisor</option>
                 <option value="Driver">Driver</option>
               </select>
-
             </div>
-
 
             <div>
               <label className="text-sm text-gray-600 font-medium">
@@ -216,7 +209,9 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
             </div>
 
             <div>
-              <label className="text-sm text-gray-600 font-medium">Hire Date</label>
+              <label className="text-sm text-gray-600 font-medium">
+                Hire Date
+              </label>
               <input
                 name="hire_date"
                 type="date"
@@ -226,7 +221,6 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
                 className="mt-1 w-full h-[38px] px-3 text-sm border border-[#E2E8F0] rounded-[8px]"
               />
             </div>
-
 
             {form.role === "Driver" && (
               <>
@@ -260,7 +254,6 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
               </>
             )}
 
-
             <div className="col-span-2">
               <label className="text-sm text-gray-600 font-medium">
                 Address <span className="text-red-500">*</span>
@@ -291,7 +284,10 @@ function AddNewEmployee({ onClose, role, mode = "add", employee, onSuccess }) {
               Save
             </button> */}
             {!isView && (
-              <button type="submit" className="px-6 py-2 bg-indigo-600 text-white">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-indigo-600 text-white"
+              >
                 {isEdit ? "Update" : "Save"}
               </button>
             )}
