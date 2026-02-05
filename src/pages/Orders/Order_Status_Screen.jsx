@@ -31,11 +31,11 @@ const OrderCard = ({ item }) => {
         </p>
       </div>
 
-      <p className="text-xs text-gray-800 mt-2">
+      <p className="text-xs py-2 font-bold text-gray-800 mt-2">
         Delivery Date: {item.delivery_date.split("T")[0].split("-").reverse().join("/")}
       </p>
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs py-2 font-bold text-gray-800">
         Driver: {item.driver_name || "Not Assigned"}
       </p>
     </div>
@@ -78,8 +78,6 @@ function Order_Status_Screen() {
         Order Status Screen
       </p>
 
-      {/* Cards Section */}
-      {/* Cards Section */}
       <div className="flex absolute top-[150px] left-[338px] w-[1000px] gap-6">
         {/* Column 1 - Pending */}
         <div className="flex flex-col gap-4 w-[309px]">
