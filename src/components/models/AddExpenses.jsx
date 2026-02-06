@@ -4,94 +4,104 @@ import { createExpense, updateExpense, getAllExpensesCategories } from "../../ap
 
 const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
   const isEditMode = mode === "edit";
+
   const [formData, setFormData] = useState({
     date: "",
     category: "",
     amount: "",
     payment_mode: "",
-    taxIncluded:"",
+    taxIncluded: "No",
     tax: "",
     note: "",
   });
 
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  // 🔹 If edit mode → prefill data
+  /** 🔹 Prefill in edit mode */
   useEffect(() => {
     if (expenseData) {
       setFormData({
-        date: expenseData.date?.split("T")[0],
-        category: expenseData.category,
-        amount: expenseData.amount,
-        payment_mode: expenseData.payment_mode,
-        taxIncluded: expenseData.taxIncluded,
-        tax: expenseData.tax,
+        date: expenseData.date?.split("T")[0] || "",
+        category: expenseData.category || "",
+        amount: expenseData.amount || "",
+        payment_mode: expenseData.payment_mode || "",
+        taxIncluded: expenseData.tax ? "Yes" : "No",
+        tax: expenseData.tax || "",
         note: expenseData.note || "",
       });
     }
   }, [expenseData]);
 
+  /** 🔹 Handle input */
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "taxIncluded" && value === "No" ? { tax: "" } : {}),
+    }));
   };
 
+  /** 🔹 Fetch categories */
   const fetchCategories = async () => {
     try {
       setLoadingCategories(true);
-      const response = await getAllExpensesCategories();
-      if (response.data.success) {
-        setCategories(response.data.data || []);
-       
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
+      const res = await getAllExpensesCategories();
+      if (res.data?.success) setCategories(res.data.data || []);
+    } catch (err) {
+      console.error("Category fetch error:", err);
     } finally {
       setLoadingCategories(false);
     }
-  };                   
+  };
+
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  
-
- const handleSubmit = async (e) => {
+  /** 🔹 Submit */
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
-    if (!formData.date || !formData.category || !formData.amount || !formData.payment_mode || !formData.taxIncluded) {
-      alert("Please fill in all required fields");
-      return;
+    if (!formData.date || !formData.category || !formData.amount || !formData.payment_mode) {
+      return alert("Please fill required fields");
     }
 
     if (parseFloat(formData.amount) <= 0) {
-      alert("Expense amount must be greater than 0");
-      return;
+      return alert("Amount must be greater than 0");
     }
 
     if (formData.taxIncluded === "Yes" && (!formData.tax || parseFloat(formData.tax) < 0)) {
-      alert("Please enter a valid tax percentage");
-      return;
+      return alert("Enter valid tax %");
     }
 
     try {
-      if (mode === "edit") {
-        await updateExpense(expenseData.id, formData);
+      setSubmitting(true);
+
+      const payload = {
+        ...formData,
+        tax: formData.taxIncluded === "Yes" ? formData.tax : 0,
+        created_by: "admin", // 🔹 set from auth later
+      };
+
+      if (isEditMode) {
+        await updateExpense(expenseData.id, payload);
       } else {
-        await createExpense(formData);
+        await createExpense(payload);
       }
 
-      onSuccess();
-      onClose();
-    } catch (error) {
-      console.error("Expense save error:", error);
-      alert("Failed to save expense. Please try again.");
+      onSuccess?.();
+      onClose?.();
+    } catch (err) {
+      console.error("Save expense error:", err);
+      alert("Failed to save expense");
+    } finally {
+      setSubmitting(false);
     }
   };
-
 
   return (
     <>
@@ -262,3 +272,4 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
 };
 
 export default AddExpenses;
+

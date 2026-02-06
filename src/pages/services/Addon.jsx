@@ -187,7 +187,7 @@ const Addon = () => {
                   </td>
 
                   <td className="px-4 py-3 text-gray-700 text-left border-b border-gray-300">
-                    {item.price}
+                   AED {item.price}
                   </td>
 
                   <td className="px-4 py-3 border-b text-left border-gray-300">

@@ -18,3 +18,7 @@ export const getSalesReport = (params) => {
         params,
     });
 };
+
+export const getClothWiseReport = (params) => {
+    return API.get("/cloth-wise", { params });
+};

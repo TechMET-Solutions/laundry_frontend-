@@ -5,6 +5,9 @@ const API = axios.create({
 
 export const createNewServiceList = (data) => API.post("/create", data);
 
+export const getAllServiceListSelect = () => API.get("/list");
+
+
 export const getAllServicesList = (page = 1, limit = 10, search = "", category = "", status = "", sortField = "", sortDirection = "asc") => {
   const params = new URLSearchParams({
     page: page.toString(),

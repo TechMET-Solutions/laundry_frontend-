@@ -138,6 +138,16 @@ function Customer() {
 
         <div className="flex gap-4">
           <button
+            onClick={handleExportExcel}
+            className="bg-white text-green-600 border border-green-600 px-4 py-2 rounded-lg text-sm hover:bg-green-50"
+          >
+            <div className="flex items-center gap-2">
+              <img src={Excel} alt="Excel" className="w-5 h-5" />
+              Export Excel Sheet
+            </div>
+          </button>
+          
+          <button
             onClick={() => {
               setEditCustomer(null);
               setShowAddModal(true);
@@ -147,15 +157,7 @@ function Customer() {
             + Add New Customer
           </button>
 
-          <button
-            onClick={handleExportExcel}
-            className="bg-white text-green-600 border border-green-600 px-4 py-2 rounded-lg text-sm hover:bg-green-50"
-          >
-            <div className="flex items-center gap-2">
-              <img src={Excel} alt="Excel" className="w-5 h-5" />
-              Export Excel Sheet
-            </div>
-          </button>
+          
 
         </div>
       </div>

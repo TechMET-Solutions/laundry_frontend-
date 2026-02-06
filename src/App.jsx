@@ -11,7 +11,7 @@ import Area from "./pages/Location_management/Area.jsx";
 import Collections from "./pages/Collections.jsx";
 
 import Daily_reports from "./pages/Reports/Daily_reports.jsx";
-import Cloth_wise_reports from "./pages/Reports/Cloth_wise_report.jsx";
+import ClothWiseReport from "./pages/Reports/ClothWiseReport.jsx";
 import Outstanding_reports from "./pages/Reports/Outstanding_report.jsx";
 import SalesReport from "./pages/Reports/SalesReport.jsx";
 import OrderReports from "./pages/Reports/OrderReports.jsx";
@@ -72,7 +72,7 @@ function App() {
           path="reports/customer-outstanding"
           element={<Customer_outstanding_report />}
         />
-        <Route path="reports/cloth-wise" element={<Cloth_wise_reports />} />
+        <Route path="reports/cloth-wise" element={<ClothWiseReport />} />
         <Route path="reports/expenses" element={<Expenses_report />} />
         <Route path="reports/tax" element={<Tax_report />} />
 
