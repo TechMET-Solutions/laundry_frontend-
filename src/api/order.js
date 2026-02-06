@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_URL } from "./index";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/orders",
+  baseURL: `${API_URL}/api/orders`,
 });
 
 export const createOrder = (data) => API.post("/create", data);

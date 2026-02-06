@@ -1,6 +1,8 @@
 import axios from "axios";
+import { API_URL } from "./index";
+
 const API = axios.create({
-    baseURL: "http://localhost:5000/api/areas",
+    baseURL: `${API_URL}/api/areas`,
 });
 
 

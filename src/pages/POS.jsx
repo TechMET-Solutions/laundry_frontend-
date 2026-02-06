@@ -19,6 +19,7 @@ import { getAllServicesCategory } from "../api/servicesapi";
 import { MdOutlinePersonAddAlt } from "react-icons/md";
 import AddCustomerModal from "./services/AddCustomerModal";
 import { useNavigate, useLocation } from "react-router-dom";
+import { API_URL } from "../api";
 
 const POS = () => {
   const navigate = useNavigate();
@@ -112,8 +113,8 @@ const POS = () => {
     const fetchData = async () => {
       try {
         const [srvRes, addonRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/service_list/list"),
-          axios.get("http://localhost:5000/api/service/service_addon/list"),
+          axios.get(`${API_URL}/api/service_list/list`),
+          axios.get(`${API_URL}/api/service/service_addon/list`),
         ]);
         setServices(srvRes.data.data || []);
         setAddons(addonRes.data.data.filter((a) => a.status === 1) || []);
@@ -1136,7 +1137,7 @@ const POS = () => {
                 >
                   <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center border border-slate-100">
                     <img
-                      src={`http://localhost:5000/${type.image}`}
+                      src={`${API_URL}/${type.image}`}
                       alt=""
                       className="h-10 object-contain"
                     />
@@ -1340,7 +1341,7 @@ const POS = () => {
 };
 
 const ServiceGrid = ({ services = [], onServiceClick }) => {
-  const BASE_URL = "http://localhost:5000/uploads/services";
+  const BASE_URL = `${API_URL}/uploads/services`;
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-4">
       {services.map((item) => (

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FiEdit, FiSearch, FiTrash2 } from "react-icons/fi";
 import { IoReturnUpBackOutline } from "react-icons/io5";
 import { RiArrowDropDownLine, RiArrowUpDownLine, RiArrowUpLine, RiArrowDownLine } from "react-icons/ri";
-import { ImageURL } from "../../api";
+import { API_URL } from "../../api";
 import { deleteServiceList, getAllServicesList } from "../../api/servicelist";
 import { getAllServicesCategory } from "../../api/servicesapi";
 import DeleteModal from "../../components/models/DeleteModal";
@@ -230,7 +230,7 @@ const ServiceList = () => {
                   <td className="px-4 py-4 font-medium flex items-center gap-4 text-left border-b border-gray-300">
                     <img
                       className="w-10 h-10 rounded-full object-cover border border-gray-200"
-                      src={`${ImageURL}/services/${item.addIcon}`}
+                      src={`${API_URL}/services/${item.addIcon}`}
                       alt={item.name}
                       onError={(e) => (e.target.src = "https://via.placeholder.com/40")}
                     />

@@ -1,9 +1,8 @@
 import axios from "axios";
-import { API_URL } from ".";
+import { API_URL } from "./index";
 
 const API = axios.create({
-    baseURL: "http://localhost:5000/api/timeslot",
-    // baseURL: `${API_URL}/api/timeslot`,
+    baseURL: `${API_URL}/api/timeslot`,
 });
 
 // CREATE

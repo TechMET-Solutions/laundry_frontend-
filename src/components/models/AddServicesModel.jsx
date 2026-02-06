@@ -6,6 +6,7 @@ import {
 } from "../../api/servicesapi";
 import Button from "../ui/Button";
 import ToggleButton from "../ui/ToggleButton";
+import { API_URL } from "../../api";
 
 const AddServicesModel = ({ mode, onClose, serviceData, setRefresh }) => {
   const isEditMode = mode === "edit";
@@ -200,7 +201,7 @@ const AddServicesModel = ({ mode, onClose, serviceData, setRefresh }) => {
               <div className="flex items-end justify-center ">
                 <div className="h-18 w-18 flex items-center justify-center bg-white">
                   <img
-                    src={`http://localhost:5000/uploads/services/${formData.addIcon}`}
+                    src={`${API_URL}/uploads/services/${formData.addIcon}`}
                     alt={formData.name}
                   />
                 </div>

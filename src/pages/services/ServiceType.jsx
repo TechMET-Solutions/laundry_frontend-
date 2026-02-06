@@ -6,7 +6,7 @@ import Setting_img from "../../assets/carbon_settings-services.png";
 import AddNewServicesType_PopUp from "../../components/models/AddNewServicesType_PopUp.jsx";
 import { getAllServiceTypes, deleteServiceType } from "../../api/servicesapi";
 import DeleteModal from "../../components/models/DeleteModal.jsx";
-import { API_URL, ImageURL } from "../../api/index.js";
+import { API_URL } from "../../api/index.js";
 import Pagination from "../../components/Pagination.jsx";
 
 const ServiceType = () => {

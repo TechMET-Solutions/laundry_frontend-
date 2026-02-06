@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_URL } from '.';
 
-const API_BASE_URL = 'http://localhost:5000/api/reports'; // Replace with your actual URL
+const API_BASE_URL = `${API_URL}/api/reports`; // Replace with your actual URL
 
 export const getAllPaymentReceipts = async (params) => {
     try {

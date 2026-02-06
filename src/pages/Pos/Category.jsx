@@ -131,6 +131,7 @@ import { useEffect, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { FiEdit2 } from "react-icons/fi";
 import { getAllServicesAddon } from "../../api/servicesapi";
+import { API_URL } from "../../api";
 
 function Category({ onSaveOrder, servicesData }) {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -289,7 +290,7 @@ function Category({ onSaveOrder, servicesData }) {
               {/* Image Container with fixed Aspect Ratio */}
               <div className=" mb-3 flex items-center justify-center bg-slate-50">
                 <img
-                  src={`http://localhost:5000/uploads/services/${el.addIcon}`}
+                  src={`${API_URL}/uploads/services/${el.addIcon}`}
                   alt={el.name}
                   className=" object-contain  rounded-t-2xl"
                 />
@@ -322,7 +323,7 @@ function Category({ onSaveOrder, servicesData }) {
               {selectedCategory?.service_types?.map((el) => {
                 const value = `${selectedCategory.id}-${el.type}`;
 
-                const imageUrl = `http://localhost:5000/${el.image}`;
+                const imageUrl = `${API_URL}/${el.image}`;
                 const isSelected = !!selectedServicesCheckbox[value];
 
                 // console.log(el.image);

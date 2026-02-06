@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_URL } from "./index";
 
 const API = axios.create({
-    baseURL: "http://localhost:5000/api/reports",
+    baseURL: `${API_URL}/api/reports`
 });
 
 export const getTaxReport = (startDate, endDate) =>

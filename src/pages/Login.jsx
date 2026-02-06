@@ -14,6 +14,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../api";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -31,7 +32,7 @@ const Login = () => {
     try {
       // Call backend login controller
       const response = await axios.post(
-        "http://localhost:5000/api/employees/login",
+        `${API_URL}/api/employees/login`,
         {
           email,
           password,
