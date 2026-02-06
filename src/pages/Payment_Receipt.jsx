@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { IoReturnUpBackOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
 import { getAllPaymentReceipts } from "../api/paymentReport";
 import { formatDateForInput } from "../utils/formatDateForInput";
 import { getEmployeeSearch } from "../api/employee";
 import { CiSearch } from "react-icons/ci";
+import NavButton from "../components/ui/NavButton";
+import PageHeader from "../components/pageHeader";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 function Payment_Receipt() {
   const navigate = useNavigate();
@@ -21,8 +25,10 @@ function Payment_Receipt() {
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState("");
   const [driver, setDriver] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const today = new Date().toISOString().split("T")[0];
+
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
 
   const fetchPaymentReceipts = async () => {
     try {
@@ -145,20 +151,75 @@ function Payment_Receipt() {
     setPage(1);
   };
 
+
+    const handleDownloadPDF = () => {
+      const doc = new jsPDF();
+  
+      doc.setFontSize(16);
+      doc.text("Payment Report", 14, 15);
+  
+      doc.setFontSize(10);
+      doc.text(`From: ${startDate}`, 14, 22);
+      doc.text(`To: ${endDate}`, 60, 22);
+
+  
+      autoTable(doc, {
+        startY: 38,
+        head: [[
+          "Sr No",
+          "Date",
+          "Order ID",
+          "Customer",
+          "Driver",
+          "Order Amount",
+          "Payment Type",
+          "Notes"
+        ]],
+        body: paymentReceipts.map((item, index) => ([
+          index + 1,
+          formatDateForInput(item.date),
+          item.order_id,
+          item.customer,
+          item.driver,
+          item.amount,
+          item.payment_type,
+          item.note,
+        ])),
+        styles: { fontSize: 9 },
+        headStyles: {
+          fillColor: [86, 204, 255],
+          textColor: 0,
+        },
+      });
+  
+      doc.save(`tax-report-${startDate}-to-${endDate}.pdf`);
+  };
+  
+
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div
-            className="h-8 w-8 flex items-center justify-center bg-blue-600 text-white rounded cursor-pointer"
-            onClick={() => navigate(-1)}
-          >
-            <IoReturnUpBackOutline />
-          </div>
-          <h2 className="font-semibold text-lg">Payment Receipt</h2>
-        </div>
-      </div>
+      <PageHeader
+        title="Payment Receipt"
+        actions={
+          <>
+            <NavButton
+              variant="download"
+            onClick={handleDownloadPDF}
+            >
+              Download Report
+            </NavButton>
+
+            <NavButton
+              variant="print"
+              // onClick={handleDownloadPDF}
+            >
+              Print Report
+
+            </NavButton>
+          </>
+        }
+      />
 
       {/* FILTERS SECTION */}
       <div className="flex flex-wrap justify-end gap-4 mb-6">

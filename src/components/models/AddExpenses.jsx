@@ -5,6 +5,9 @@ import { createExpense, updateExpense, getAllExpensesCategories } from "../../ap
 const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
   const isEditMode = mode === "edit";
 
+  const userData = JSON.parse(localStorage.getItem("userData"));
+  const createdByUser = userData?.first_name + " " + userData?.last_name || "admin";
+
   const [formData, setFormData] = useState({
     date: "",
     category: "",
@@ -84,7 +87,7 @@ const AddExpenses = ({ mode, onClose, expenseData, onSuccess }) => {
       const payload = {
         ...formData,
         tax: formData.taxIncluded === "Yes" ? formData.tax : 0,
-        created_by: "admin", // 🔹 set from auth later
+        created_by: createdByUser, // 🔹 set from auth later
       };
 
       if (isEditMode) {

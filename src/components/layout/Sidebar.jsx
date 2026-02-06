@@ -105,7 +105,7 @@ function Sidebar() {
                 <div key={i}>
                   <button
                     onClick={() => setOpenMenu(isOpen ? null : item.name)}
-                    className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
+                    className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-lg font-medium
                                text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition"
                   >
                     <Icon className="text-lg" />
@@ -123,7 +123,7 @@ function Sidebar() {
                           to={child.path}
                           onClick={() => setOpen(false)}
                           className={({ isActive }) =>
-                            `block px-3 py-2 rounded-md text-sm transition
+                            `block px-3 py-2 rounded-md text-lg transition
                             ${
                               isActive
                                 ? "bg-blue-100 text-blue-600"
@@ -145,7 +145,7 @@ function Sidebar() {
                 <button
                   key={i}
                   onClick={() => handleLogout()}
-                  className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium
+                  className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-lg font-medium
                              text-red-600 hover:bg-red-50 hover:text-red-700 transition"
                 >
                   <Icon className="text-lg" />
@@ -160,7 +160,7 @@ function Sidebar() {
                 to={item.path}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
-                  `w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition
+                  `w-full flex items-center gap-3 px-4 py-2 rounded-lg text-lg font-medium transition
                   ${
                     isActive
                       ? "bg-blue-100 text-blue-600"

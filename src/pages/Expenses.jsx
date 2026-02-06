@@ -161,7 +161,7 @@ function Expenses() {
                   <td className="px-4 py-3">{item.category}</td>
                   <td className="px-4 py-3">{item.tax}</td>
                   <td className="px-4 py-3">{item.payment_mode}</td>
-                  <td className="px-4 py-3">{loggedInEmail}</td>
+                  <td className="px-4 py-3">{item.created_by}</td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button

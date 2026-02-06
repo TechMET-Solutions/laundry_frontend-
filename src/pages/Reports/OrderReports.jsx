@@ -151,7 +151,7 @@ function OrderReports() {
     doc.text(`To: ${endDate}`, 60, 22);
 
     doc.text(`Total Orders : ${totalOrder}`, 14, 30);
-    doc.text(`Total Order Amount: AED ${totalAmount}`, 60, 30);
+    doc.text(`Total Order Amount: AED ${Number(totalAmount).toFixed(2)}`, 60, 30);
 
     autoTable(doc, {
       startY: 38,
@@ -215,7 +215,7 @@ function OrderReports() {
           <h2>Order Report</h2>
           <p><strong>From:</strong> ${startDate} &nbsp;&nbsp; <strong>To:</strong> ${endDate}</p>
           <p><strong>Total Orders:</strong> ${totalOrder}</p>
-          <p><strong>Total Amount:</strong> AED ${totalAmount}</p>
+          <p><strong>Total Amount:</strong> AED ${Number(totalAmount).toFixed(2)}</p>
   
           <table>
             <thead>
@@ -276,7 +276,7 @@ function OrderReports() {
         />
         <SummaryCard
           label="Total Order Amount"
-          value={totalAmount}
+          value={Number(totalAmount).toFixed(2)}
           borderColor="border-yellow-400"
         />
       </div>
