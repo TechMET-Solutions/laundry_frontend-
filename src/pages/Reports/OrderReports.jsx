@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FiUser } from "react-icons/fi";
 import { FiTruck } from "react-icons/fi";
-
 import { reportitems } from "../../constants/reportitems";
 import { getEmployeeSearch } from "../../api/employee";
 import { getCustomersSearch } from "../../api/customer";
-
 import NavButton from "../../components/ui/NavButton";
 import ReportHeader from "../../components/ReportHeader";
 import DateFilter from "../../components/DateFilter";
@@ -13,7 +11,6 @@ import SummaryCard from "../../components/SummaryCard";
 import SearchSelectInput from "../../components/ui/SearchSelectInput";
 import { getOrderReport } from "../../api/report";
 import { formatDateForInput } from "../../utils/formatDateForInput";
-
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -142,105 +139,155 @@ function OrderReports() {
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
+    const accentColor = [26, 86, 219]; // Modern Blue
 
-    doc.setFontSize(16);
-    doc.text("Order Report", 14, 15);
+    // --- Header Section ---
+    doc.setFontSize(22);
+    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+    doc.text("SALES ORDER REPORT", 14, 20);
+
+    // Shop Details (Mock Address)
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("123 Business Way, Dubai, UAE", 14, 27);
+    doc.text("Contact: +971 00 000 0000", 14, 32);
+
+    // --- Summary Box ---
+    doc.setDrawColor(230);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(14, 38, 182, 18, 2, 2, 'FD');
 
     doc.setFontSize(10);
-    doc.text(`From: ${startDate}`, 14, 22);
-    doc.text(`To: ${endDate}`, 60, 22);
+    doc.setTextColor(50);
+    doc.setFont("helvetica", "bold");
+    doc.text(`DATE RANGE:`, 18, 45);
+    doc.text(`TOTAL ORDERS:`, 85, 45);
+    doc.text(`TOTAL REVENUE:`, 140, 45);
 
-    doc.text(`Total Orders : ${totalOrder}`, 14, 30);
-    doc.text(`Total Order Amount: AED ${Number(totalAmount).toFixed(2)}`, 60, 30);
+    doc.setFont("helvetica", "normal");
+    doc.text(`${startDate} to ${endDate}`, 18, 51);
+    doc.text(`${totalOrder}`, 85, 51);
+    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+    doc.text(`AED ${Number(totalAmount).toFixed(2)}`, 140, 51);
 
+    // --- Table Section ---
     autoTable(doc, {
-      startY: 38,
-      head: [[
-        "Sr No",
-        "Date",
-        "Order ID",
-        "Customer",
-        "Driver",
-        "Order Amount",
-        "Status",
-      ]],
-      body: orders.map((item, index) => ([
+      startY: 62,
+      head: [["Sr No", "Date", "Order ID", "Customer", "Driver", "Amount", "Status"]],
+      body: orders.map((item, index) => [
         index + 1,
         formatDateForInput(item.order_date),
         item.order_code,
         item.customer_name,
-        item.driver_name,
+        item.driver_name || 'N/A',
         `AED ${item.gross_total}`,
-        item.order_status,
-      ])),
-      styles: { fontSize: 9 },
+        item.order_status.toUpperCase(),
+      ]),
+      styles: { fontSize: 9, cellPadding: 4 },
       headStyles: {
-        fillColor: [86, 204, 255],
-        textColor: 0,
+        fillColor: accentColor,
+        textColor: 255,
+        fontStyle: 'bold',
       },
+      alternateRowStyles: { fillColor: [250, 250, 250] },
+      margin: { top: 20 },
     });
 
-    doc.save(`tax-report-${startDate}-to-${endDate}.pdf`);
+    doc.save(`order-report-${startDate}.pdf`);
   };
 
 
-    const handlePrintPDF = () => {
-      const printWindow = window.open("", "_blank");
-  
-      const tableRows = orders.map((item, index) => `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${formatDateForInput(item.order_date)}</td>
-        <td>${item.order_code}</td>
-        <td>${item.customer_name}</td>
-        <td>${item.driver_name}</td>
-        <td>AED ${item.gross_total}</td>
-        <td>${item.order_status}</td>
-      </tr>
-    `).join("");
-  
-      printWindow.document.write(`
-      <html>
-        <head>
-          <title>Order Report</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h2 { margin-bottom: 5px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-            th { background: #56CCFF; }
-          </style>
-        </head>
-        <body>
-          <h2>Order Report</h2>
-          <p><strong>From:</strong> ${startDate} &nbsp;&nbsp; <strong>To:</strong> ${endDate}</p>
-          <p><strong>Total Orders:</strong> ${totalOrder}</p>
-          <p><strong>Total Amount:</strong> AED ${Number(totalAmount).toFixed(2)}</p>
-  
-          <table>
-            <thead>
-              <tr>
-                <th>Sr No</th>
-                <th>Date</th>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Driver</th>
-                <th>Order Amount</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tableRows}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `);
-  
-      printWindow.document.close();
-      printWindow.print();
-    };
+  const handlePrintPDF = () => {
+    const printWindow = window.open("", "_blank");
 
+    const tableRows = orders.map((item, index) => `
+    <tr>
+      <td>${index + 1}</td>
+      <td>${formatDateForInput(item.order_date)}</td>
+      <td class="bold">${item.order_code}</td>
+      <td>${item.customer_name}</td>
+      <td>${item.driver_name || '-'}</td>
+      <td class="amount">AED ${Number(item.gross_total).toFixed(2)}</td>
+      <td><span class="status-badge">${item.order_status}</span></td>
+    </tr>
+  `).join("");
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Order Report</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+          body { font-family: 'Inter', sans-serif; color: #334155; padding: 40px; }
+          
+          .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; }
+          .shop-info h1 { margin: 0; color: #1e40af; font-size: 24px; }
+          .shop-info p { margin: 5px 0; font-size: 12px; color: #64748b; }
+          
+          .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+          .stat-card { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+          .stat-card label { display: block; font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: bold; }
+          .stat-card value { font-size: 16px; font-weight: bold; color: #0f172a; }
+
+          table { width: 100%; border-collapse: collapse; }
+          th { background: #f1f5f9; color: #475569; font-size: 11px; text-transform: uppercase; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; }
+          td { padding: 12px; font-size: 12px; border-bottom: 1px solid #f1f5f9; }
+          
+          .amount { font-weight: bold; color: #1e293b; }
+          .bold { font-weight: bold; }
+          .status-badge { background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+          
+          @media print {
+            body { padding: 0; }
+            .stat-card { border: 1px solid #ddd; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="shop-info">
+            <h1> DEMO LAUNDRY </h1>
+            <p>Main Street, Business Bay, Dubai</p>
+            <p>Date Generated: ${new Date().toLocaleDateString()}</p>
+          </div>
+          <div style="text-align: right">
+            <h2 style="margin:0">Order Report</h2>
+            <p style="color:#64748b">${startDate} to ${endDate}</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><label>Total Orders</label><value>${totalOrder}</value></div>
+          <div class="stat-card"><label>Report Period</label><value>${startDate} - ${endDate}</value></div>
+          <div class="stat-card"><label>Total Revenue</label><value style="color:#16a34a">AED ${Number(totalAmount).toFixed(2)}</value></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Sr No</th>
+              <th>Date</th>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Driver</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+    // Wait for fonts to load before printing
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
 
 
   return (

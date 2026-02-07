@@ -9,7 +9,7 @@ import SearchSelectInput from "../../components/ui/SearchSelectInput";
 import { FiTruck } from "react-icons/fi";
 import { getAllServiceListSelect } from "../../api/servicelist";
 import { getAllServiceTypes } from "../../api/servicesapi";
-import { getClothWiseReport } from "../../api/report";
+import { exportClothWisePDF, getClothWiseReport, printClothWisePDF } from "../../api/report";
 
 function ClothWiseReport() {
   const today = new Date().toISOString().split("T")[0];
@@ -123,6 +123,63 @@ function ClothWiseReport() {
   }, [startDate, endDate, selectedService, selectedServiceType, selectedDriver]);
 
 
+  const downloadPDF = async () => {
+    try {
+      const params = {
+        start_date: startDate,
+        end_date: endDate,
+        services_list: selectedService || undefined,
+        services_types: selectedServiceType || undefined,
+        driver_name: selectedDriver?.name || undefined,
+      };
+
+      const res = await exportClothWisePDF(params);
+
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `cloth-wise-report-${startDate}-to-${endDate}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF download error:", error);
+      alert("Failed to download PDF");
+    }
+  };
+
+  const printPDF = async () => {
+    try {
+      const params = {
+        start_date: startDate,
+        end_date: endDate,
+        services_list: selectedService || undefined,
+        services_types: selectedServiceType || undefined,
+        driver_name: selectedDriver?.name || undefined,
+      };
+
+      const res = await printClothWisePDF(params);
+
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+
+      const printWindow = window.open(url);
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+    } catch (error) {
+      console.error("Print error:", error);
+      alert("Failed to print report");
+    }
+  };
+
+
+
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
 
@@ -132,15 +189,11 @@ function ClothWiseReport() {
         reportItems={reportitems}
         actions={
           <>
-            <NavButton
-              variant="download">
-              {/* onClick={downloadExcel} */}
+            <NavButton variant="download" onClick={downloadPDF}>
               Download Report
             </NavButton>
 
-            <NavButton
-              // onClick={downloadPDF} 
-              variant="print">
+            <NavButton variant="print" onClick={printPDF}>
               Print Report
             </NavButton>
           </>

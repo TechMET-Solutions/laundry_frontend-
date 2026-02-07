@@ -207,7 +207,7 @@ function Expenses_report() {
       </div>
 
       {/* DATE FILTERS */}
-      <div className="flex justify-end gap-6 ">
+      <div className="flex justify-end gap-6 mb-4">
         <DateFilter
           startDate={startDate}
           endDate={endDate}

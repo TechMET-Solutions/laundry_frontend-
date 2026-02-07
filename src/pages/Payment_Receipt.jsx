@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../components/Pagination";
-import { getAllPaymentReceipts } from "../api/paymentReport";
+import { exportPaymentExcel, exportPaymentPDF, getAllPaymentReceipts } from "../api/paymentReport";
 import { formatDateForInput } from "../utils/formatDateForInput";
 import { getEmployeeSearch } from "../api/employee";
 import { CiSearch } from "react-icons/ci";
 import NavButton from "../components/ui/NavButton";
 import PageHeader from "../components/pageHeader";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-
 
 function Payment_Receipt() {
   const navigate = useNavigate();
@@ -151,48 +148,66 @@ function Payment_Receipt() {
     setPage(1);
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const response = await exportPaymentExcel();
 
-    const handleDownloadPDF = () => {
-      const doc = new jsPDF();
-  
-      doc.setFontSize(16);
-      doc.text("Payment Report", 14, 15);
-  
-      doc.setFontSize(10);
-      doc.text(`From: ${startDate}`, 14, 22);
-      doc.text(`To: ${endDate}`, 60, 22);
-
-  
-      autoTable(doc, {
-        startY: 38,
-        head: [[
-          "Sr No",
-          "Date",
-          "Order ID",
-          "Customer",
-          "Driver",
-          "Order Amount",
-          "Payment Type",
-          "Notes"
-        ]],
-        body: paymentReceipts.map((item, index) => ([
-          index + 1,
-          formatDateForInput(item.date),
-          item.order_id,
-          item.customer,
-          item.driver,
-          item.amount,
-          item.payment_type,
-          item.note,
-        ])),
-        styles: { fontSize: 9 },
-        headStyles: {
-          fillColor: [86, 204, 255],
-          textColor: 0,
-        },
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-  
-      doc.save(`tax-report-${startDate}-to-${endDate}.pdf`);
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Payment-Report.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Export error:", error);
+      alert("Failed to download Excel file");
+
+    }
+  };
+
+
+
+  const handlePrintPDF = async () => {
+    try {
+      const response = await exportPaymentPDF();
+
+      // 1. Create the Blob from response data
+      const blob = new Blob([response.data], {
+        type: "application/pdf",
+      });
+
+      // 2. Create a URL for the blob
+      const url = window.URL.createObjectURL(blob);
+
+      // 3. Open the PDF in a hidden iframe and trigger print
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none"; // Hide the iframe
+      iframe.src = url;
+      document.body.appendChild(iframe);
+
+      iframe.onload = () => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+
+        // Cleanup: remove iframe and revoke URL after a delay
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(iframe);
+        }, 1000);
+      };
+
+    } catch (error) {
+      console.error("PDF Print error:", error);
+      alert("Failed to open print options");
+    }
   };
   
 
@@ -203,19 +218,12 @@ function Payment_Receipt() {
         title="Payment Receipt"
         actions={
           <>
-            <NavButton
-              variant="download"
-            onClick={handleDownloadPDF}
-            >
+            <NavButton variant="download" onClick={handleExportExcel}>
               Download Report
             </NavButton>
 
-            <NavButton
-              variant="print"
-              // onClick={handleDownloadPDF}
-            >
+            <NavButton variant="print" onClick={handlePrintPDF}>
               Print Report
-
             </NavButton>
           </>
         }

@@ -257,11 +257,6 @@ const AddServicesModel = ({ mode, onClose, serviceData, setRefresh }) => {
                 className="w-full rounded-lg border-2 border-gray-300 px-4 py-2 text-sm text-gray-600 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               >
                 <option value="" disabled>Choose Shorting Order</option>
-                {/* <option value="51">51</option>
-                <option value="52">52</option>
-                <option value="53">53</option>
-                <option value="54">54</option>
-                <option value="55">55</option> */}
                 {
                   arr.map((num)=>{
                     return(
@@ -275,7 +270,8 @@ const AddServicesModel = ({ mode, onClose, serviceData, setRefresh }) => {
             <div className="mt-8">
               <ToggleButton
               
-              label="Active SQF"
+                label="Active SQF"
+                label2="Unactive SQF"
               checked={formData.sqf_status === 1}
               onChange={(isOn) => setFormData(p => ({ ...p, sqf_status: isOn ? 1 : 0 }))}
             />

@@ -70,7 +70,7 @@ function Emirates() {
   );
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-6 min-h-screen">
        <div className="flex flex-col gap-4 mb-6">
          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
            <button onClick={() => navigate(-1)} className="flex items-center justify-center bg-indigo-800 w-10 h-10 md:w-11 md:h-11 rounded-sm cursor-pointer hover:bg-indigo-900 transition-colors">

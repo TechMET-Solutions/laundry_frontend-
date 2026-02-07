@@ -23,3 +23,17 @@ export const getSalesReport = (params) => {
 export const getClothWiseReport = (params) => {
     return API.get("/cloth-wise", { params });
 };
+
+// 📄 PDF download
+export const exportClothWisePDF = (params) =>
+    API.get("/cloth-wise/print", {
+        params,
+        responseType: "blob",
+    });
+
+// 🖨️ Direct print preview
+export const printClothWisePDF = (params) =>
+    API.get("/cloth-wise/print", {
+        params,
+        responseType: "blob",
+    });

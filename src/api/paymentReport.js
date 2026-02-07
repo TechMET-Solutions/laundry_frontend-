@@ -23,3 +23,17 @@ export const getAllPaymentReceipts = async (params) => {
         throw error;
     }
 };
+
+const API = axios.create({
+    baseURL: `${API_URL}/api/reports`,
+});
+
+export const exportPaymentExcel = () =>
+    API.get("/payments/excel", {
+        responseType: "blob",
+    });
+
+export const exportPaymentPDF = () =>
+    API.get("/payments/print", {
+        responseType: "blob",
+    });
