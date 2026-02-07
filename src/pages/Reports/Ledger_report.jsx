@@ -20,12 +20,14 @@ function Ledger_report() {
         actions={
           <>
             <NavButton
+              className="rounded-lg"
               // onClick={handleDownloadPDF}
               variant="download">
               Download Report
             </NavButton>
 
             <NavButton
+              className="rounded-lg"
               // onClick={handlePrintPDF}
               variant="print">
               Print Report
@@ -33,7 +35,7 @@ function Ledger_report() {
           </>
         }
       />
-         <div className="flex gap-6 mt-6">
+      <div className="flex gap-6 mt-6">
         {/* Total Debit */}
         <div className=" bg-white rounded-lg shadow-sm w-56">
           <div className="flex gap-4 px-4 py-3 border-b border-green-400">

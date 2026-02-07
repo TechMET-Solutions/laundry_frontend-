@@ -4,10 +4,11 @@ import { IoReturnUpBackOutline } from "react-icons/io5";
 import { reportitems } from "../../constants/reportitems";
 import NavButton from "../../components/ui/NavButton";
 import ReportHeader from "../../components/ReportHeader";
+import SummaryCard from "../../components/SummaryCard";
 
 
 
-function Customer_outstanding_report() {
+function CustomerOutstandingReport() {
 
   const [startDate, setStartDate] = useState("2025-12-01");
   const [endDate, setEndDate] = useState("2025-12-01");
@@ -23,12 +24,14 @@ function Customer_outstanding_report() {
         actions={
           <>
             <NavButton
+            className="rounded-lg"
               // onClick={downloadExcel} 
               variant="download">
               Download Report
             </NavButton>
 
             <NavButton
+            className="rounded-lg"
               // onClick={downloadPDF} 
               variant="print">
               Print Report
@@ -36,23 +39,23 @@ function Customer_outstanding_report() {
           </>
         }
       />
-      <div className="flex items-center gap-6 mt-6 mb-6">
-        {/* Total Debit */}
-        <div className=" bg-white rounded-lg shadow-sm w-56">
-          <div className="flex gap-4 px-4 py-3 border-b border-green-400">
-            <p className="text-sm text-gray-600">Total Debit</p>
-            <span className="text-2xl font-semibold text-gray-800">03</span>
 
-          </div>
-        </div>
-
-        {/* Total Credit */}
-        <div className="bg-white rounded-lg shadow-sm w-56">
-          <div className=" flex gap-4 px-4 py-3 border-b border-yellow-400">
-            <p className="text-sm text-gray-600">Total Credit</p>
-            <span className="text-2xl font-semibold text-gray-800">04</span>
-          </div>
-        </div>
+      <div className="flex gap-6 mt-6">
+        <SummaryCard
+          label="Total Orders"
+          value="03"
+          borderColor="border-green-400"
+        />
+        <SummaryCard
+          label="Total Sales"
+          value="03"
+          borderColor="border-yellow-400"
+        />
+        <SummaryCard
+          label="Total Tax Amount"
+          value="05"
+          borderColor="border-blue-400"
+        />
       </div>
 
       {/* DATE FILTERS */}
@@ -208,4 +211,4 @@ function Customer_outstanding_report() {
 }
 
 
-export default Customer_outstanding_report;
+export default CustomerOutstandingReport;

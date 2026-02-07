@@ -8,7 +8,7 @@ import DateFilter from "../../components/DateFilter";
 
 
 
-function Daily_reports() {
+function DailyReports() {
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -26,15 +26,17 @@ function Daily_reports() {
         reportItems={reportitems}
         actions={
           <>
-            <NavButton 
-            // onClick={downloadExcel} 
-            variant="download">
+            <NavButton
+              className="rounded-lg"
+              // onClick={downloadExcel} 
+              variant="download">
               Download Report
             </NavButton>
 
-            <NavButton 
-            // onClick={downloadPDF} 
-            variant="print">
+            <NavButton
+              className="rounded-lg"
+              // onClick={downloadPDF} 
+              variant="print">
               Print Report
             </NavButton>
           </>
@@ -100,4 +102,4 @@ function Daily_reports() {
   );
 }
 
-export default Daily_reports;
+export default DailyReports;

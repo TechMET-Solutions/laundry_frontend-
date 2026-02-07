@@ -298,17 +298,19 @@ function OrderReports() {
         actions={
           <>
             <NavButton
+              className="rounded-lg"
               variant="download"
               onClick={handleDownloadPDF}>
               Download Report
             </NavButton>
 
-            <NavButton 
-            variant="print"
-            onClick={handlePrintPDF}
+            <NavButton
+              className="rounded-lg"
+              variant="print"
+              onClick={handlePrintPDF}
             >
               Print Report
-              
+
             </NavButton>
           </>
         }

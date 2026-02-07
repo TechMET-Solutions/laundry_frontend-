@@ -78,7 +78,7 @@ export default function Order_List() {
       const res = await getAllOrders(p, 10);
       
       const data = (res.data.data || []).filter(
-        (order) => order.order_status !== "Deleted orders" && order.order_status !== "Cancelled"
+        (order) => order.order_status !== "Deleted"
       );
 
       setAllOrders(data);
@@ -176,7 +176,7 @@ export default function Order_List() {
 
   const handleDelete = async () => {
     try {
-      await softDeleteOrder(deleteId, { order_status: "Cancelled" });
+      await softDeleteOrder(deleteId, { order_status: "Deleted" });
       fetchOrders(page);
     } catch (error) {
       console.error("Delete failed:", error);

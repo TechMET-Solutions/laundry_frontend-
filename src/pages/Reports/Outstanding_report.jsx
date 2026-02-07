@@ -21,12 +21,14 @@ function Outstanding_report() {
         actions={
           <>
             <NavButton
+              className="rounded-lg"
               // onClick={handleDownloadPDF}
               variant="download">
               Download Report
             </NavButton>
 
             <NavButton
+              className="rounded-lg"
               // onClick={handlePrintPDF}
               variant="print">
               Print Report
@@ -49,7 +51,7 @@ function Outstanding_report() {
         />
       </div>
 
-{/* DATE FILTERS */}
+      {/* DATE FILTERS */}
       <div className="flex justify-end gap-6 mb-6">
         <div className="flex items-center gap-2">
           <label className="text-sm font-medium text-gray-600">

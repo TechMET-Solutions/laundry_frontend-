@@ -257,12 +257,14 @@ function SalesReport() {
         actions={
           <>
             <NavButton
+              className="rounded-lg"
               onClick={handleDownloadPDF}
               variant="download">
               Download Report
             </NavButton>
 
             <NavButton
+              className="rounded-lg"
               onClick={handlePrintPDF}
               variant="print">
               Print Report

@@ -36,8 +36,10 @@ function DetailedOrderPage() {
       try {
         setLoading(true);
         const order = await getOrderById(state.orderId);
-        const orderData = order.data.data;
+        const orderData = order.data;
         setOrderDetails(orderData);
+
+        console.log(orderData)
 
         // Fetch customer details
         if (orderData.customer_id) {
@@ -195,12 +197,12 @@ function DetailedOrderPage() {
 
             <div className="text-sm text-gray-700 flex gap-6">
               <span className="font-medium">Pickup Date</span>
-              <span>{orderDetails?.order_date.split("T")[0]}</span>
+              <span>{orderDetails?.order_date?.split("T")[0] || "N/A"}</span>
             </div>
 
             <div className="text-sm text-gray-700 flex gap-6">
               <span className="font-medium">Delivery Date</span>
-              <span>{orderDetails?.delivery_date.split("T")[0]}</span>
+              <span>{orderDetails?.delivery_date?.split("T")[0] || "N/A"}</span>
             </div>
           </div>
         )}
@@ -515,3 +517,54 @@ function DetailedOrderPage() {
 }
 
 export default DetailedOrderPage;
+
+
+{/* <div className="flex flex-col md:flex-row justify-between items-start gap-8 p-6 ">
+
+  <div className="flex-1">
+    <h3 className="text-lg font-bold text-gray-800 uppercase  mb-4">Customer Details</h3>
+    <div className="grid grid-cols-[80px_auto] gap-y-3 text-sm text-[#1F2937]">
+      <span className="font-medium text-gray-500">Name</span>
+      <span className="font-semibold">{orderDetails?.customer_name || "N/A"}</span>
+
+      <span className="font-medium text-gray-500">Phone</span>
+      <span>{customerDetails?.mobile_no || "N/A"}</span>
+
+      <span className="font-medium text-gray-500">Email</span>
+      <span className="text-blue-600">{customerDetails?.email || "N/A"}</span>
+
+      <span className="font-medium text-gray-500">Address</span>
+      <span className="leading-tight">{customerDetails?.address || "N/A"}</span>
+    </div>
+  </div>
+
+  <div className="flex flex-col items-end justify-end gap-4 w-full md:w-auto">
+    <div className="flex flex-col justify-center items-center gap-3">
+      <div className="relative">
+        <select
+          className="appearance-none bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg block w-full p-2.5 pr-10 outline-none transition-all"
+          name="service"
+        >
+          <option value="">Quick Select Service</option>
+          <option value="wash">Wash & Fold</option>
+          <option value="dry">Dry Cleaning</option>
+        </select>
+
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+          <svg className="fill-current h-4 w-4" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+        </div>
+      </div>
+
+      <button
+        onClick={() =>
+          navigate("/pos", {
+            state: { orderDetails, orderId: state.orderId },
+          })
+        }
+        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition-all active:scale-95 whitespace-nowrap"
+      >
+        + Add New Service
+      </button>
+    </div>
+  </div>
+</div> */}

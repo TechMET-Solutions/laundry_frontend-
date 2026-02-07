@@ -94,29 +94,29 @@ function ClothWiseReport() {
   const [loadingReport, setLoadingReport] = useState(false);
 
   const fetchClothWiseReport = async () => {
-  try {
-    setLoadingReport(true);
+    try {
+      setLoadingReport(true);
 
-    const params = {
-      start_date: startDate,
-      end_date: endDate,
-      services_list: selectedService || undefined,
-      services_types: selectedServiceType || undefined,
-      driver_name: selectedDriver?.name || undefined
-    };
+      const params = {
+        start_date: startDate,
+        end_date: endDate,
+        services_list: selectedService || undefined,
+        services_types: selectedServiceType || undefined,
+        driver_name: selectedDriver?.name || undefined
+      };
 
-    const res = await getClothWiseReport(params);
+      const res = await getClothWiseReport(params);
 
-    if (res.data.success) {
-      setReportData(res.data.data);
-      setSummary(res.data.summary);
+      if (res.data.success) {
+        setReportData(res.data.data);
+        setSummary(res.data.summary);
+      }
+    } catch (error) {
+      console.error("Cloth wise report error:", error);
+    } finally {
+      setLoadingReport(false);
     }
-  } catch (error) {
-    console.error("Cloth wise report error:", error);
-  } finally {
-    setLoadingReport(false);
-  }
-};
+  };
 
   useEffect(() => {
     fetchClothWiseReport();
@@ -189,11 +189,11 @@ function ClothWiseReport() {
         reportItems={reportitems}
         actions={
           <>
-            <NavButton variant="download" onClick={downloadPDF}>
+            <NavButton className="rounded-lg" variant="download" onClick={downloadPDF}>
               Download Report
             </NavButton>
 
-            <NavButton variant="print" onClick={printPDF}>
+            <NavButton className="rounded-lg" variant="print" onClick={printPDF}>
               Print Report
             </NavButton>
           </>

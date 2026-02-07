@@ -11,7 +11,7 @@ import DateFilter from "../../components/DateFilter";
 import ReportTable from "../../components/ReportTable";
 
 
-function Tax_report() {
+function TaxReport() {
 
 
   const today = new Date().toISOString().split("T")[0];
@@ -159,12 +159,14 @@ function Tax_report() {
         actions={
           <>
             <NavButton
+              className="rounded-lg"
               onClick={handleDownloadPDF}
               variant="download">
               Download Report
             </NavButton>
 
             <NavButton
+              className="rounded-lg"
               onClick={handlePrintPDF}
               variant="print">
               Print Report
@@ -176,13 +178,13 @@ function Tax_report() {
         <SummaryCard
           label="Total Debit"
           currency="AED"
-          value={totalDebit}
+          value={Number(totalDebit).toFixed(2)}
           borderColor="border-green-400"
         />
         <SummaryCard
           label="Total Credit"
           currency="AED"
-          value={totalCredit}
+          value={Number(totalCredit).toFixed(2)}
           borderColor="border-yellow-400"
         />
       </div>
@@ -232,5 +234,5 @@ function Tax_report() {
   );
 }
 
-export default Tax_report;
+export default TaxReport;
 

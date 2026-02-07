@@ -16,6 +16,21 @@ export const getTodaysOrdesrs = ()=> API.get(`/list`);
 
 export const softDeleteOrder = (id, data) => API.put(`/update/${id}`, data,);
 
+// export const softDeleteOrder = (id) => {
+//   const token = localStorage.getItem("token");
+
+//   return axios.put(
+//     `/orders/delete/${id}`,
+//     {},
+//     {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     }
+//   );
+// };
+
+
 export const revokeOrder = (id) => {return API.put(`/revoke/${id}`);};
 
 export const hardDeleteOrder = (id) => API.delete(`/delete/${id}`);

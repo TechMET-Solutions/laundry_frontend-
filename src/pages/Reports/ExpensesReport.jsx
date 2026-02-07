@@ -11,7 +11,7 @@ import DateFilter from "../../components/DateFilter";
 
 
 
-function Expenses_report() {
+function ExpensesReport() {
 
 
   const today = new Date().toISOString().split("T")[0];
@@ -179,12 +179,14 @@ function Expenses_report() {
         actions={
           <>
             <NavButton
+              className="rounded-lg"
               onClick={handleDownloadPDF}
               variant="download">
               Download Report
             </NavButton>
 
             <NavButton
+              className="rounded-lg"
               onClick={handlePrintPDF}
               variant="print">
               Print Report
@@ -299,4 +301,4 @@ function Expenses_report() {
 }
 
 
-export default Expenses_report;
+export default ExpensesReport;
