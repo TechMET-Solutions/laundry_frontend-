@@ -408,7 +408,7 @@ export default function Order_List() {
                 const status = item.order_status || "--";
                 const totalAmount = item.gross_total || "--";
                 const paidAmount = item.paid_amount || 0;
-                const createdBy = createdByEmail || "Admin";
+                const createdBy = item.created_by || "Admin";
 
                 return (
                   <tr key={orderId} className="bg-[#f1f5fb] text-[#3A3D51]">

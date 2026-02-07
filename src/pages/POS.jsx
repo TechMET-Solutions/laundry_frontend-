@@ -94,6 +94,15 @@ const POS = () => {
   // Customer Modal
   const [openAddCustomerModal, setOpenAddCustomerModal] = useState(false);
 
+  const getLoggedInUser = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("userData"));
+      return user?.first_name + " " + user?.last_name || "admin";
+    } catch {
+      return "System";
+    }
+  };
+
   const [errors, setErrors] = useState({
     deliveryDate: "",
     driverName: "",
@@ -356,6 +365,112 @@ const POS = () => {
 
   // Order Validation and Save
 
+  // const handleSaveOrder = async () => {
+  //   const newErrors = {
+  //     deliveryDate: "",
+  //     driverName: "",
+  //     customerName: "",
+  //     items: "",
+  //     paymentMethod: "",
+  //     paidAmount: "",
+  //   };
+  //   if (!deliveryDate) {
+  //     newErrors.deliveryDate = "Select a delivery date";
+  //   }
+  //   if (!customerSearchTerm.trim() || !selectedCustomer?.id) {
+  //     newErrors.customerName = "Please select a customer";
+  //   }
+  //   if (!driverSearchTerm.trim() || !selectedDriver?.id) {
+  //     newErrors.driverName = "Please select a driver";
+  //   }
+  //   if (cart.length === 0) {
+  //     newErrors.items = "Please add at least one item";
+  //   }
+  //   if (!paymentMethod || paymentMethod === "") {
+  //     newErrors.paymentMethod = "Please select a payment method";
+  //   }
+
+  //   if (paidAmount && parseFloat(paidAmount) > grandTotal) {
+  //     newErrors.paidAmount = "Paid amount cannot exceed total";
+  //   }
+
+  //   setErrors(newErrors);
+  //   if (
+  //     newErrors.deliveryDate ||
+  //     newErrors.driverName ||
+  //     newErrors.customerName ||
+  //     newErrors.items ||
+  //     newErrors.paymentMethod ||
+  //     newErrors.paidAmount
+  //   ) {
+  //     return;
+  //   }
+
+  //   const orderObject = {
+  //     orderDate,
+  //     deliveryDate,
+  //     customerName: selectedCustomer?.name || customerSearchTerm,
+  //     customerId: selectedCustomer?.id || null,
+  //     driverName: selectedDriver
+  //       ? `${selectedDriver.first_name} ${selectedDriver.last_name}`
+  //       : driverSearchTerm,
+  //     driverId: selectedDriver?.id || null,
+  //     subTotal,
+  //     addon: selectedAddon
+  //       ? {
+  //           addonId: selectedAddon.id,
+  //           addonName: selectedAddon.name,
+  //           addonPrice: Number(selectedAddon.price),
+  //         }
+  //       : 0,
+  //     tax,
+  //     discount,
+  //     grossTotal: grandTotal,
+  //     paidAmount: paidAmount ? Number(paidAmount) : 0,
+  //     pendingAmount: grandTotal - (paidAmount ? Number(paidAmount) : 0),
+  //     paymentMethod,
+  //     status: "Pending",
+  //     itemList: cart.map((item) => {
+  //       const sqftFactor = item.sqft ? Number(item.sqft) : 1;
+  //       const rate = Number(item.price);
+  //       const qtyValue = Number(item.qty);
+  //       return {
+  //         name: item.name,
+  //         type: item.type,
+  //         color: item.color,
+  //         rate,
+  //         qty: qtyValue,
+  //         total: rate * qtyValue * sqftFactor,
+  //         height: item.length ? Number(item.length) : null,
+  //         width: item.width ? Number(item.width) : null,
+  //       };
+  //     }),
+  //     remark: remarks,
+  //     height: null,
+  //     width: null,
+  //   };
+
+  //   // console.log("Saving order:", orderObject);
+  //   try {
+  //     if (isEditMode && existingOrderData) {
+  //       // UPDATE existing order
+  //       const orderId = existingOrderData.id || existingOrderData._id;
+  //       await updateOrder(orderId, orderObject);
+  //       navigate(`/orders/detailed_order`, {
+  //         state: { orderId },
+  //         replace: true,
+  //       });
+  //     } else {
+  //       // CREATE new order
+  //       await createOrder(orderObject);
+  //       navigate("/orders");
+  //     }
+  //   } catch (error) {
+  //     console.error("Order create/update error:", error);
+  //   }
+  // };
+
+ 
   const handleSaveOrder = async () => {
     const newErrors = {
       deliveryDate: "",
@@ -365,27 +480,19 @@ const POS = () => {
       paymentMethod: "",
       paidAmount: "",
     };
-    if (!deliveryDate) {
-      newErrors.deliveryDate = "Select a delivery date";
-    }
-    if (!customerSearchTerm.trim() || !selectedCustomer?.id) {
-      newErrors.customerName = "Please select a customer";
-    }
-    if (!driverSearchTerm.trim() || !selectedDriver?.id) {
-      newErrors.driverName = "Please select a driver";
-    }
-    if (cart.length === 0) {
-      newErrors.items = "Please add at least one item";
-    }
-    if (!paymentMethod || paymentMethod === "") {
-      newErrors.paymentMethod = "Please select a payment method";
-    }
 
-    if (paidAmount && parseFloat(paidAmount) > grandTotal) {
+    if (!deliveryDate) newErrors.deliveryDate = "Select a delivery date";
+    if (!customerSearchTerm.trim() || !selectedCustomer?.id)
+      newErrors.customerName = "Please select a customer";
+    if (!driverSearchTerm.trim() || !selectedDriver?.id)
+      newErrors.driverName = "Please select a driver";
+    if (cart.length === 0) newErrors.items = "Please add at least one item";
+    if (!paymentMethod) newErrors.paymentMethod = "Please select a payment method";
+    if (paidAmount && parseFloat(paidAmount) > grandTotal)
       newErrors.paidAmount = "Paid amount cannot exceed total";
-    }
 
     setErrors(newErrors);
+
     if (
       newErrors.deliveryDate ||
       newErrors.driverName ||
@@ -396,6 +503,9 @@ const POS = () => {
     ) {
       return;
     }
+
+    // ✅ GET logged in user
+    const createdBy = getLoggedInUser();
 
     const orderObject = {
       orderDate,
@@ -409,22 +519,32 @@ const POS = () => {
       subTotal,
       addon: selectedAddon
         ? {
-            addonId: selectedAddon.id,
-            addonName: selectedAddon.name,
-            addonPrice: Number(selectedAddon.price),
-          }
-        : 0,
+          addonId: selectedAddon.id,
+          addonName: selectedAddon.name,
+          addonPrice: Number(selectedAddon.price),
+        }
+        : [],
       tax,
       discount,
       grossTotal: grandTotal,
       paidAmount: paidAmount ? Number(paidAmount) : 0,
       pendingAmount: grandTotal - (paidAmount ? Number(paidAmount) : 0),
       paymentMethod,
+      paymentStage:
+        Number(paidAmount) === 0
+          ? "unpaid"
+          : Number(paidAmount) >= grandTotal
+            ? "full"
+            : "partial",
+
       status: "Pending",
+      created_by: createdBy,   // ⭐ IMPORTANT LINE
+
       itemList: cart.map((item) => {
         const sqftFactor = item.sqft ? Number(item.sqft) : 1;
         const rate = Number(item.price);
         const qtyValue = Number(item.qty);
+
         return {
           name: item.name,
           type: item.type,
@@ -436,23 +556,20 @@ const POS = () => {
           width: item.width ? Number(item.width) : null,
         };
       }),
+
       remark: remarks,
-      height: null,
-      width: null,
     };
 
-    // console.log("Saving order:", orderObject);
     try {
       if (isEditMode && existingOrderData) {
-        // UPDATE existing order
         const orderId = existingOrderData.id || existingOrderData._id;
         await updateOrder(orderId, orderObject);
+
         navigate(`/orders/detailed_order`, {
           state: { orderId },
           replace: true,
         });
       } else {
-        // CREATE new order
         await createOrder(orderObject);
         navigate("/orders");
       }
@@ -460,7 +577,12 @@ const POS = () => {
       console.error("Order create/update error:", error);
     }
   };
+
+
+
   // --- Actions ---
+  
+  
   const handleServiceClick = (service) => {
     const firstType = service.service_types?.[0];
     setSelectedService(service);

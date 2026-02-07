@@ -9,6 +9,15 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
   const isView = mode === "view";
   const isEdit = mode === "edit";
 
+  const getLoggedInUser = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("userData"));
+      return user?.first_name + " " + user?.last_name || "admin";
+    } catch {
+      return "System";
+    }
+  };
+
   const [form, setForm] = useState({
     collection_type: "CLOTH",
     customer_type: "",
@@ -288,12 +297,19 @@ const AddCollectionModal = ({ mode, collection, onClose, onSuccess }) => {
 
     try {
       let response;
-      console.log("Form data being submitted:", form);
+      // ⭐ logged in user
+      const createdBy = getLoggedInUser();
+
+      // ⭐ payload with created_by
+      const payload = {
+        ...form,
+        created_by: createdBy,
+      };
 
       if (isEdit) {
-        response = await updateCollection(collection.id, form);
+        response = await updateCollection(collection.id, payload);
       } else {
-        response = await createCollection(form);
+        response = await createCollection(payload);
       }
 
       console.log("Response from backend:", response);

@@ -302,7 +302,7 @@ useEffect(() => {
                 <td className="p-3">{item.status}</td>
                 <td className="p-3">{`${employees[item.driver_id]?.first_name || ""} ${employees[item.driver_id]?.last_name || ""}`.trim() || "N/A"}</td>
                 <td className="p-3">{item.collection_type}</td>
-                <td className="p-3">{createdByEmail}</td>
+                <td className="p-3">{item.created_by}</td>
                 <td className="p-3 flex gap-2">
                   {/* VIEW */}
                   <button
