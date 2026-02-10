@@ -15,6 +15,7 @@ import NavButton from "../components/ui/NavButton";
 //------------Pie Chart Data and Settings----------------
 
 import { PieChart } from "@mui/x-charts/PieChart";
+import Attendance from "../components/Attendence";
 
 const data = [
   { label: "Ready to deliver", value: 4, color: "#10b981" },
@@ -117,25 +118,35 @@ function Dashboard() {
   return (
     <div className="p-6 bg-[#f4f7fb] min-h-screen">
       {/* HEADER */}
-      <div className="flex justify-end mb-6 gap-3 items-center">
-        <NavButton onClick={() => navigate("/pos")}>
-          <IoIosAddCircleOutline className="inline mr-1" />
-          Add New Order
-        </NavButton>
+      <div className="flex flex-col items-end gap-3 mb-6">
+        {/* Top action buttons */}
+        <div className="flex items-center gap-3">
+          <NavButton onClick={() => navigate("/pos")}>
+            <IoIosAddCircleOutline className="inline mr-1" />
+            Add New Order
+          </NavButton>
 
-        <NavButton onClick={() => navigate("/customers")}>
-          <IoPersonOutline className="inline mr-1" />
-          Manage Customer
-        </NavButton>
+          <NavButton onClick={() => navigate("/customers")}>
+            <IoPersonOutline className="inline mr-1" />
+            Manage Customer
+          </NavButton>
 
-        <NavButton onClick={() => navigate("/services/list")}>
-          <TbSettingsBolt className="inline mr-1" />
-          Add New Services
-        </NavButton>
+          <NavButton onClick={() => navigate("/services/list")}>
+            <TbSettingsBolt className="inline mr-1" />
+            Add New Services
+          </NavButton>
 
-        <VscBell className="h-6 w-6" />
-        <CgProfile className="h-6 w-6" />
+          {/* Icons */}
+          <div className="flex items-center gap-3 ml-2">
+            <VscBell className="h-6 w-6 cursor-pointer" />
+            <CgProfile className="h-6 w-6 cursor-pointer" />
+          </div>
+        </div>
+
+        {/* Attendance section aligned right */}
+        <Attendance />
       </div>
+
 
       <div className="flex gap-6">
         <div className="flex-1">

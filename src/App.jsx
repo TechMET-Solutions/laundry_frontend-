@@ -31,6 +31,7 @@ import CustomerD from "./pages/CustomerD.jsx";
 import Login from "./pages/Login.jsx";
 import ExpenseCategories from "./pages/Expense_categories.jsx";
 import POS from "./pages/POS.jsx";
+import AttendanceReport from "./pages/Reports/AttendanceReport.jsx";
 
 function App() {
   return (
@@ -65,6 +66,7 @@ function App() {
         <Route path="reports/cloth-wise" element={<ClothWiseReport />} />
         <Route path="reports/expenses" element={<ExpensesReport />} />
         <Route path="reports/tax" element={<TaxReport />} />
+        <Route path="reports/attendance" element={<AttendanceReport />} />
 
         {/* Other */}
         <Route path="expenses" element={<Expenses />} />

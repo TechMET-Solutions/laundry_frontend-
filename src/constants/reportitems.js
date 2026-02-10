@@ -8,4 +8,5 @@ export const reportitems = [
     { name: "Customer Outstanding Reports", path: "/reports/customer-outstanding" },
     { name: "Expenses Reports", path: "/reports/expenses" },
     { name: "Tax Reports", path: "/reports/tax" },
+    { name: "Attendance Reports", path: "/reports/attendance" },
 ];

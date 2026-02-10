@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 const AuthContext = createContext();
 
@@ -11,6 +12,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
+
+    if (storedToken) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${storedToken}`;
+    }
+
 
     // Check if the value exists and is NOT the string "undefined" or "null"
     if (storedUser && storedUser !== "undefined" && storedUser !== "null" && storedToken) {
@@ -35,18 +41,31 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login function - Add a safety check here
+  // const login = (userData, authToken) => {
+  //   if (!userData || !authToken) {
+  //     console.error("Login failed: User data or Token is missing");
+  //     return;
+  //   }
+
+  //   localStorage.setItem("user", JSON.stringify(userData));
+  //   localStorage.setItem("token", authToken);
+
+  //   setUser(userData);
+  //   setToken(authToken);
+  // };
+
   const login = (userData, authToken) => {
-    if (!userData || !authToken) {
-      console.error("Login failed: User data or Token is missing");
-      return;
-    }
+    if (!userData || !authToken) return;
 
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", authToken);
 
+    axios.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
+
     setUser(userData);
     setToken(authToken);
   };
+
 
   // Logout function
   const logout = () => {
